@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .hash import Hash
 from .inner_transaction_result import InnerTransactionResult
-
-__all__ = ["InnerTransactionResultPair"]
-
-
+__all__ = ['InnerTransactionResultPair']
 class InnerTransactionResultPair:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class InnerTransactionResultPair:
             InnerTransactionResult result; // result for the inner transaction
         };
     """
-
     def __init__(
         self,
         transaction_hash: Hash,
@@ -30,11 +29,9 @@ class InnerTransactionResultPair:
     ) -> None:
         self.transaction_hash = transaction_hash
         self.result = result
-
     def pack(self, packer: Packer) -> None:
         self.transaction_hash.pack(packer)
         self.result.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> InnerTransactionResultPair:
         transaction_hash = Hash.unpack(unpacker)
@@ -43,7 +40,6 @@ class InnerTransactionResultPair:
             transaction_hash=transaction_hash,
             result=result,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,26 +58,15 @@ class InnerTransactionResultPair:
     def from_xdr(cls, xdr: str) -> InnerTransactionResultPair:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.transaction_hash,
-                self.result,
-            )
-        )
-
+        return hash((self.transaction_hash, self.result,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.transaction_hash == other.transaction_hash
-            and self.result == other.result
-        )
-
+        return self.transaction_hash== other.transaction_hash and self.result== other.result
     def __str__(self):
         out = [
-            f"transaction_hash={self.transaction_hash}",
-            f"result={self.result}",
+            f'transaction_hash={self.transaction_hash}',
+            f'result={self.result}',
         ]
         return f"<InnerTransactionResultPair [{', '.join(out)}]>"

@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Opaque
-
-__all__ = ["HmacSha256Mac"]
-
-
+__all__ = ['HmacSha256Mac']
 class HmacSha256Mac:
     """
     XDR Source Code::
@@ -20,23 +19,19 @@ class HmacSha256Mac:
             opaque mac[32];
         };
     """
-
     def __init__(
         self,
         mac: bytes,
     ) -> None:
         self.mac = mac
-
     def pack(self, packer: Packer) -> None:
         Opaque(self.mac, 32, True).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> HmacSha256Mac:
         mac = Opaque.unpack(unpacker, 32, True)
         return cls(
             mac=mac,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +50,14 @@ class HmacSha256Mac:
     def from_xdr(cls, xdr: str) -> HmacSha256Mac:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.mac,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.mac == other.mac
-
+        return self.mac== other.mac
     def __str__(self):
         out = [
-            f"mac={self.mac}",
+            f'mac={self.mac}',
         ]
         return f"<HmacSha256Mac [{', '.join(out)}]>"

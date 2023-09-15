@@ -3,35 +3,29 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_val import SCVal
-
-__all__ = ["SCVec"]
-
-
+__all__ = ['SCVec']
 class SCVec:
     """
     XDR Source Code::
 
         typedef SCVal SCVec<>;
     """
-
     def __init__(self, sc_vec: List[SCVal]) -> None:
         _expect_max_length = 4294967295
         if sc_vec and len(sc_vec) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `sc_vec` should be {_expect_max_length}, but got {len(sc_vec)}."
-            )
+            raise ValueError(f"The maximum length of `sc_vec` should be {_expect_max_length}, but got {len(sc_vec)}.")
         self.sc_vec = sc_vec
-
     def pack(self, packer: Packer) -> None:
         packer.pack_uint(len(self.sc_vec))
         for sc_vec_item in self.sc_vec:
             sc_vec_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCVec:
         length = unpacker.unpack_uint()
@@ -39,7 +33,6 @@ class SCVec:
         for _ in range(length):
             sc_vec.append(SCVal.unpack(unpacker))
         return cls(sc_vec)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -58,10 +51,8 @@ class SCVec:
     def from_xdr(cls, xdr: str) -> SCVec:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.sc_vec)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

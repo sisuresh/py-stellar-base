@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .liquidity_pool_entry_constant_product import LiquidityPoolEntryConstantProduct
 from .liquidity_pool_type import LiquidityPoolType
-
-__all__ = ["LiquidityPoolEntryBody"]
-
-
+from .liquidity_pool_entry_constant_product import LiquidityPoolEntryConstantProduct
+__all__ = ['LiquidityPoolEntryBody']
 class LiquidityPoolEntryBody:
     """
     XDR Source Code::
@@ -31,7 +31,6 @@ class LiquidityPoolEntryBody:
                 } constantProduct;
             }
     """
-
     def __init__(
         self,
         type: LiquidityPoolType,
@@ -39,7 +38,6 @@ class LiquidityPoolEntryBody:
     ) -> None:
         self.type = type
         self.constant_product = constant_product
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == LiquidityPoolType.LIQUIDITY_POOL_CONSTANT_PRODUCT:
@@ -47,7 +45,6 @@ class LiquidityPoolEntryBody:
                 raise ValueError("constant_product should not be None.")
             self.constant_product.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LiquidityPoolEntryBody:
         type = LiquidityPoolType.unpack(unpacker)
@@ -55,7 +52,6 @@ class LiquidityPoolEntryBody:
             constant_product = LiquidityPoolEntryConstantProduct.unpack(unpacker)
             return cls(type=type, constant_product=constant_product)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -74,26 +70,14 @@ class LiquidityPoolEntryBody:
     def from_xdr(cls, xdr: str) -> LiquidityPoolEntryBody:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.constant_product,
-            )
-        )
-
+        return hash((self.type, self.constant_product,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type and self.constant_product == other.constant_product
-        )
-
+        return self.type== other.type and self.constant_product== other.constant_product
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"constant_product={self.constant_product}"
-        ) if self.constant_product is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'constant_product={self.constant_product}') if self.constant_product is not None else None
         return f"<LiquidityPoolEntryBody [{', '.join(out)}]>"

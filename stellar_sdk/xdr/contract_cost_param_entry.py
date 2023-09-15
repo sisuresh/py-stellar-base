@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .extension_point import ExtensionPoint
 from .int64 import Int64
-
-__all__ = ["ContractCostParamEntry"]
-
-
+from .int64 import Int64
+__all__ = ['ContractCostParamEntry']
 class ContractCostParamEntry:
     """
     XDR Source Code::
@@ -24,7 +25,6 @@ class ContractCostParamEntry:
             int64 linearTerm;
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
@@ -34,12 +34,10 @@ class ContractCostParamEntry:
         self.ext = ext
         self.const_term = const_term
         self.linear_term = linear_term
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         self.const_term.pack(packer)
         self.linear_term.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ContractCostParamEntry:
         ext = ExtensionPoint.unpack(unpacker)
@@ -50,7 +48,6 @@ class ContractCostParamEntry:
             const_term=const_term,
             linear_term=linear_term,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +66,16 @@ class ContractCostParamEntry:
     def from_xdr(cls, xdr: str) -> ContractCostParamEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.const_term,
-                self.linear_term,
-            )
-        )
-
+        return hash((self.ext, self.const_term, self.linear_term,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ext == other.ext
-            and self.const_term == other.const_term
-            and self.linear_term == other.linear_term
-        )
-
+        return self.ext== other.ext and self.const_term== other.const_term and self.linear_term== other.linear_term
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"const_term={self.const_term}",
-            f"linear_term={self.linear_term}",
+            f'ext={self.ext}',
+            f'const_term={self.const_term}',
+            f'linear_term={self.linear_term}',
         ]
         return f"<ContractCostParamEntry [{', '.join(out)}]>"

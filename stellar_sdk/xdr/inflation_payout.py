@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
 from .int64 import Int64
-
-__all__ = ["InflationPayout"]
-
-
+__all__ = ['InflationPayout']
 class InflationPayout:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class InflationPayout:
             int64 amount;
         };
     """
-
     def __init__(
         self,
         destination: AccountID,
@@ -30,11 +29,9 @@ class InflationPayout:
     ) -> None:
         self.destination = destination
         self.amount = amount
-
     def pack(self, packer: Packer) -> None:
         self.destination.pack(packer)
         self.amount.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> InflationPayout:
         destination = AccountID.unpack(unpacker)
@@ -43,7 +40,6 @@ class InflationPayout:
             destination=destination,
             amount=amount,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class InflationPayout:
     def from_xdr(cls, xdr: str) -> InflationPayout:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.destination,
-                self.amount,
-            )
-        )
-
+        return hash((self.destination, self.amount,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.destination == other.destination and self.amount == other.amount
-
+        return self.destination== other.destination and self.amount== other.amount
     def __str__(self):
         out = [
-            f"destination={self.destination}",
-            f"amount={self.amount}",
+            f'destination={self.destination}',
+            f'amount={self.amount}',
         ]
         return f"<InflationPayout [{', '.join(out)}]>"

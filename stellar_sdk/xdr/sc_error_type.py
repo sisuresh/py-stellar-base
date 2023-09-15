@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["SCErrorType"]
-
-
+__all__ = ['SCErrorType']
 class SCErrorType(IntEnum):
     """
     XDR Source Code::
@@ -28,7 +28,6 @@ class SCErrorType(IntEnum):
             SCE_AUTH = 9               // Errors from the authentication subsystem.
         };
     """
-
     SCE_CONTRACT = 0
     SCE_WASM_VM = 1
     SCE_CONTEXT = 2
@@ -39,7 +38,6 @@ class SCErrorType(IntEnum):
     SCE_BUDGET = 7
     SCE_VALUE = 8
     SCE_AUTH = 9
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -47,7 +45,6 @@ class SCErrorType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> SCErrorType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

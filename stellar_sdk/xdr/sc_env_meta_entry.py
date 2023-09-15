@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_env_meta_kind import SCEnvMetaKind
 from .uint64 import Uint64
-
-__all__ = ["SCEnvMetaEntry"]
-
-
+__all__ = ['SCEnvMetaEntry']
 class SCEnvMetaEntry:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class SCEnvMetaEntry:
             uint64 interfaceVersion;
         };
     """
-
     def __init__(
         self,
         kind: SCEnvMetaKind,
@@ -30,7 +29,6 @@ class SCEnvMetaEntry:
     ) -> None:
         self.kind = kind
         self.interface_version = interface_version
-
     def pack(self, packer: Packer) -> None:
         self.kind.pack(packer)
         if self.kind == SCEnvMetaKind.SC_ENV_META_KIND_INTERFACE_VERSION:
@@ -38,7 +36,6 @@ class SCEnvMetaEntry:
                 raise ValueError("interface_version should not be None.")
             self.interface_version.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCEnvMetaEntry:
         kind = SCEnvMetaKind.unpack(unpacker)
@@ -46,7 +43,6 @@ class SCEnvMetaEntry:
             interface_version = Uint64.unpack(unpacker)
             return cls(kind=kind, interface_version=interface_version)
         return cls(kind=kind)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -65,27 +61,14 @@ class SCEnvMetaEntry:
     def from_xdr(cls, xdr: str) -> SCEnvMetaEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.kind,
-                self.interface_version,
-            )
-        )
-
+        return hash((self.kind, self.interface_version,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.kind == other.kind
-            and self.interface_version == other.interface_version
-        )
-
+        return self.kind== other.kind and self.interface_version== other.interface_version
     def __str__(self):
         out = []
-        out.append(f"kind={self.kind}")
-        out.append(
-            f"interface_version={self.interface_version}"
-        ) if self.interface_version is not None else None
+        out.append(f'kind={self.kind}')
+        out.append(f'interface_version={self.interface_version}') if self.interface_version is not None else None
         return f"<SCEnvMetaEntry [{', '.join(out)}]>"

@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .encrypted_body import EncryptedBody
 from .node_id import NodeID
-from .survey_message_command_type import SurveyMessageCommandType
+from .node_id import NodeID
 from .uint32 import Uint32
-
-__all__ = ["SurveyResponseMessage"]
-
-
+from .survey_message_command_type import SurveyMessageCommandType
+from .encrypted_body import EncryptedBody
+__all__ = ['SurveyResponseMessage']
 class SurveyResponseMessage:
     """
     XDR Source Code::
@@ -27,7 +28,6 @@ class SurveyResponseMessage:
             EncryptedBody encryptedBody;
         };
     """
-
     def __init__(
         self,
         surveyor_peer_id: NodeID,
@@ -41,14 +41,12 @@ class SurveyResponseMessage:
         self.ledger_num = ledger_num
         self.command_type = command_type
         self.encrypted_body = encrypted_body
-
     def pack(self, packer: Packer) -> None:
         self.surveyor_peer_id.pack(packer)
         self.surveyed_peer_id.pack(packer)
         self.ledger_num.pack(packer)
         self.command_type.pack(packer)
         self.encrypted_body.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SurveyResponseMessage:
         surveyor_peer_id = NodeID.unpack(unpacker)
@@ -63,7 +61,6 @@ class SurveyResponseMessage:
             command_type=command_type,
             encrypted_body=encrypted_body,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -82,35 +79,18 @@ class SurveyResponseMessage:
     def from_xdr(cls, xdr: str) -> SurveyResponseMessage:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.surveyor_peer_id,
-                self.surveyed_peer_id,
-                self.ledger_num,
-                self.command_type,
-                self.encrypted_body,
-            )
-        )
-
+        return hash((self.surveyor_peer_id, self.surveyed_peer_id, self.ledger_num, self.command_type, self.encrypted_body,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.surveyor_peer_id == other.surveyor_peer_id
-            and self.surveyed_peer_id == other.surveyed_peer_id
-            and self.ledger_num == other.ledger_num
-            and self.command_type == other.command_type
-            and self.encrypted_body == other.encrypted_body
-        )
-
+        return self.surveyor_peer_id== other.surveyor_peer_id and self.surveyed_peer_id== other.surveyed_peer_id and self.ledger_num== other.ledger_num and self.command_type== other.command_type and self.encrypted_body== other.encrypted_body
     def __str__(self):
         out = [
-            f"surveyor_peer_id={self.surveyor_peer_id}",
-            f"surveyed_peer_id={self.surveyed_peer_id}",
-            f"ledger_num={self.ledger_num}",
-            f"command_type={self.command_type}",
-            f"encrypted_body={self.encrypted_body}",
+            f'surveyor_peer_id={self.surveyor_peer_id}',
+            f'surveyed_peer_id={self.surveyed_peer_id}',
+            f'ledger_num={self.ledger_num}',
+            f'command_type={self.command_type}',
+            f'encrypted_body={self.encrypted_body}',
         ]
         return f"<SurveyResponseMessage [{', '.join(out)}]>"

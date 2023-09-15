@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .revoke_sponsorship_type import RevokeSponsorshipType
 from .ledger_key import LedgerKey
 from .revoke_sponsorship_op_signer import RevokeSponsorshipOpSigner
-from .revoke_sponsorship_type import RevokeSponsorshipType
-
-__all__ = ["RevokeSponsorshipOp"]
-
-
+__all__ = ['RevokeSponsorshipOp']
 class RevokeSponsorshipOp:
     """
     XDR Source Code::
@@ -29,7 +29,6 @@ class RevokeSponsorshipOp:
             } signer;
         };
     """
-
     def __init__(
         self,
         type: RevokeSponsorshipType,
@@ -39,7 +38,6 @@ class RevokeSponsorshipOp:
         self.type = type
         self.ledger_key = ledger_key
         self.signer = signer
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == RevokeSponsorshipType.REVOKE_SPONSORSHIP_LEDGER_ENTRY:
@@ -52,7 +50,6 @@ class RevokeSponsorshipOp:
                 raise ValueError("signer should not be None.")
             self.signer.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> RevokeSponsorshipOp:
         type = RevokeSponsorshipType.unpack(unpacker)
@@ -63,7 +60,6 @@ class RevokeSponsorshipOp:
             signer = RevokeSponsorshipOpSigner.unpack(unpacker)
             return cls(type=type, signer=signer)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -82,30 +78,15 @@ class RevokeSponsorshipOp:
     def from_xdr(cls, xdr: str) -> RevokeSponsorshipOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.ledger_key,
-                self.signer,
-            )
-        )
-
+        return hash((self.type, self.ledger_key, self.signer,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.ledger_key == other.ledger_key
-            and self.signer == other.signer
-        )
-
+        return self.type== other.type and self.ledger_key== other.ledger_key and self.signer== other.signer
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"ledger_key={self.ledger_key}"
-        ) if self.ledger_key is not None else None
-        out.append(f"signer={self.signer}") if self.signer is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'ledger_key={self.ledger_key}') if self.ledger_key is not None else None
+        out.append(f'signer={self.signer}') if self.signer is not None else None
         return f"<RevokeSponsorshipOp [{', '.join(out)}]>"

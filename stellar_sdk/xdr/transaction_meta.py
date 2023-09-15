@@ -3,19 +3,17 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Integer
 from .operation_meta import OperationMeta
 from .transaction_meta_v1 import TransactionMetaV1
 from .transaction_meta_v2 import TransactionMetaV2
 from .transaction_meta_v3 import TransactionMetaV3
-
-__all__ = ["TransactionMeta"]
-
-
+__all__ = ['TransactionMeta']
 class TransactionMeta:
     """
     XDR Source Code::
@@ -32,7 +30,6 @@ class TransactionMeta:
             TransactionMetaV3 v3;
         };
     """
-
     def __init__(
         self,
         v: int,
@@ -43,15 +40,12 @@ class TransactionMeta:
     ) -> None:
         _expect_max_length = 4294967295
         if operations and len(operations) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}."
-            )
+            raise ValueError(f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}.")
         self.v = v
         self.operations = operations
         self.v1 = v1
         self.v2 = v2
         self.v3 = v3
-
     def pack(self, packer: Packer) -> None:
         Integer(self.v).pack(packer)
         if self.v == 0:
@@ -76,7 +70,6 @@ class TransactionMeta:
                 raise ValueError("v3 should not be None.")
             self.v3.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionMeta:
         v = Integer.unpack(unpacker)
@@ -96,7 +89,6 @@ class TransactionMeta:
             v3 = TransactionMetaV3.unpack(unpacker)
             return cls(v=v, v3=v3)
         return cls(v=v)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -115,36 +107,17 @@ class TransactionMeta:
     def from_xdr(cls, xdr: str) -> TransactionMeta:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.v,
-                self.operations,
-                self.v1,
-                self.v2,
-                self.v3,
-            )
-        )
-
+        return hash((self.v, self.operations, self.v1, self.v2, self.v3,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.v == other.v
-            and self.operations == other.operations
-            and self.v1 == other.v1
-            and self.v2 == other.v2
-            and self.v3 == other.v3
-        )
-
+        return self.v== other.v and self.operations== other.operations and self.v1== other.v1 and self.v2== other.v2 and self.v3== other.v3
     def __str__(self):
         out = []
-        out.append(f"v={self.v}")
-        out.append(
-            f"operations={self.operations}"
-        ) if self.operations is not None else None
-        out.append(f"v1={self.v1}") if self.v1 is not None else None
-        out.append(f"v2={self.v2}") if self.v2 is not None else None
-        out.append(f"v3={self.v3}") if self.v3 is not None else None
+        out.append(f'v={self.v}')
+        out.append(f'operations={self.operations}') if self.operations is not None else None
+        out.append(f'v1={self.v1}') if self.v1 is not None else None
+        out.append(f'v2={self.v2}') if self.v2 is not None else None
+        out.append(f'v3={self.v3}') if self.v3 is not None else None
         return f"<TransactionMeta [{', '.join(out)}]>"

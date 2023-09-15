@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .uint32 import Uint32
 from .ledger_entry_data import LedgerEntryData
 from .ledger_entry_ext import LedgerEntryExt
-from .uint32 import Uint32
-
-__all__ = ["LedgerEntry"]
-
-
+__all__ = ['LedgerEntry']
 class LedgerEntry:
     """
     XDR Source Code::
@@ -57,7 +57,6 @@ class LedgerEntry:
             ext;
         };
     """
-
     def __init__(
         self,
         last_modified_ledger_seq: Uint32,
@@ -67,12 +66,10 @@ class LedgerEntry:
         self.last_modified_ledger_seq = last_modified_ledger_seq
         self.data = data
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.last_modified_ledger_seq.pack(packer)
         self.data.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerEntry:
         last_modified_ledger_seq = Uint32.unpack(unpacker)
@@ -83,7 +80,6 @@ class LedgerEntry:
             data=data,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -102,29 +98,16 @@ class LedgerEntry:
     def from_xdr(cls, xdr: str) -> LedgerEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.last_modified_ledger_seq,
-                self.data,
-                self.ext,
-            )
-        )
-
+        return hash((self.last_modified_ledger_seq, self.data, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.last_modified_ledger_seq == other.last_modified_ledger_seq
-            and self.data == other.data
-            and self.ext == other.ext
-        )
-
+        return self.last_modified_ledger_seq== other.last_modified_ledger_seq and self.data== other.data and self.ext== other.ext
     def __str__(self):
         out = [
-            f"last_modified_ledger_seq={self.last_modified_ledger_seq}",
-            f"data={self.data}",
-            f"ext={self.ext}",
+            f'last_modified_ledger_seq={self.last_modified_ledger_seq}',
+            f'data={self.data}',
+            f'ext={self.ext}',
         ]
         return f"<LedgerEntry [{', '.join(out)}]>"

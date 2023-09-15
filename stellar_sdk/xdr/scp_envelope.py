@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .scp_statement import SCPStatement
 from .signature import Signature
-
-__all__ = ["SCPEnvelope"]
-
-
+__all__ = ['SCPEnvelope']
 class SCPEnvelope:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class SCPEnvelope:
             Signature signature;
         };
     """
-
     def __init__(
         self,
         statement: SCPStatement,
@@ -30,11 +29,9 @@ class SCPEnvelope:
     ) -> None:
         self.statement = statement
         self.signature = signature
-
     def pack(self, packer: Packer) -> None:
         self.statement.pack(packer)
         self.signature.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCPEnvelope:
         statement = SCPStatement.unpack(unpacker)
@@ -43,7 +40,6 @@ class SCPEnvelope:
             statement=statement,
             signature=signature,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class SCPEnvelope:
     def from_xdr(cls, xdr: str) -> SCPEnvelope:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.statement,
-                self.signature,
-            )
-        )
-
+        return hash((self.statement, self.signature,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.statement == other.statement and self.signature == other.signature
-
+        return self.statement== other.statement and self.signature== other.signature
     def __str__(self):
         out = [
-            f"statement={self.statement}",
-            f"signature={self.signature}",
+            f'statement={self.statement}',
+            f'signature={self.signature}',
         ]
         return f"<SCPEnvelope [{', '.join(out)}]>"

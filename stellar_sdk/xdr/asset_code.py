@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .asset_type import AssetType
 from .asset_code4 import AssetCode4
 from .asset_code12 import AssetCode12
-from .asset_type import AssetType
-
-__all__ = ["AssetCode"]
-
-
+__all__ = ['AssetCode']
 class AssetCode:
     """
     XDR Source Code::
@@ -28,7 +28,6 @@ class AssetCode:
             // add other asset types here in the future
         };
     """
-
     def __init__(
         self,
         type: AssetType,
@@ -38,7 +37,6 @@ class AssetCode:
         self.type = type
         self.asset_code4 = asset_code4
         self.asset_code12 = asset_code12
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == AssetType.ASSET_TYPE_CREDIT_ALPHANUM4:
@@ -51,7 +49,6 @@ class AssetCode:
                 raise ValueError("asset_code12 should not be None.")
             self.asset_code12.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AssetCode:
         type = AssetType.unpack(unpacker)
@@ -62,7 +59,6 @@ class AssetCode:
             asset_code12 = AssetCode12.unpack(unpacker)
             return cls(type=type, asset_code12=asset_code12)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -81,32 +77,15 @@ class AssetCode:
     def from_xdr(cls, xdr: str) -> AssetCode:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.asset_code4,
-                self.asset_code12,
-            )
-        )
-
+        return hash((self.type, self.asset_code4, self.asset_code12,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.asset_code4 == other.asset_code4
-            and self.asset_code12 == other.asset_code12
-        )
-
+        return self.type== other.type and self.asset_code4== other.asset_code4 and self.asset_code12== other.asset_code12
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"asset_code4={self.asset_code4}"
-        ) if self.asset_code4 is not None else None
-        out.append(
-            f"asset_code12={self.asset_code12}"
-        ) if self.asset_code12 is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'asset_code4={self.asset_code4}') if self.asset_code4 is not None else None
+        out.append(f'asset_code12={self.asset_code12}') if self.asset_code12 is not None else None
         return f"<AssetCode [{', '.join(out)}]>"

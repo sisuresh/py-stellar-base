@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .end_sponsoring_future_reserves_result_code import (
-    EndSponsoringFutureReservesResultCode,
-)
-
-__all__ = ["EndSponsoringFutureReservesResult"]
-
-
+from .end_sponsoring_future_reserves_result_code import EndSponsoringFutureReservesResultCode
+__all__ = ['EndSponsoringFutureReservesResult']
 class EndSponsoringFutureReservesResult:
     """
     XDR Source Code::
@@ -26,41 +24,25 @@ class EndSponsoringFutureReservesResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: EndSponsoringFutureReservesResultCode,
     ) -> None:
         self.code = code
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
-        if (
-            self.code
-            == EndSponsoringFutureReservesResultCode.END_SPONSORING_FUTURE_RESERVES_SUCCESS
-        ):
+        if self.code == EndSponsoringFutureReservesResultCode.END_SPONSORING_FUTURE_RESERVES_SUCCESS:
             return
-        if (
-            self.code
-            == EndSponsoringFutureReservesResultCode.END_SPONSORING_FUTURE_RESERVES_NOT_SPONSORED
-        ):
+        if self.code == EndSponsoringFutureReservesResultCode.END_SPONSORING_FUTURE_RESERVES_NOT_SPONSORED:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> EndSponsoringFutureReservesResult:
         code = EndSponsoringFutureReservesResultCode.unpack(unpacker)
-        if (
-            code
-            == EndSponsoringFutureReservesResultCode.END_SPONSORING_FUTURE_RESERVES_SUCCESS
-        ):
+        if code == EndSponsoringFutureReservesResultCode.END_SPONSORING_FUTURE_RESERVES_SUCCESS:
             return cls(code=code)
-        if (
-            code
-            == EndSponsoringFutureReservesResultCode.END_SPONSORING_FUTURE_RESERVES_NOT_SPONSORED
-        ):
+        if code == EndSponsoringFutureReservesResultCode.END_SPONSORING_FUTURE_RESERVES_NOT_SPONSORED:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -79,16 +61,13 @@ class EndSponsoringFutureReservesResult:
     def from_xdr(cls, xdr: str) -> EndSponsoringFutureReservesResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.code,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code
-
+        return self.code== other.code
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
+        out.append(f'code={self.code}')
         return f"<EndSponsoringFutureReservesResult [{', '.join(out)}]>"

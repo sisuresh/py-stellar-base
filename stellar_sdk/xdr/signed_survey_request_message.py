@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .signature import Signature
 from .survey_request_message import SurveyRequestMessage
-
-__all__ = ["SignedSurveyRequestMessage"]
-
-
+__all__ = ['SignedSurveyRequestMessage']
 class SignedSurveyRequestMessage:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class SignedSurveyRequestMessage:
             SurveyRequestMessage request;
         };
     """
-
     def __init__(
         self,
         request_signature: Signature,
@@ -30,11 +29,9 @@ class SignedSurveyRequestMessage:
     ) -> None:
         self.request_signature = request_signature
         self.request = request
-
     def pack(self, packer: Packer) -> None:
         self.request_signature.pack(packer)
         self.request.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SignedSurveyRequestMessage:
         request_signature = Signature.unpack(unpacker)
@@ -43,7 +40,6 @@ class SignedSurveyRequestMessage:
             request_signature=request_signature,
             request=request,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,26 +58,15 @@ class SignedSurveyRequestMessage:
     def from_xdr(cls, xdr: str) -> SignedSurveyRequestMessage:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.request_signature,
-                self.request,
-            )
-        )
-
+        return hash((self.request_signature, self.request,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.request_signature == other.request_signature
-            and self.request == other.request
-        )
-
+        return self.request_signature== other.request_signature and self.request== other.request
     def __str__(self):
         out = [
-            f"request_signature={self.request_signature}",
-            f"request={self.request}",
+            f'request_signature={self.request_signature}',
+            f'request={self.request}',
         ]
         return f"<SignedSurveyRequestMessage [{', '.join(out)}]>"

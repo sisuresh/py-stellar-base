@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .asset import Asset
+from .asset import Asset
 from .int32 import Int32
-
-__all__ = ["LiquidityPoolConstantProductParameters"]
-
-
+__all__ = ['LiquidityPoolConstantProductParameters']
 class LiquidityPoolConstantProductParameters:
     """
     XDR Source Code::
@@ -23,7 +24,6 @@ class LiquidityPoolConstantProductParameters:
             int32 fee; // Fee is in basis points, so the actual rate is (fee/100)%
         };
     """
-
     def __init__(
         self,
         asset_a: Asset,
@@ -33,12 +33,10 @@ class LiquidityPoolConstantProductParameters:
         self.asset_a = asset_a
         self.asset_b = asset_b
         self.fee = fee
-
     def pack(self, packer: Packer) -> None:
         self.asset_a.pack(packer)
         self.asset_b.pack(packer)
         self.fee.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LiquidityPoolConstantProductParameters:
         asset_a = Asset.unpack(unpacker)
@@ -49,7 +47,6 @@ class LiquidityPoolConstantProductParameters:
             asset_b=asset_b,
             fee=fee,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -68,29 +65,16 @@ class LiquidityPoolConstantProductParameters:
     def from_xdr(cls, xdr: str) -> LiquidityPoolConstantProductParameters:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.asset_a,
-                self.asset_b,
-                self.fee,
-            )
-        )
-
+        return hash((self.asset_a, self.asset_b, self.fee,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.asset_a == other.asset_a
-            and self.asset_b == other.asset_b
-            and self.fee == other.fee
-        )
-
+        return self.asset_a== other.asset_a and self.asset_b== other.asset_b and self.fee== other.fee
     def __str__(self):
         out = [
-            f"asset_a={self.asset_a}",
-            f"asset_b={self.asset_b}",
-            f"fee={self.fee}",
+            f'asset_a={self.asset_a}',
+            f'asset_b={self.asset_b}',
+            f'fee={self.fee}',
         ]
         return f"<LiquidityPoolConstantProductParameters [{', '.join(out)}]>"

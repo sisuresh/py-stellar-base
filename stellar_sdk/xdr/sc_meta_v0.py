@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import String
-
-__all__ = ["SCMetaV0"]
-
-
+__all__ = ['SCMetaV0']
 class SCMetaV0:
     """
     XDR Source Code::
@@ -21,7 +20,6 @@ class SCMetaV0:
             string val<>;
         };
     """
-
     def __init__(
         self,
         key: bytes,
@@ -29,11 +27,9 @@ class SCMetaV0:
     ) -> None:
         self.key = key
         self.val = val
-
     def pack(self, packer: Packer) -> None:
         String(self.key, 4294967295).pack(packer)
         String(self.val, 4294967295).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCMetaV0:
         key = String.unpack(unpacker)
@@ -42,7 +38,6 @@ class SCMetaV0:
             key=key,
             val=val,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -61,23 +56,15 @@ class SCMetaV0:
     def from_xdr(cls, xdr: str) -> SCMetaV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.key,
-                self.val,
-            )
-        )
-
+        return hash((self.key, self.val,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.key == other.key and self.val == other.val
-
+        return self.key== other.key and self.val== other.val
     def __str__(self):
         out = [
-            f"key={self.key}",
-            f"val={self.val}",
+            f'key={self.key}',
+            f'val={self.val}',
         ]
         return f"<SCMetaV0 [{', '.join(out)}]>"

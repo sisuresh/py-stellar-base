@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .manage_buy_offer_result_code import ManageBuyOfferResultCode
 from .manage_offer_success_result import ManageOfferSuccessResult
-
-__all__ = ["ManageBuyOfferResult"]
-
-
+__all__ = ['ManageBuyOfferResult']
 class ManageBuyOfferResult:
     """
     XDR Source Code::
@@ -35,7 +35,6 @@ class ManageBuyOfferResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: ManageBuyOfferResultCode,
@@ -43,7 +42,6 @@ class ManageBuyOfferResult:
     ) -> None:
         self.code = code
         self.success = success
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == ManageBuyOfferResultCode.MANAGE_BUY_OFFER_SUCCESS:
@@ -75,7 +73,6 @@ class ManageBuyOfferResult:
             return
         if self.code == ManageBuyOfferResultCode.MANAGE_BUY_OFFER_LOW_RESERVE:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ManageBuyOfferResult:
         code = ManageBuyOfferResultCode.unpack(unpacker)
@@ -107,7 +104,6 @@ class ManageBuyOfferResult:
         if code == ManageBuyOfferResultCode.MANAGE_BUY_OFFER_LOW_RESERVE:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -126,22 +122,14 @@ class ManageBuyOfferResult:
     def from_xdr(cls, xdr: str) -> ManageBuyOfferResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.code,
-                self.success,
-            )
-        )
-
+        return hash((self.code, self.success,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code and self.success == other.success
-
+        return self.code== other.code and self.success== other.success
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
-        out.append(f"success={self.success}") if self.success is not None else None
+        out.append(f'code={self.code}')
+        out.append(f'success={self.success}') if self.success is not None else None
         return f"<ManageBuyOfferResult [{', '.join(out)}]>"

@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .authenticated_message_v0 import AuthenticatedMessageV0
 from .uint32 import Uint32
-
-__all__ = ["AuthenticatedMessage"]
-
-
+from .authenticated_message_v0 import AuthenticatedMessageV0
+__all__ = ['AuthenticatedMessage']
 class AuthenticatedMessage:
     """
     XDR Source Code::
@@ -27,7 +27,6 @@ class AuthenticatedMessage:
             } v0;
         };
     """
-
     def __init__(
         self,
         v: Uint32,
@@ -35,7 +34,6 @@ class AuthenticatedMessage:
     ) -> None:
         self.v = v
         self.v0 = v0
-
     def pack(self, packer: Packer) -> None:
         self.v.pack(packer)
         if self.v == 0:
@@ -43,7 +41,6 @@ class AuthenticatedMessage:
                 raise ValueError("v0 should not be None.")
             self.v0.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AuthenticatedMessage:
         v = Uint32.unpack(unpacker)
@@ -51,7 +48,6 @@ class AuthenticatedMessage:
             v0 = AuthenticatedMessageV0.unpack(unpacker)
             return cls(v=v, v0=v0)
         return cls(v=v)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -70,22 +66,14 @@ class AuthenticatedMessage:
     def from_xdr(cls, xdr: str) -> AuthenticatedMessage:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.v,
-                self.v0,
-            )
-        )
-
+        return hash((self.v, self.v0,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.v == other.v and self.v0 == other.v0
-
+        return self.v== other.v and self.v0== other.v0
     def __str__(self):
         out = []
-        out.append(f"v={self.v}")
-        out.append(f"v0={self.v0}") if self.v0 is not None else None
+        out.append(f'v={self.v}')
+        out.append(f'v0={self.v0}') if self.v0 is not None else None
         return f"<AuthenticatedMessage [{', '.join(out)}]>"

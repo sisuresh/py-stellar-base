@@ -3,32 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import String
-
-__all__ = ["String32"]
-
-
+__all__ = ['String32']
 class String32:
     """
     XDR Source Code::
 
         typedef string string32<32>;
     """
-
     def __init__(self, string32: bytes) -> None:
         self.string32 = string32
-
     def pack(self, packer: Packer) -> None:
         String(self.string32, 32).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> String32:
         string32 = String.unpack(unpacker)
         return cls(string32)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -47,10 +42,8 @@ class String32:
     def from_xdr(cls, xdr: str) -> String32:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.string32)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

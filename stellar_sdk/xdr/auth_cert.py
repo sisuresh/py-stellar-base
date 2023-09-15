@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .curve25519_public import Curve25519Public
-from .signature import Signature
 from .uint64 import Uint64
-
-__all__ = ["AuthCert"]
-
-
+from .signature import Signature
+__all__ = ['AuthCert']
 class AuthCert:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class AuthCert:
             Signature sig;
         };
     """
-
     def __init__(
         self,
         pubkey: Curve25519Public,
@@ -34,12 +33,10 @@ class AuthCert:
         self.pubkey = pubkey
         self.expiration = expiration
         self.sig = sig
-
     def pack(self, packer: Packer) -> None:
         self.pubkey.pack(packer)
         self.expiration.pack(packer)
         self.sig.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AuthCert:
         pubkey = Curve25519Public.unpack(unpacker)
@@ -50,7 +47,6 @@ class AuthCert:
             expiration=expiration,
             sig=sig,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +65,16 @@ class AuthCert:
     def from_xdr(cls, xdr: str) -> AuthCert:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.pubkey,
-                self.expiration,
-                self.sig,
-            )
-        )
-
+        return hash((self.pubkey, self.expiration, self.sig,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.pubkey == other.pubkey
-            and self.expiration == other.expiration
-            and self.sig == other.sig
-        )
-
+        return self.pubkey== other.pubkey and self.expiration== other.expiration and self.sig== other.sig
     def __str__(self):
         out = [
-            f"pubkey={self.pubkey}",
-            f"expiration={self.expiration}",
-            f"sig={self.sig}",
+            f'pubkey={self.pubkey}',
+            f'expiration={self.expiration}',
+            f'sig={self.sig}',
         ]
         return f"<AuthCert [{', '.join(out)}]>"

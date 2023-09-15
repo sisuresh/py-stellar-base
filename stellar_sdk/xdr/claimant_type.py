@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["ClaimantType"]
-
-
+__all__ = ['ClaimantType']
 class ClaimantType(IntEnum):
     """
     XDR Source Code::
@@ -19,9 +19,7 @@ class ClaimantType(IntEnum):
             CLAIMANT_TYPE_V0 = 0
         };
     """
-
     CLAIMANT_TYPE_V0 = 0
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -29,7 +27,6 @@ class ClaimantType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> ClaimantType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

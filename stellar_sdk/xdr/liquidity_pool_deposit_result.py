@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .liquidity_pool_deposit_result_code import LiquidityPoolDepositResultCode
-
-__all__ = ["LiquidityPoolDepositResult"]
-
-
+__all__ = ['LiquidityPoolDepositResult']
 class LiquidityPoolDepositResult:
     """
     XDR Source Code::
@@ -29,13 +29,11 @@ class LiquidityPoolDepositResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: LiquidityPoolDepositResultCode,
     ) -> None:
         self.code = code
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == LiquidityPoolDepositResultCode.LIQUIDITY_POOL_DEPOSIT_SUCCESS:
@@ -44,15 +42,9 @@ class LiquidityPoolDepositResult:
             return
         if self.code == LiquidityPoolDepositResultCode.LIQUIDITY_POOL_DEPOSIT_NO_TRUST:
             return
-        if (
-            self.code
-            == LiquidityPoolDepositResultCode.LIQUIDITY_POOL_DEPOSIT_NOT_AUTHORIZED
-        ):
+        if self.code == LiquidityPoolDepositResultCode.LIQUIDITY_POOL_DEPOSIT_NOT_AUTHORIZED:
             return
-        if (
-            self.code
-            == LiquidityPoolDepositResultCode.LIQUIDITY_POOL_DEPOSIT_UNDERFUNDED
-        ):
+        if self.code == LiquidityPoolDepositResultCode.LIQUIDITY_POOL_DEPOSIT_UNDERFUNDED:
             return
         if self.code == LiquidityPoolDepositResultCode.LIQUIDITY_POOL_DEPOSIT_LINE_FULL:
             return
@@ -60,7 +52,6 @@ class LiquidityPoolDepositResult:
             return
         if self.code == LiquidityPoolDepositResultCode.LIQUIDITY_POOL_DEPOSIT_POOL_FULL:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LiquidityPoolDepositResult:
         code = LiquidityPoolDepositResultCode.unpack(unpacker)
@@ -81,7 +72,6 @@ class LiquidityPoolDepositResult:
         if code == LiquidityPoolDepositResultCode.LIQUIDITY_POOL_DEPOSIT_POOL_FULL:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -100,16 +90,13 @@ class LiquidityPoolDepositResult:
     def from_xdr(cls, xdr: str) -> LiquidityPoolDepositResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.code,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code
-
+        return self.code== other.code
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
+        out.append(f'code={self.code}')
         return f"<LiquidityPoolDepositResult [{', '.join(out)}]>"

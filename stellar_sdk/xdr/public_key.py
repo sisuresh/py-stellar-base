@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .public_key_type import PublicKeyType
 from .uint256 import Uint256
-
-__all__ = ["PublicKey"]
-
-
+__all__ = ['PublicKey']
 class PublicKey:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class PublicKey:
             uint256 ed25519;
         };
     """
-
     def __init__(
         self,
         type: PublicKeyType,
@@ -30,7 +29,6 @@ class PublicKey:
     ) -> None:
         self.type = type
         self.ed25519 = ed25519
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == PublicKeyType.PUBLIC_KEY_TYPE_ED25519:
@@ -38,7 +36,6 @@ class PublicKey:
                 raise ValueError("ed25519 should not be None.")
             self.ed25519.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> PublicKey:
         type = PublicKeyType.unpack(unpacker)
@@ -46,7 +43,6 @@ class PublicKey:
             ed25519 = Uint256.unpack(unpacker)
             return cls(type=type, ed25519=ed25519)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -65,22 +61,14 @@ class PublicKey:
     def from_xdr(cls, xdr: str) -> PublicKey:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.ed25519,
-            )
-        )
-
+        return hash((self.type, self.ed25519,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.type == other.type and self.ed25519 == other.ed25519
-
+        return self.type== other.type and self.ed25519== other.ed25519
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"ed25519={self.ed25519}") if self.ed25519 is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'ed25519={self.ed25519}') if self.ed25519 is not None else None
         return f"<PublicKey [{', '.join(out)}]>"

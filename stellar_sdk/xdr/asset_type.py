@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["AssetType"]
-
-
+__all__ = ['AssetType']
 class AssetType(IntEnum):
     """
     XDR Source Code::
@@ -22,12 +22,10 @@ class AssetType(IntEnum):
             ASSET_TYPE_POOL_SHARE = 3
         };
     """
-
     ASSET_TYPE_NATIVE = 0
     ASSET_TYPE_CREDIT_ALPHANUM4 = 1
     ASSET_TYPE_CREDIT_ALPHANUM12 = 2
     ASSET_TYPE_POOL_SHARE = 3
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -35,7 +33,6 @@ class AssetType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> AssetType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

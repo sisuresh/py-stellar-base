@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .account_id import AccountID
 from .asset_code12 import AssetCode12
-
-__all__ = ["AlphaNum12"]
-
-
+from .account_id import AccountID
+__all__ = ['AlphaNum12']
 class AlphaNum12:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class AlphaNum12:
             AccountID issuer;
         };
     """
-
     def __init__(
         self,
         asset_code: AssetCode12,
@@ -30,11 +29,9 @@ class AlphaNum12:
     ) -> None:
         self.asset_code = asset_code
         self.issuer = issuer
-
     def pack(self, packer: Packer) -> None:
         self.asset_code.pack(packer)
         self.issuer.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AlphaNum12:
         asset_code = AssetCode12.unpack(unpacker)
@@ -43,7 +40,6 @@ class AlphaNum12:
             asset_code=asset_code,
             issuer=issuer,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class AlphaNum12:
     def from_xdr(cls, xdr: str) -> AlphaNum12:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.asset_code,
-                self.issuer,
-            )
-        )
-
+        return hash((self.asset_code, self.issuer,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.asset_code == other.asset_code and self.issuer == other.issuer
-
+        return self.asset_code== other.asset_code and self.issuer== other.issuer
     def __str__(self):
         out = [
-            f"asset_code={self.asset_code}",
-            f"issuer={self.issuer}",
+            f'asset_code={self.asset_code}',
+            f'issuer={self.issuer}',
         ]
         return f"<AlphaNum12 [{', '.join(out)}]>"

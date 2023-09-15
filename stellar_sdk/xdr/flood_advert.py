@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .tx_advert_vector import TxAdvertVector
-
-__all__ = ["FloodAdvert"]
-
-
+__all__ = ['FloodAdvert']
 class FloodAdvert:
     """
     XDR Source Code::
@@ -20,23 +20,19 @@ class FloodAdvert:
             TxAdvertVector txHashes;
         };
     """
-
     def __init__(
         self,
         tx_hashes: TxAdvertVector,
     ) -> None:
         self.tx_hashes = tx_hashes
-
     def pack(self, packer: Packer) -> None:
         self.tx_hashes.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> FloodAdvert:
         tx_hashes = TxAdvertVector.unpack(unpacker)
         return cls(
             tx_hashes=tx_hashes,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +51,14 @@ class FloodAdvert:
     def from_xdr(cls, xdr: str) -> FloodAdvert:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.tx_hashes,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.tx_hashes == other.tx_hashes
-
+        return self.tx_hashes== other.tx_hashes
     def __str__(self):
         out = [
-            f"tx_hashes={self.tx_hashes}",
+            f'tx_hashes={self.tx_hashes}',
         ]
         return f"<FloodAdvert [{', '.join(out)}]>"

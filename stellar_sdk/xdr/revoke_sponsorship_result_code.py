@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["RevokeSponsorshipResultCode"]
-
-
+__all__ = ['RevokeSponsorshipResultCode']
 class RevokeSponsorshipResultCode(IntEnum):
     """
     XDR Source Code::
@@ -27,14 +27,12 @@ class RevokeSponsorshipResultCode(IntEnum):
             REVOKE_SPONSORSHIP_MALFORMED = -5
         };
     """
-
     REVOKE_SPONSORSHIP_SUCCESS = 0
     REVOKE_SPONSORSHIP_DOES_NOT_EXIST = -1
     REVOKE_SPONSORSHIP_NOT_SPONSOR = -2
     REVOKE_SPONSORSHIP_LOW_RESERVE = -3
     REVOKE_SPONSORSHIP_ONLY_TRANSFERABLE = -4
     REVOKE_SPONSORSHIP_MALFORMED = -5
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -42,7 +40,6 @@ class RevokeSponsorshipResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> RevokeSponsorshipResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

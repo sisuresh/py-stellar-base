@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .transaction_history_entry_ext import TransactionHistoryEntryExt
-from .transaction_set import TransactionSet
 from .uint32 import Uint32
-
-__all__ = ["TransactionHistoryEntry"]
-
-
+from .transaction_set import TransactionSet
+from .transaction_history_entry_ext import TransactionHistoryEntryExt
+__all__ = ['TransactionHistoryEntry']
 class TransactionHistoryEntry:
     """
     XDR Source Code::
@@ -33,7 +33,6 @@ class TransactionHistoryEntry:
             ext;
         };
     """
-
     def __init__(
         self,
         ledger_seq: Uint32,
@@ -43,12 +42,10 @@ class TransactionHistoryEntry:
         self.ledger_seq = ledger_seq
         self.tx_set = tx_set
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.ledger_seq.pack(packer)
         self.tx_set.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionHistoryEntry:
         ledger_seq = Uint32.unpack(unpacker)
@@ -59,7 +56,6 @@ class TransactionHistoryEntry:
             tx_set=tx_set,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -78,29 +74,16 @@ class TransactionHistoryEntry:
     def from_xdr(cls, xdr: str) -> TransactionHistoryEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ledger_seq,
-                self.tx_set,
-                self.ext,
-            )
-        )
-
+        return hash((self.ledger_seq, self.tx_set, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ledger_seq == other.ledger_seq
-            and self.tx_set == other.tx_set
-            and self.ext == other.ext
-        )
-
+        return self.ledger_seq== other.ledger_seq and self.tx_set== other.tx_set and self.ext== other.ext
     def __str__(self):
         out = [
-            f"ledger_seq={self.ledger_seq}",
-            f"tx_set={self.tx_set}",
-            f"ext={self.ext}",
+            f'ledger_seq={self.ledger_seq}',
+            f'tx_set={self.tx_set}',
+            f'ext={self.ext}',
         ]
         return f"<TransactionHistoryEntry [{', '.join(out)}]>"

@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .ledger_entry_changes import LedgerEntryChanges
 from .ledger_upgrade import LedgerUpgrade
-
-__all__ = ["UpgradeEntryMeta"]
-
-
+from .ledger_entry_changes import LedgerEntryChanges
+__all__ = ['UpgradeEntryMeta']
 class UpgradeEntryMeta:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class UpgradeEntryMeta:
             LedgerEntryChanges changes;
         };
     """
-
     def __init__(
         self,
         upgrade: LedgerUpgrade,
@@ -30,11 +29,9 @@ class UpgradeEntryMeta:
     ) -> None:
         self.upgrade = upgrade
         self.changes = changes
-
     def pack(self, packer: Packer) -> None:
         self.upgrade.pack(packer)
         self.changes.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> UpgradeEntryMeta:
         upgrade = LedgerUpgrade.unpack(unpacker)
@@ -43,7 +40,6 @@ class UpgradeEntryMeta:
             upgrade=upgrade,
             changes=changes,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class UpgradeEntryMeta:
     def from_xdr(cls, xdr: str) -> UpgradeEntryMeta:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.upgrade,
-                self.changes,
-            )
-        )
-
+        return hash((self.upgrade, self.changes,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.upgrade == other.upgrade and self.changes == other.changes
-
+        return self.upgrade== other.upgrade and self.changes== other.changes
     def __str__(self):
         out = [
-            f"upgrade={self.upgrade}",
-            f"changes={self.changes}",
+            f'upgrade={self.upgrade}',
+            f'changes={self.changes}',
         ]
         return f"<UpgradeEntryMeta [{', '.join(out)}]>"

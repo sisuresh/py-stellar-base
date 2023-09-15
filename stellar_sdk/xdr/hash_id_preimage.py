@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .envelope_type import EnvelopeType
-from .hash_id_preimage_contract_id import HashIDPreimageContractID
 from .hash_id_preimage_operation_id import HashIDPreimageOperationID
 from .hash_id_preimage_revoke_id import HashIDPreimageRevokeID
+from .hash_id_preimage_contract_id import HashIDPreimageContractID
 from .hash_id_preimage_soroban_authorization import HashIDPreimageSorobanAuthorization
-
-__all__ = ["HashIDPreimage"]
-
-
+__all__ = ['HashIDPreimage']
 class HashIDPreimage:
     """
     XDR Source Code::
@@ -32,7 +32,7 @@ class HashIDPreimage:
             struct
             {
                 AccountID sourceAccount;
-                SequenceNumber seqNum;
+                SequenceNumber seqNum; 
                 uint32 opNum;
                 PoolID liquidityPoolID;
                 Asset asset;
@@ -53,7 +53,6 @@ class HashIDPreimage:
             } sorobanAuthorization;
         };
     """
-
     def __init__(
         self,
         type: EnvelopeType,
@@ -67,7 +66,6 @@ class HashIDPreimage:
         self.revoke_id = revoke_id
         self.contract_id = contract_id
         self.soroban_authorization = soroban_authorization
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == EnvelopeType.ENVELOPE_TYPE_OP_ID:
@@ -90,7 +88,6 @@ class HashIDPreimage:
                 raise ValueError("soroban_authorization should not be None.")
             self.soroban_authorization.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> HashIDPreimage:
         type = EnvelopeType.unpack(unpacker)
@@ -107,7 +104,6 @@ class HashIDPreimage:
             soroban_authorization = HashIDPreimageSorobanAuthorization.unpack(unpacker)
             return cls(type=type, soroban_authorization=soroban_authorization)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -126,42 +122,17 @@ class HashIDPreimage:
     def from_xdr(cls, xdr: str) -> HashIDPreimage:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.operation_id,
-                self.revoke_id,
-                self.contract_id,
-                self.soroban_authorization,
-            )
-        )
-
+        return hash((self.type, self.operation_id, self.revoke_id, self.contract_id, self.soroban_authorization,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.operation_id == other.operation_id
-            and self.revoke_id == other.revoke_id
-            and self.contract_id == other.contract_id
-            and self.soroban_authorization == other.soroban_authorization
-        )
-
+        return self.type== other.type and self.operation_id== other.operation_id and self.revoke_id== other.revoke_id and self.contract_id== other.contract_id and self.soroban_authorization== other.soroban_authorization
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"operation_id={self.operation_id}"
-        ) if self.operation_id is not None else None
-        out.append(
-            f"revoke_id={self.revoke_id}"
-        ) if self.revoke_id is not None else None
-        out.append(
-            f"contract_id={self.contract_id}"
-        ) if self.contract_id is not None else None
-        out.append(
-            f"soroban_authorization={self.soroban_authorization}"
-        ) if self.soroban_authorization is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'operation_id={self.operation_id}') if self.operation_id is not None else None
+        out.append(f'revoke_id={self.revoke_id}') if self.revoke_id is not None else None
+        out.append(f'contract_id={self.contract_id}') if self.contract_id is not None else None
+        out.append(f'soroban_authorization={self.soroban_authorization}') if self.soroban_authorization is not None else None
         return f"<HashIDPreimage [{', '.join(out)}]>"

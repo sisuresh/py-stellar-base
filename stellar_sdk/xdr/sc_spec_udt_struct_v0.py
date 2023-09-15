@@ -3,17 +3,14 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
-
-from .base import String
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
 from .constants import *
+
 from .sc_spec_udt_struct_field_v0 import SCSpecUDTStructFieldV0
-
-__all__ = ["SCSpecUDTStructV0"]
-
-
+__all__ = ['SCSpecUDTStructV0']
 class SCSpecUDTStructV0:
     """
     XDR Source Code::
@@ -26,7 +23,6 @@ class SCSpecUDTStructV0:
             SCSpecUDTStructFieldV0 fields<40>;
         };
     """
-
     def __init__(
         self,
         doc: bytes,
@@ -36,14 +32,11 @@ class SCSpecUDTStructV0:
     ) -> None:
         _expect_max_length = 40
         if fields and len(fields) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `fields` should be {_expect_max_length}, but got {len(fields)}."
-            )
+            raise ValueError(f"The maximum length of `fields` should be {_expect_max_length}, but got {len(fields)}.")
         self.doc = doc
         self.lib = lib
         self.name = name
         self.fields = fields
-
     def pack(self, packer: Packer) -> None:
         String(self.doc, SC_SPEC_DOC_LIMIT).pack(packer)
         String(self.lib, 80).pack(packer)
@@ -51,7 +44,6 @@ class SCSpecUDTStructV0:
         packer.pack_uint(len(self.fields))
         for fields_item in self.fields:
             fields_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecUDTStructV0:
         doc = String.unpack(unpacker)
@@ -67,7 +59,6 @@ class SCSpecUDTStructV0:
             name=name,
             fields=fields,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -86,32 +77,17 @@ class SCSpecUDTStructV0:
     def from_xdr(cls, xdr: str) -> SCSpecUDTStructV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.doc,
-                self.lib,
-                self.name,
-                self.fields,
-            )
-        )
-
+        return hash((self.doc, self.lib, self.name, self.fields,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.doc == other.doc
-            and self.lib == other.lib
-            and self.name == other.name
-            and self.fields == other.fields
-        )
-
+        return self.doc== other.doc and self.lib== other.lib and self.name== other.name and self.fields== other.fields
     def __str__(self):
         out = [
-            f"doc={self.doc}",
-            f"lib={self.lib}",
-            f"name={self.name}",
-            f"fields={self.fields}",
+            f'doc={self.doc}',
+            f'lib={self.lib}',
+            f'name={self.name}',
+            f'fields={self.fields}',
         ]
         return f"<SCSpecUDTStructV0 [{', '.join(out)}]>"

@@ -3,16 +3,22 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .int64 import Int64
 from .int64 import Int64
 from .uint32 import Uint32
+from .uint32 import Uint32
 from .uint64 import Uint64
-
-__all__ = ["StateExpirationSettings"]
-
-
+from .uint32 import Uint32
+__all__ = ['StateExpirationSettings']
 class StateExpirationSettings:
     """
     XDR Source Code::
@@ -39,7 +45,6 @@ class StateExpirationSettings:
             uint32 startingEvictionScanLevel;
         };
     """
-
     def __init__(
         self,
         max_entry_expiration: Uint32,
@@ -61,7 +66,6 @@ class StateExpirationSettings:
         self.bucket_list_size_window_sample_size = bucket_list_size_window_sample_size
         self.eviction_scan_size = eviction_scan_size
         self.starting_eviction_scan_level = starting_eviction_scan_level
-
     def pack(self, packer: Packer) -> None:
         self.max_entry_expiration.pack(packer)
         self.min_temp_entry_expiration.pack(packer)
@@ -72,7 +76,6 @@ class StateExpirationSettings:
         self.bucket_list_size_window_sample_size.pack(packer)
         self.eviction_scan_size.pack(packer)
         self.starting_eviction_scan_level.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> StateExpirationSettings:
         max_entry_expiration = Uint32.unpack(unpacker)
@@ -95,7 +98,6 @@ class StateExpirationSettings:
             eviction_scan_size=eviction_scan_size,
             starting_eviction_scan_level=starting_eviction_scan_level,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -114,50 +116,22 @@ class StateExpirationSettings:
     def from_xdr(cls, xdr: str) -> StateExpirationSettings:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.max_entry_expiration,
-                self.min_temp_entry_expiration,
-                self.min_persistent_entry_expiration,
-                self.persistent_rent_rate_denominator,
-                self.temp_rent_rate_denominator,
-                self.max_entries_to_expire,
-                self.bucket_list_size_window_sample_size,
-                self.eviction_scan_size,
-                self.starting_eviction_scan_level,
-            )
-        )
-
+        return hash((self.max_entry_expiration, self.min_temp_entry_expiration, self.min_persistent_entry_expiration, self.persistent_rent_rate_denominator, self.temp_rent_rate_denominator, self.max_entries_to_expire, self.bucket_list_size_window_sample_size, self.eviction_scan_size, self.starting_eviction_scan_level,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.max_entry_expiration == other.max_entry_expiration
-            and self.min_temp_entry_expiration == other.min_temp_entry_expiration
-            and self.min_persistent_entry_expiration
-            == other.min_persistent_entry_expiration
-            and self.persistent_rent_rate_denominator
-            == other.persistent_rent_rate_denominator
-            and self.temp_rent_rate_denominator == other.temp_rent_rate_denominator
-            and self.max_entries_to_expire == other.max_entries_to_expire
-            and self.bucket_list_size_window_sample_size
-            == other.bucket_list_size_window_sample_size
-            and self.eviction_scan_size == other.eviction_scan_size
-            and self.starting_eviction_scan_level == other.starting_eviction_scan_level
-        )
-
+        return self.max_entry_expiration== other.max_entry_expiration and self.min_temp_entry_expiration== other.min_temp_entry_expiration and self.min_persistent_entry_expiration== other.min_persistent_entry_expiration and self.persistent_rent_rate_denominator== other.persistent_rent_rate_denominator and self.temp_rent_rate_denominator== other.temp_rent_rate_denominator and self.max_entries_to_expire== other.max_entries_to_expire and self.bucket_list_size_window_sample_size== other.bucket_list_size_window_sample_size and self.eviction_scan_size== other.eviction_scan_size and self.starting_eviction_scan_level== other.starting_eviction_scan_level
     def __str__(self):
         out = [
-            f"max_entry_expiration={self.max_entry_expiration}",
-            f"min_temp_entry_expiration={self.min_temp_entry_expiration}",
-            f"min_persistent_entry_expiration={self.min_persistent_entry_expiration}",
-            f"persistent_rent_rate_denominator={self.persistent_rent_rate_denominator}",
-            f"temp_rent_rate_denominator={self.temp_rent_rate_denominator}",
-            f"max_entries_to_expire={self.max_entries_to_expire}",
-            f"bucket_list_size_window_sample_size={self.bucket_list_size_window_sample_size}",
-            f"eviction_scan_size={self.eviction_scan_size}",
-            f"starting_eviction_scan_level={self.starting_eviction_scan_level}",
+            f'max_entry_expiration={self.max_entry_expiration}',
+            f'min_temp_entry_expiration={self.min_temp_entry_expiration}',
+            f'min_persistent_entry_expiration={self.min_persistent_entry_expiration}',
+            f'persistent_rent_rate_denominator={self.persistent_rent_rate_denominator}',
+            f'temp_rent_rate_denominator={self.temp_rent_rate_denominator}',
+            f'max_entries_to_expire={self.max_entries_to_expire}',
+            f'bucket_list_size_window_sample_size={self.bucket_list_size_window_sample_size}',
+            f'eviction_scan_size={self.eviction_scan_size}',
+            f'starting_eviction_scan_level={self.starting_eviction_scan_level}',
         ]
         return f"<StateExpirationSettings [{', '.join(out)}]>"

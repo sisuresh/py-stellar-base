@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_spec_type_def import SCSpecTypeDef
-
-__all__ = ["SCSpecTypeMap"]
-
-
+from .sc_spec_type_def import SCSpecTypeDef
+__all__ = ['SCSpecTypeMap']
 class SCSpecTypeMap:
     """
     XDR Source Code::
@@ -21,7 +22,6 @@ class SCSpecTypeMap:
             SCSpecTypeDef valueType;
         };
     """
-
     def __init__(
         self,
         key_type: SCSpecTypeDef,
@@ -29,11 +29,9 @@ class SCSpecTypeMap:
     ) -> None:
         self.key_type = key_type
         self.value_type = value_type
-
     def pack(self, packer: Packer) -> None:
         self.key_type.pack(packer)
         self.value_type.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecTypeMap:
         key_type = SCSpecTypeDef.unpack(unpacker)
@@ -42,7 +40,6 @@ class SCSpecTypeMap:
             key_type=key_type,
             value_type=value_type,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -61,23 +58,15 @@ class SCSpecTypeMap:
     def from_xdr(cls, xdr: str) -> SCSpecTypeMap:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.key_type,
-                self.value_type,
-            )
-        )
-
+        return hash((self.key_type, self.value_type,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.key_type == other.key_type and self.value_type == other.value_type
-
+        return self.key_type== other.key_type and self.value_type== other.value_type
     def __str__(self):
         out = [
-            f"key_type={self.key_type}",
-            f"value_type={self.value_type}",
+            f'key_type={self.key_type}',
+            f'value_type={self.value_type}',
         ]
         return f"<SCSpecTypeMap [{', '.join(out)}]>"

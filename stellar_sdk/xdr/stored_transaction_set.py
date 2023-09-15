@@ -3,29 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Integer
-from .generalized_transaction_set import GeneralizedTransactionSet
 from .transaction_set import TransactionSet
-
-__all__ = ["StoredTransactionSet"]
-
-
+from .generalized_transaction_set import GeneralizedTransactionSet
+__all__ = ['StoredTransactionSet']
 class StoredTransactionSet:
     """
     XDR Source Code::
 
-                                                                union StoredTransactionSet switch (int v)
-                                                                {
-                                                                case 0:
-                                                                        TransactionSet txSet;
-                                                                case 1:
-                                                                        GeneralizedTransactionSet generalizedTxSet;
-                                                                };
+								union StoredTransactionSet switch (int v)
+								{
+								case 0:
+									TransactionSet txSet;
+								case 1:
+									GeneralizedTransactionSet generalizedTxSet;
+								};
     """
-
     def __init__(
         self,
         v: int,
@@ -35,7 +33,6 @@ class StoredTransactionSet:
         self.v = v
         self.tx_set = tx_set
         self.generalized_tx_set = generalized_tx_set
-
     def pack(self, packer: Packer) -> None:
         Integer(self.v).pack(packer)
         if self.v == 0:
@@ -48,7 +45,6 @@ class StoredTransactionSet:
                 raise ValueError("generalized_tx_set should not be None.")
             self.generalized_tx_set.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> StoredTransactionSet:
         v = Integer.unpack(unpacker)
@@ -59,7 +55,6 @@ class StoredTransactionSet:
             generalized_tx_set = GeneralizedTransactionSet.unpack(unpacker)
             return cls(v=v, generalized_tx_set=generalized_tx_set)
         return cls(v=v)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -78,30 +73,15 @@ class StoredTransactionSet:
     def from_xdr(cls, xdr: str) -> StoredTransactionSet:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.v,
-                self.tx_set,
-                self.generalized_tx_set,
-            )
-        )
-
+        return hash((self.v, self.tx_set, self.generalized_tx_set,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.v == other.v
-            and self.tx_set == other.tx_set
-            and self.generalized_tx_set == other.generalized_tx_set
-        )
-
+        return self.v== other.v and self.tx_set== other.tx_set and self.generalized_tx_set== other.generalized_tx_set
     def __str__(self):
         out = []
-        out.append(f"v={self.v}")
-        out.append(f"tx_set={self.tx_set}") if self.tx_set is not None else None
-        out.append(
-            f"generalized_tx_set={self.generalized_tx_set}"
-        ) if self.generalized_tx_set is not None else None
+        out.append(f'v={self.v}')
+        out.append(f'tx_set={self.tx_set}') if self.tx_set is not None else None
+        out.append(f'generalized_tx_set={self.generalized_tx_set}') if self.generalized_tx_set is not None else None
         return f"<StoredTransactionSet [{', '.join(out)}]>"

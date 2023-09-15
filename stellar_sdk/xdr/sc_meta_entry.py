@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_meta_kind import SCMetaKind
 from .sc_meta_v0 import SCMetaV0
-
-__all__ = ["SCMetaEntry"]
-
-
+__all__ = ['SCMetaEntry']
 class SCMetaEntry:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class SCMetaEntry:
             SCMetaV0 v0;
         };
     """
-
     def __init__(
         self,
         kind: SCMetaKind,
@@ -30,7 +29,6 @@ class SCMetaEntry:
     ) -> None:
         self.kind = kind
         self.v0 = v0
-
     def pack(self, packer: Packer) -> None:
         self.kind.pack(packer)
         if self.kind == SCMetaKind.SC_META_V0:
@@ -38,7 +36,6 @@ class SCMetaEntry:
                 raise ValueError("v0 should not be None.")
             self.v0.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCMetaEntry:
         kind = SCMetaKind.unpack(unpacker)
@@ -46,7 +43,6 @@ class SCMetaEntry:
             v0 = SCMetaV0.unpack(unpacker)
             return cls(kind=kind, v0=v0)
         return cls(kind=kind)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -65,22 +61,14 @@ class SCMetaEntry:
     def from_xdr(cls, xdr: str) -> SCMetaEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.kind,
-                self.v0,
-            )
-        )
-
+        return hash((self.kind, self.v0,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.kind == other.kind and self.v0 == other.v0
-
+        return self.kind== other.kind and self.v0== other.v0
     def __str__(self):
         out = []
-        out.append(f"kind={self.kind}")
-        out.append(f"v0={self.v0}") if self.v0 is not None else None
+        out.append(f'kind={self.kind}')
+        out.append(f'v0={self.v0}') if self.v0 is not None else None
         return f"<SCMetaEntry [{', '.join(out)}]>"

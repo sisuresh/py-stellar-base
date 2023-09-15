@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .scp_envelope import SCPEnvelope
 from .uint32 import Uint32
-
-__all__ = ["LedgerSCPMessages"]
-
-
+from .scp_envelope import SCPEnvelope
+__all__ = ['LedgerSCPMessages']
 class LedgerSCPMessages:
     """
     XDR Source Code::
@@ -23,7 +22,6 @@ class LedgerSCPMessages:
             SCPEnvelope messages<>;
         };
     """
-
     def __init__(
         self,
         ledger_seq: Uint32,
@@ -31,18 +29,14 @@ class LedgerSCPMessages:
     ) -> None:
         _expect_max_length = 4294967295
         if messages and len(messages) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `messages` should be {_expect_max_length}, but got {len(messages)}."
-            )
+            raise ValueError(f"The maximum length of `messages` should be {_expect_max_length}, but got {len(messages)}.")
         self.ledger_seq = ledger_seq
         self.messages = messages
-
     def pack(self, packer: Packer) -> None:
         self.ledger_seq.pack(packer)
         packer.pack_uint(len(self.messages))
         for messages_item in self.messages:
             messages_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerSCPMessages:
         ledger_seq = Uint32.unpack(unpacker)
@@ -54,7 +48,6 @@ class LedgerSCPMessages:
             ledger_seq=ledger_seq,
             messages=messages,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -73,23 +66,15 @@ class LedgerSCPMessages:
     def from_xdr(cls, xdr: str) -> LedgerSCPMessages:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ledger_seq,
-                self.messages,
-            )
-        )
-
+        return hash((self.ledger_seq, self.messages,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.ledger_seq == other.ledger_seq and self.messages == other.messages
-
+        return self.ledger_seq== other.ledger_seq and self.messages== other.messages
     def __str__(self):
         out = [
-            f"ledger_seq={self.ledger_seq}",
-            f"messages={self.messages}",
+            f'ledger_seq={self.ledger_seq}',
+            f'messages={self.messages}',
         ]
         return f"<LedgerSCPMessages [{', '.join(out)}]>"

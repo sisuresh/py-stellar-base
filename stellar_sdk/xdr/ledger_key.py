@@ -3,24 +3,24 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .ledger_entry_type import LedgerEntryType
 from .ledger_key_account import LedgerKeyAccount
-from .ledger_key_claimable_balance import LedgerKeyClaimableBalance
-from .ledger_key_config_setting import LedgerKeyConfigSetting
-from .ledger_key_contract_code import LedgerKeyContractCode
-from .ledger_key_contract_data import LedgerKeyContractData
-from .ledger_key_data import LedgerKeyData
-from .ledger_key_expiration import LedgerKeyExpiration
-from .ledger_key_liquidity_pool import LedgerKeyLiquidityPool
-from .ledger_key_offer import LedgerKeyOffer
 from .ledger_key_trust_line import LedgerKeyTrustLine
-
-__all__ = ["LedgerKey"]
-
-
+from .ledger_key_offer import LedgerKeyOffer
+from .ledger_key_data import LedgerKeyData
+from .ledger_key_claimable_balance import LedgerKeyClaimableBalance
+from .ledger_key_liquidity_pool import LedgerKeyLiquidityPool
+from .ledger_key_contract_data import LedgerKeyContractData
+from .ledger_key_contract_code import LedgerKeyContractCode
+from .ledger_key_config_setting import LedgerKeyConfigSetting
+from .ledger_key_expiration import LedgerKeyExpiration
+__all__ = ['LedgerKey']
 class LedgerKey:
     """
     XDR Source Code::
@@ -90,7 +90,6 @@ class LedgerKey:
             } expiration;
         };
     """
-
     def __init__(
         self,
         type: LedgerEntryType,
@@ -116,7 +115,6 @@ class LedgerKey:
         self.contract_code = contract_code
         self.config_setting = config_setting
         self.expiration = expiration
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == LedgerEntryType.ACCOUNT:
@@ -169,7 +167,6 @@ class LedgerKey:
                 raise ValueError("expiration should not be None.")
             self.expiration.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerKey:
         type = LedgerEntryType.unpack(unpacker)
@@ -204,7 +201,6 @@ class LedgerKey:
             expiration = LedgerKeyExpiration.unpack(unpacker)
             return cls(type=type, expiration=expiration)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -223,66 +219,23 @@ class LedgerKey:
     def from_xdr(cls, xdr: str) -> LedgerKey:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.account,
-                self.trust_line,
-                self.offer,
-                self.data,
-                self.claimable_balance,
-                self.liquidity_pool,
-                self.contract_data,
-                self.contract_code,
-                self.config_setting,
-                self.expiration,
-            )
-        )
-
+        return hash((self.type, self.account, self.trust_line, self.offer, self.data, self.claimable_balance, self.liquidity_pool, self.contract_data, self.contract_code, self.config_setting, self.expiration,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.account == other.account
-            and self.trust_line == other.trust_line
-            and self.offer == other.offer
-            and self.data == other.data
-            and self.claimable_balance == other.claimable_balance
-            and self.liquidity_pool == other.liquidity_pool
-            and self.contract_data == other.contract_data
-            and self.contract_code == other.contract_code
-            and self.config_setting == other.config_setting
-            and self.expiration == other.expiration
-        )
-
+        return self.type== other.type and self.account== other.account and self.trust_line== other.trust_line and self.offer== other.offer and self.data== other.data and self.claimable_balance== other.claimable_balance and self.liquidity_pool== other.liquidity_pool and self.contract_data== other.contract_data and self.contract_code== other.contract_code and self.config_setting== other.config_setting and self.expiration== other.expiration
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"account={self.account}") if self.account is not None else None
-        out.append(
-            f"trust_line={self.trust_line}"
-        ) if self.trust_line is not None else None
-        out.append(f"offer={self.offer}") if self.offer is not None else None
-        out.append(f"data={self.data}") if self.data is not None else None
-        out.append(
-            f"claimable_balance={self.claimable_balance}"
-        ) if self.claimable_balance is not None else None
-        out.append(
-            f"liquidity_pool={self.liquidity_pool}"
-        ) if self.liquidity_pool is not None else None
-        out.append(
-            f"contract_data={self.contract_data}"
-        ) if self.contract_data is not None else None
-        out.append(
-            f"contract_code={self.contract_code}"
-        ) if self.contract_code is not None else None
-        out.append(
-            f"config_setting={self.config_setting}"
-        ) if self.config_setting is not None else None
-        out.append(
-            f"expiration={self.expiration}"
-        ) if self.expiration is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'account={self.account}') if self.account is not None else None
+        out.append(f'trust_line={self.trust_line}') if self.trust_line is not None else None
+        out.append(f'offer={self.offer}') if self.offer is not None else None
+        out.append(f'data={self.data}') if self.data is not None else None
+        out.append(f'claimable_balance={self.claimable_balance}') if self.claimable_balance is not None else None
+        out.append(f'liquidity_pool={self.liquidity_pool}') if self.liquidity_pool is not None else None
+        out.append(f'contract_data={self.contract_data}') if self.contract_data is not None else None
+        out.append(f'contract_code={self.contract_code}') if self.contract_code is not None else None
+        out.append(f'config_setting={self.config_setting}') if self.config_setting is not None else None
+        out.append(f'expiration={self.expiration}') if self.expiration is not None else None
         return f"<LedgerKey [{', '.join(out)}]>"

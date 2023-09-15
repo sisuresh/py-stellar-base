@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Integer
-
-__all__ = ["Auth"]
-
-
+__all__ = ['Auth']
 class Auth:
     """
     XDR Source Code::
@@ -20,23 +19,19 @@ class Auth:
             int flags;
         };
     """
-
     def __init__(
         self,
         flags: int,
     ) -> None:
         self.flags = flags
-
     def pack(self, packer: Packer) -> None:
         Integer(self.flags).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Auth:
         flags = Integer.unpack(unpacker)
         return cls(
             flags=flags,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +50,14 @@ class Auth:
     def from_xdr(cls, xdr: str) -> Auth:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.flags,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.flags == other.flags
-
+        return self.flags== other.flags
     def __str__(self):
         out = [
-            f"flags={self.flags}",
+            f'flags={self.flags}',
         ]
         return f"<Auth [{', '.join(out)}]>"

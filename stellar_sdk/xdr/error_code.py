@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["ErrorCode"]
-
-
+__all__ = ['ErrorCode']
 class ErrorCode(IntEnum):
     """
     XDR Source Code::
@@ -23,13 +23,11 @@ class ErrorCode(IntEnum):
             ERR_LOAD = 4  // System overloaded
         };
     """
-
     ERR_MISC = 0
     ERR_DATA = 1
     ERR_CONF = 2
     ERR_AUTH = 3
     ERR_LOAD = 4
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -37,7 +35,6 @@ class ErrorCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> ErrorCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

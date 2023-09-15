@@ -3,16 +3,18 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .asset import Asset
 from .asset import Asset
 from .int64 import Int64
 from .price import Price
-
-__all__ = ["ManageBuyOfferOp"]
-
-
+from .int64 import Int64
+__all__ = ['ManageBuyOfferOp']
 class ManageBuyOfferOp:
     """
     XDR Source Code::
@@ -29,7 +31,6 @@ class ManageBuyOfferOp:
             int64 offerID;
         };
     """
-
     def __init__(
         self,
         selling: Asset,
@@ -43,14 +44,12 @@ class ManageBuyOfferOp:
         self.buy_amount = buy_amount
         self.price = price
         self.offer_id = offer_id
-
     def pack(self, packer: Packer) -> None:
         self.selling.pack(packer)
         self.buying.pack(packer)
         self.buy_amount.pack(packer)
         self.price.pack(packer)
         self.offer_id.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ManageBuyOfferOp:
         selling = Asset.unpack(unpacker)
@@ -65,7 +64,6 @@ class ManageBuyOfferOp:
             price=price,
             offer_id=offer_id,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -84,35 +82,18 @@ class ManageBuyOfferOp:
     def from_xdr(cls, xdr: str) -> ManageBuyOfferOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.selling,
-                self.buying,
-                self.buy_amount,
-                self.price,
-                self.offer_id,
-            )
-        )
-
+        return hash((self.selling, self.buying, self.buy_amount, self.price, self.offer_id,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.selling == other.selling
-            and self.buying == other.buying
-            and self.buy_amount == other.buy_amount
-            and self.price == other.price
-            and self.offer_id == other.offer_id
-        )
-
+        return self.selling== other.selling and self.buying== other.buying and self.buy_amount== other.buy_amount and self.price== other.price and self.offer_id== other.offer_id
     def __str__(self):
         out = [
-            f"selling={self.selling}",
-            f"buying={self.buying}",
-            f"buy_amount={self.buy_amount}",
-            f"price={self.price}",
-            f"offer_id={self.offer_id}",
+            f'selling={self.selling}',
+            f'buying={self.buying}',
+            f'buy_amount={self.buy_amount}',
+            f'price={self.price}',
+            f'offer_id={self.offer_id}',
         ]
         return f"<ManageBuyOfferOp [{', '.join(out)}]>"

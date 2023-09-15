@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .soroban_authorized_function import SorobanAuthorizedFunction
-
-__all__ = ["SorobanAuthorizedInvocation"]
-
-
+__all__ = ['SorobanAuthorizedInvocation']
 class SorobanAuthorizedInvocation:
     """
     XDR Source Code::
@@ -22,7 +21,6 @@ class SorobanAuthorizedInvocation:
             SorobanAuthorizedInvocation subInvocations<>;
         };
     """
-
     def __init__(
         self,
         function: SorobanAuthorizedFunction,
@@ -30,18 +28,14 @@ class SorobanAuthorizedInvocation:
     ) -> None:
         _expect_max_length = 4294967295
         if sub_invocations and len(sub_invocations) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `sub_invocations` should be {_expect_max_length}, but got {len(sub_invocations)}."
-            )
+            raise ValueError(f"The maximum length of `sub_invocations` should be {_expect_max_length}, but got {len(sub_invocations)}.")
         self.function = function
         self.sub_invocations = sub_invocations
-
     def pack(self, packer: Packer) -> None:
         self.function.pack(packer)
         packer.pack_uint(len(self.sub_invocations))
         for sub_invocations_item in self.sub_invocations:
             sub_invocations_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SorobanAuthorizedInvocation:
         function = SorobanAuthorizedFunction.unpack(unpacker)
@@ -53,7 +47,6 @@ class SorobanAuthorizedInvocation:
             function=function,
             sub_invocations=sub_invocations,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -72,26 +65,15 @@ class SorobanAuthorizedInvocation:
     def from_xdr(cls, xdr: str) -> SorobanAuthorizedInvocation:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.function,
-                self.sub_invocations,
-            )
-        )
-
+        return hash((self.function, self.sub_invocations,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.function == other.function
-            and self.sub_invocations == other.sub_invocations
-        )
-
+        return self.function== other.function and self.sub_invocations== other.sub_invocations
     def __str__(self):
         out = [
-            f"function={self.function}",
-            f"sub_invocations={self.sub_invocations}",
+            f'function={self.function}',
+            f'sub_invocations={self.sub_invocations}',
         ]
         return f"<SorobanAuthorizedInvocation [{', '.join(out)}]>"

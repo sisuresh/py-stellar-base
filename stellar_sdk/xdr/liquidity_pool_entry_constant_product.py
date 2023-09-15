@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .liquidity_pool_constant_product_parameters import LiquidityPoolConstantProductParameters
 from .int64 import Int64
-from .liquidity_pool_constant_product_parameters import (
-    LiquidityPoolConstantProductParameters,
-)
-
-__all__ = ["LiquidityPoolEntryConstantProduct"]
-
-
+from .int64 import Int64
+from .int64 import Int64
+from .int64 import Int64
+__all__ = ['LiquidityPoolEntryConstantProduct']
 class LiquidityPoolEntryConstantProduct:
     """
     XDR Source Code::
@@ -29,7 +30,6 @@ class LiquidityPoolEntryConstantProduct:
                                                     // associated pool shares
                 }
     """
-
     def __init__(
         self,
         params: LiquidityPoolConstantProductParameters,
@@ -43,14 +43,12 @@ class LiquidityPoolEntryConstantProduct:
         self.reserve_b = reserve_b
         self.total_pool_shares = total_pool_shares
         self.pool_shares_trust_line_count = pool_shares_trust_line_count
-
     def pack(self, packer: Packer) -> None:
         self.params.pack(packer)
         self.reserve_a.pack(packer)
         self.reserve_b.pack(packer)
         self.total_pool_shares.pack(packer)
         self.pool_shares_trust_line_count.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LiquidityPoolEntryConstantProduct:
         params = LiquidityPoolConstantProductParameters.unpack(unpacker)
@@ -65,7 +63,6 @@ class LiquidityPoolEntryConstantProduct:
             total_pool_shares=total_pool_shares,
             pool_shares_trust_line_count=pool_shares_trust_line_count,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -84,35 +81,18 @@ class LiquidityPoolEntryConstantProduct:
     def from_xdr(cls, xdr: str) -> LiquidityPoolEntryConstantProduct:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.params,
-                self.reserve_a,
-                self.reserve_b,
-                self.total_pool_shares,
-                self.pool_shares_trust_line_count,
-            )
-        )
-
+        return hash((self.params, self.reserve_a, self.reserve_b, self.total_pool_shares, self.pool_shares_trust_line_count,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.params == other.params
-            and self.reserve_a == other.reserve_a
-            and self.reserve_b == other.reserve_b
-            and self.total_pool_shares == other.total_pool_shares
-            and self.pool_shares_trust_line_count == other.pool_shares_trust_line_count
-        )
-
+        return self.params== other.params and self.reserve_a== other.reserve_a and self.reserve_b== other.reserve_b and self.total_pool_shares== other.total_pool_shares and self.pool_shares_trust_line_count== other.pool_shares_trust_line_count
     def __str__(self):
         out = [
-            f"params={self.params}",
-            f"reserve_a={self.reserve_a}",
-            f"reserve_b={self.reserve_b}",
-            f"total_pool_shares={self.total_pool_shares}",
-            f"pool_shares_trust_line_count={self.pool_shares_trust_line_count}",
+            f'params={self.params}',
+            f'reserve_a={self.reserve_a}',
+            f'reserve_b={self.reserve_b}',
+            f'total_pool_shares={self.total_pool_shares}',
+            f'pool_shares_trust_line_count={self.pool_shares_trust_line_count}',
         ]
         return f"<LiquidityPoolEntryConstantProduct [{', '.join(out)}]>"

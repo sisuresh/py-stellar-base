@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .operation_result import OperationResult
 from .transaction_result_code import TransactionResultCode
-
-__all__ = ["InnerTransactionResultResult"]
-
-
+from .operation_result import OperationResult
+__all__ = ['InnerTransactionResultResult']
 class InnerTransactionResultResult:
     """
     XDR Source Code::
@@ -42,7 +41,6 @@ class InnerTransactionResultResult:
                 void;
             }
     """
-
     def __init__(
         self,
         code: TransactionResultCode,
@@ -50,12 +48,9 @@ class InnerTransactionResultResult:
     ) -> None:
         _expect_max_length = 4294967295
         if results and len(results) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `results` should be {_expect_max_length}, but got {len(results)}."
-            )
+            raise ValueError(f"The maximum length of `results` should be {_expect_max_length}, but got {len(results)}.")
         self.code = code
         self.results = results
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == TransactionResultCode.txSUCCESS:
@@ -102,7 +97,6 @@ class InnerTransactionResultResult:
             return
         if self.code == TransactionResultCode.txSOROBAN_INVALID:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> InnerTransactionResultResult:
         code = TransactionResultCode.unpack(unpacker)
@@ -149,7 +143,6 @@ class InnerTransactionResultResult:
         if code == TransactionResultCode.txSOROBAN_INVALID:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -168,22 +161,14 @@ class InnerTransactionResultResult:
     def from_xdr(cls, xdr: str) -> InnerTransactionResultResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.code,
-                self.results,
-            )
-        )
-
+        return hash((self.code, self.results,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code and self.results == other.results
-
+        return self.code== other.code and self.results== other.results
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
-        out.append(f"results={self.results}") if self.results is not None else None
+        out.append(f'code={self.code}')
+        out.append(f'results={self.results}') if self.results is not None else None
         return f"<InnerTransactionResultResult [{', '.join(out)}]>"

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["ContractCostType"]
-
-
+__all__ = ['ContractCostType']
 class ContractCostType(IntEnum):
     """
     XDR Source Code::
@@ -28,7 +28,7 @@ class ContractCostType(IntEnum):
             // Cost of a host function dispatch, not including the actual work done by
             // the function nor the cost of VM invocation machinary
             DispatchHostFunction = 5,
-            // Cost of visiting a host object from the host object storage. Exists to
+            // Cost of visiting a host object from the host object storage. Exists to 
             // make sure some baseline cost coverage, i.e. repeatly visiting objects
             // by the guest will always incur some charges.
             VisitObject = 6,
@@ -77,7 +77,6 @@ class ContractCostType(IntEnum):
             Int256Shift = 27
         };
     """
-
     WasmInsnExec = 0
     WasmMemAlloc = 1
     HostMemAlloc = 2
@@ -106,7 +105,6 @@ class ContractCostType(IntEnum):
     Int256Div = 25
     Int256Pow = 26
     Int256Shift = 27
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -114,7 +112,6 @@ class ContractCostType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> ContractCostType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

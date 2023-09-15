@@ -3,35 +3,29 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .peer_stats import PeerStats
-
-__all__ = ["PeerStatList"]
-
-
+__all__ = ['PeerStatList']
 class PeerStatList:
     """
     XDR Source Code::
 
         typedef PeerStats PeerStatList<25>;
     """
-
     def __init__(self, peer_stat_list: List[PeerStats]) -> None:
         _expect_max_length = 25
         if peer_stat_list and len(peer_stat_list) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `peer_stat_list` should be {_expect_max_length}, but got {len(peer_stat_list)}."
-            )
+            raise ValueError(f"The maximum length of `peer_stat_list` should be {_expect_max_length}, but got {len(peer_stat_list)}.")
         self.peer_stat_list = peer_stat_list
-
     def pack(self, packer: Packer) -> None:
         packer.pack_uint(len(self.peer_stat_list))
         for peer_stat_list_item in self.peer_stat_list:
             peer_stat_list_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> PeerStatList:
         length = unpacker.unpack_uint()
@@ -39,7 +33,6 @@ class PeerStatList:
         for _ in range(length):
             peer_stat_list.append(PeerStats.unpack(unpacker))
         return cls(peer_stat_list)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -58,10 +51,8 @@ class PeerStatList:
     def from_xdr(cls, xdr: str) -> PeerStatList:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.peer_stat_list)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

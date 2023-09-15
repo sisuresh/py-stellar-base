@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .asset import Asset
-from .int64 import Int64
 from .muxed_account import MuxedAccount
-
-__all__ = ["ClawbackOp"]
-
-
+from .int64 import Int64
+__all__ = ['ClawbackOp']
 class ClawbackOp:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class ClawbackOp:
             int64 amount;
         };
     """
-
     def __init__(
         self,
         asset: Asset,
@@ -34,12 +33,10 @@ class ClawbackOp:
         self.asset = asset
         self.from_ = from_
         self.amount = amount
-
     def pack(self, packer: Packer) -> None:
         self.asset.pack(packer)
         self.from_.pack(packer)
         self.amount.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ClawbackOp:
         asset = Asset.unpack(unpacker)
@@ -50,7 +47,6 @@ class ClawbackOp:
             from_=from_,
             amount=amount,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +65,16 @@ class ClawbackOp:
     def from_xdr(cls, xdr: str) -> ClawbackOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.asset,
-                self.from_,
-                self.amount,
-            )
-        )
-
+        return hash((self.asset, self.from_, self.amount,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.asset == other.asset
-            and self.from_ == other.from_
-            and self.amount == other.amount
-        )
-
+        return self.asset== other.asset and self.from_== other.from_ and self.amount== other.amount
     def __str__(self):
         out = [
-            f"asset={self.asset}",
-            f"from_={self.from_}",
-            f"amount={self.amount}",
+            f'asset={self.asset}',
+            f'from_={self.from_}',
+            f'amount={self.amount}',
         ]
         return f"<ClawbackOp [{', '.join(out)}]>"

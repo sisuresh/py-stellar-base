@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["StellarValueType"]
-
-
+__all__ = ['StellarValueType']
 class StellarValueType(IntEnum):
     """
     XDR Source Code::
@@ -20,10 +20,8 @@ class StellarValueType(IntEnum):
             STELLAR_VALUE_SIGNED = 1
         };
     """
-
     STELLAR_VALUE_BASIC = 0
     STELLAR_VALUE_SIGNED = 1
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -31,7 +29,6 @@ class StellarValueType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> StellarValueType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

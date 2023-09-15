@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .hash import Hash
 from .value import Value
-
-__all__ = ["SCPNomination"]
-
-
+from .value import Value
+__all__ = ['SCPNomination']
 class SCPNomination:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class SCPNomination:
             Value accepted<>;   // Y
         };
     """
-
     def __init__(
         self,
         quorum_set_hash: Hash,
@@ -33,18 +32,13 @@ class SCPNomination:
     ) -> None:
         _expect_max_length = 4294967295
         if votes and len(votes) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `votes` should be {_expect_max_length}, but got {len(votes)}."
-            )
+            raise ValueError(f"The maximum length of `votes` should be {_expect_max_length}, but got {len(votes)}.")
         _expect_max_length = 4294967295
         if accepted and len(accepted) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `accepted` should be {_expect_max_length}, but got {len(accepted)}."
-            )
+            raise ValueError(f"The maximum length of `accepted` should be {_expect_max_length}, but got {len(accepted)}.")
         self.quorum_set_hash = quorum_set_hash
         self.votes = votes
         self.accepted = accepted
-
     def pack(self, packer: Packer) -> None:
         self.quorum_set_hash.pack(packer)
         packer.pack_uint(len(self.votes))
@@ -53,7 +47,6 @@ class SCPNomination:
         packer.pack_uint(len(self.accepted))
         for accepted_item in self.accepted:
             accepted_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCPNomination:
         quorum_set_hash = Hash.unpack(unpacker)
@@ -70,7 +63,6 @@ class SCPNomination:
             votes=votes,
             accepted=accepted,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -89,29 +81,16 @@ class SCPNomination:
     def from_xdr(cls, xdr: str) -> SCPNomination:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.quorum_set_hash,
-                self.votes,
-                self.accepted,
-            )
-        )
-
+        return hash((self.quorum_set_hash, self.votes, self.accepted,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.quorum_set_hash == other.quorum_set_hash
-            and self.votes == other.votes
-            and self.accepted == other.accepted
-        )
-
+        return self.quorum_set_hash== other.quorum_set_hash and self.votes== other.votes and self.accepted== other.accepted
     def __str__(self):
         out = [
-            f"quorum_set_hash={self.quorum_set_hash}",
-            f"votes={self.votes}",
-            f"accepted={self.accepted}",
+            f'quorum_set_hash={self.quorum_set_hash}',
+            f'votes={self.votes}',
+            f'accepted={self.accepted}',
         ]
         return f"<SCPNomination [{', '.join(out)}]>"

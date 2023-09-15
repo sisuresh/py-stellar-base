@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["SCSpecUDTUnionCaseV0Kind"]
-
-
+__all__ = ['SCSpecUDTUnionCaseV0Kind']
 class SCSpecUDTUnionCaseV0Kind(IntEnum):
     """
     XDR Source Code::
@@ -20,10 +20,8 @@ class SCSpecUDTUnionCaseV0Kind(IntEnum):
             SC_SPEC_UDT_UNION_CASE_TUPLE_V0 = 1
         };
     """
-
     SC_SPEC_UDT_UNION_CASE_VOID_V0 = 0
     SC_SPEC_UDT_UNION_CASE_TUPLE_V0 = 1
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -31,7 +29,6 @@ class SCSpecUDTUnionCaseV0Kind(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> SCSpecUDTUnionCaseV0Kind:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

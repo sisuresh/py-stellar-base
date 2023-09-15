@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .hash import Hash
 from .transaction_envelope import TransactionEnvelope
-
-__all__ = ["TransactionSet"]
-
-
+__all__ = ['TransactionSet']
 class TransactionSet:
     """
     XDR Source Code::
@@ -23,7 +22,6 @@ class TransactionSet:
             TransactionEnvelope txs<>;
         };
     """
-
     def __init__(
         self,
         previous_ledger_hash: Hash,
@@ -31,18 +29,14 @@ class TransactionSet:
     ) -> None:
         _expect_max_length = 4294967295
         if txs and len(txs) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `txs` should be {_expect_max_length}, but got {len(txs)}."
-            )
+            raise ValueError(f"The maximum length of `txs` should be {_expect_max_length}, but got {len(txs)}.")
         self.previous_ledger_hash = previous_ledger_hash
         self.txs = txs
-
     def pack(self, packer: Packer) -> None:
         self.previous_ledger_hash.pack(packer)
         packer.pack_uint(len(self.txs))
         for txs_item in self.txs:
             txs_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionSet:
         previous_ledger_hash = Hash.unpack(unpacker)
@@ -54,7 +48,6 @@ class TransactionSet:
             previous_ledger_hash=previous_ledger_hash,
             txs=txs,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -73,26 +66,15 @@ class TransactionSet:
     def from_xdr(cls, xdr: str) -> TransactionSet:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.previous_ledger_hash,
-                self.txs,
-            )
-        )
-
+        return hash((self.previous_ledger_hash, self.txs,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.previous_ledger_hash == other.previous_ledger_hash
-            and self.txs == other.txs
-        )
-
+        return self.previous_ledger_hash== other.previous_ledger_hash and self.txs== other.txs
     def __str__(self):
         out = [
-            f"previous_ledger_hash={self.previous_ledger_hash}",
-            f"txs={self.txs}",
+            f'previous_ledger_hash={self.previous_ledger_hash}',
+            f'txs={self.txs}',
         ]
         return f"<TransactionSet [{', '.join(out)}]>"

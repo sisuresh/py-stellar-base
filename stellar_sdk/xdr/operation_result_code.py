@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["OperationResultCode"]
-
-
+__all__ = ['OperationResultCode']
 class OperationResultCode(IntEnum):
     """
     XDR Source Code::
@@ -26,7 +26,6 @@ class OperationResultCode(IntEnum):
             opTOO_MANY_SPONSORING = -6  // account is sponsoring too many entries
         };
     """
-
     opINNER = 0
     opBAD_AUTH = -1
     opNO_ACCOUNT = -2
@@ -34,7 +33,6 @@ class OperationResultCode(IntEnum):
     opTOO_MANY_SUBENTRIES = -4
     opEXCEEDED_WORK_LIMIT = -5
     opTOO_MANY_SPONSORING = -6
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -42,7 +40,6 @@ class OperationResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> OperationResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

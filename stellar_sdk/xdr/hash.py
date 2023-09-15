@@ -3,32 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Opaque
-
-__all__ = ["Hash"]
-
-
+__all__ = ['Hash']
 class Hash:
     """
     XDR Source Code::
 
         typedef opaque Hash[32];
     """
-
     def __init__(self, hash: bytes) -> None:
         self.hash = hash
-
     def pack(self, packer: Packer) -> None:
         Opaque(self.hash, 32, True).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Hash:
         hash = Opaque.unpack(unpacker, 32, True)
         return cls(hash)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -47,10 +42,8 @@ class Hash:
     def from_xdr(cls, xdr: str) -> Hash:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.hash)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
 from .signer_key import SignerKey
-
-__all__ = ["RevokeSponsorshipOpSigner"]
-
-
+__all__ = ['RevokeSponsorshipOpSigner']
 class RevokeSponsorshipOpSigner:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class RevokeSponsorshipOpSigner:
                 SignerKey signerKey;
             }
     """
-
     def __init__(
         self,
         account_id: AccountID,
@@ -30,11 +29,9 @@ class RevokeSponsorshipOpSigner:
     ) -> None:
         self.account_id = account_id
         self.signer_key = signer_key
-
     def pack(self, packer: Packer) -> None:
         self.account_id.pack(packer)
         self.signer_key.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> RevokeSponsorshipOpSigner:
         account_id = AccountID.unpack(unpacker)
@@ -43,7 +40,6 @@ class RevokeSponsorshipOpSigner:
             account_id=account_id,
             signer_key=signer_key,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,25 +58,15 @@ class RevokeSponsorshipOpSigner:
     def from_xdr(cls, xdr: str) -> RevokeSponsorshipOpSigner:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.account_id,
-                self.signer_key,
-            )
-        )
-
+        return hash((self.account_id, self.signer_key,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.account_id == other.account_id and self.signer_key == other.signer_key
-        )
-
+        return self.account_id== other.account_id and self.signer_key== other.signer_key
     def __str__(self):
         out = [
-            f"account_id={self.account_id}",
-            f"signer_key={self.signer_key}",
+            f'account_id={self.account_id}',
+            f'signer_key={self.signer_key}',
         ]
         return f"<RevokeSponsorshipOpSigner [{', '.join(out)}]>"

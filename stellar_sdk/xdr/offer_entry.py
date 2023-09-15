@@ -3,19 +3,21 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
+from .int64 import Int64
+from .asset import Asset
 from .asset import Asset
 from .int64 import Int64
-from .offer_entry_ext import OfferEntryExt
 from .price import Price
 from .uint32 import Uint32
-
-__all__ = ["OfferEntry"]
-
-
+from .offer_entry_ext import OfferEntryExt
+__all__ = ['OfferEntry']
 class OfferEntry:
     """
     XDR Source Code::
@@ -45,7 +47,6 @@ class OfferEntry:
             ext;
         };
     """
-
     def __init__(
         self,
         seller_id: AccountID,
@@ -65,7 +66,6 @@ class OfferEntry:
         self.price = price
         self.flags = flags
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.seller_id.pack(packer)
         self.offer_id.pack(packer)
@@ -75,7 +75,6 @@ class OfferEntry:
         self.price.pack(packer)
         self.flags.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> OfferEntry:
         seller_id = AccountID.unpack(unpacker)
@@ -96,7 +95,6 @@ class OfferEntry:
             flags=flags,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -115,44 +113,21 @@ class OfferEntry:
     def from_xdr(cls, xdr: str) -> OfferEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.seller_id,
-                self.offer_id,
-                self.selling,
-                self.buying,
-                self.amount,
-                self.price,
-                self.flags,
-                self.ext,
-            )
-        )
-
+        return hash((self.seller_id, self.offer_id, self.selling, self.buying, self.amount, self.price, self.flags, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.seller_id == other.seller_id
-            and self.offer_id == other.offer_id
-            and self.selling == other.selling
-            and self.buying == other.buying
-            and self.amount == other.amount
-            and self.price == other.price
-            and self.flags == other.flags
-            and self.ext == other.ext
-        )
-
+        return self.seller_id== other.seller_id and self.offer_id== other.offer_id and self.selling== other.selling and self.buying== other.buying and self.amount== other.amount and self.price== other.price and self.flags== other.flags and self.ext== other.ext
     def __str__(self):
         out = [
-            f"seller_id={self.seller_id}",
-            f"offer_id={self.offer_id}",
-            f"selling={self.selling}",
-            f"buying={self.buying}",
-            f"amount={self.amount}",
-            f"price={self.price}",
-            f"flags={self.flags}",
-            f"ext={self.ext}",
+            f'seller_id={self.seller_id}',
+            f'offer_id={self.offer_id}',
+            f'selling={self.selling}',
+            f'buying={self.buying}',
+            f'amount={self.amount}',
+            f'price={self.price}',
+            f'flags={self.flags}',
+            f'ext={self.ext}',
         ]
         return f"<OfferEntry [{', '.join(out)}]>"

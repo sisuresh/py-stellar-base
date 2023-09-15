@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
 from .asset import Asset
 from .int64 import Int64
-
-__all__ = ["SimplePaymentResult"]
-
-
+__all__ = ['SimplePaymentResult']
 class SimplePaymentResult:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class SimplePaymentResult:
             int64 amount;
         };
     """
-
     def __init__(
         self,
         destination: AccountID,
@@ -34,12 +33,10 @@ class SimplePaymentResult:
         self.destination = destination
         self.asset = asset
         self.amount = amount
-
     def pack(self, packer: Packer) -> None:
         self.destination.pack(packer)
         self.asset.pack(packer)
         self.amount.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SimplePaymentResult:
         destination = AccountID.unpack(unpacker)
@@ -50,7 +47,6 @@ class SimplePaymentResult:
             asset=asset,
             amount=amount,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +65,16 @@ class SimplePaymentResult:
     def from_xdr(cls, xdr: str) -> SimplePaymentResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.destination,
-                self.asset,
-                self.amount,
-            )
-        )
-
+        return hash((self.destination, self.asset, self.amount,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.destination == other.destination
-            and self.asset == other.asset
-            and self.amount == other.amount
-        )
-
+        return self.destination== other.destination and self.asset== other.asset and self.amount== other.amount
     def __str__(self):
         out = [
-            f"destination={self.destination}",
-            f"asset={self.asset}",
-            f"amount={self.amount}",
+            f'destination={self.destination}',
+            f'asset={self.asset}',
+            f'amount={self.amount}',
         ]
         return f"<SimplePaymentResult [{', '.join(out)}]>"

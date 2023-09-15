@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["ConfigSettingID"]
-
-
+__all__ = ['ConfigSettingID']
 class ConfigSettingID(IntEnum):
     """
     XDR Source Code::
@@ -32,7 +32,6 @@ class ConfigSettingID(IntEnum):
             CONFIG_SETTING_EVICTION_ITERATOR = 13
         };
     """
-
     CONFIG_SETTING_CONTRACT_MAX_SIZE_BYTES = 0
     CONFIG_SETTING_CONTRACT_COMPUTE_V0 = 1
     CONFIG_SETTING_CONTRACT_LEDGER_COST_V0 = 2
@@ -47,7 +46,6 @@ class ConfigSettingID(IntEnum):
     CONFIG_SETTING_CONTRACT_EXECUTION_LANES = 11
     CONFIG_SETTING_BUCKETLIST_SIZE_WINDOW = 12
     CONFIG_SETTING_EVICTION_ITERATOR = 13
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -55,7 +53,6 @@ class ConfigSettingID(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> ConfigSettingID:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

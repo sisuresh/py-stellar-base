@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .contract_executable import ContractExecutable
 from .contract_id_preimage import ContractIDPreimage
-
-__all__ = ["CreateContractArgs"]
-
-
+from .contract_executable import ContractExecutable
+__all__ = ['CreateContractArgs']
 class CreateContractArgs:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class CreateContractArgs:
             ContractExecutable executable;
         };
     """
-
     def __init__(
         self,
         contract_id_preimage: ContractIDPreimage,
@@ -30,11 +29,9 @@ class CreateContractArgs:
     ) -> None:
         self.contract_id_preimage = contract_id_preimage
         self.executable = executable
-
     def pack(self, packer: Packer) -> None:
         self.contract_id_preimage.pack(packer)
         self.executable.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> CreateContractArgs:
         contract_id_preimage = ContractIDPreimage.unpack(unpacker)
@@ -43,7 +40,6 @@ class CreateContractArgs:
             contract_id_preimage=contract_id_preimage,
             executable=executable,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,26 +58,15 @@ class CreateContractArgs:
     def from_xdr(cls, xdr: str) -> CreateContractArgs:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.contract_id_preimage,
-                self.executable,
-            )
-        )
-
+        return hash((self.contract_id_preimage, self.executable,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.contract_id_preimage == other.contract_id_preimage
-            and self.executable == other.executable
-        )
-
+        return self.contract_id_preimage== other.contract_id_preimage and self.executable== other.executable
     def __str__(self):
         out = [
-            f"contract_id_preimage={self.contract_id_preimage}",
-            f"executable={self.executable}",
+            f'contract_id_preimage={self.contract_id_preimage}',
+            f'executable={self.executable}',
         ]
         return f"<CreateContractArgs [{', '.join(out)}]>"

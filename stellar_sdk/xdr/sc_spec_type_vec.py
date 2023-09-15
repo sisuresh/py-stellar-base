@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_spec_type_def import SCSpecTypeDef
-
-__all__ = ["SCSpecTypeVec"]
-
-
+__all__ = ['SCSpecTypeVec']
 class SCSpecTypeVec:
     """
     XDR Source Code::
@@ -20,23 +20,19 @@ class SCSpecTypeVec:
             SCSpecTypeDef elementType;
         };
     """
-
     def __init__(
         self,
         element_type: SCSpecTypeDef,
     ) -> None:
         self.element_type = element_type
-
     def pack(self, packer: Packer) -> None:
         self.element_type.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecTypeVec:
         element_type = SCSpecTypeDef.unpack(unpacker)
         return cls(
             element_type=element_type,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +51,14 @@ class SCSpecTypeVec:
     def from_xdr(cls, xdr: str) -> SCSpecTypeVec:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.element_type,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.element_type == other.element_type
-
+        return self.element_type== other.element_type
     def __str__(self):
         out = [
-            f"element_type={self.element_type}",
+            f'element_type={self.element_type}',
         ]
         return f"<SCSpecTypeVec [{', '.join(out)}]>"

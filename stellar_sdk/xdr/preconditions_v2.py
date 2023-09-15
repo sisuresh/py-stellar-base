@@ -3,20 +3,19 @@
 from __future__ import annotations
 
 import base64
-from typing import List, Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .duration import Duration
+from .time_bounds import TimeBounds
 from .ledger_bounds import LedgerBounds
 from .sequence_number import SequenceNumber
-from .signer_key import SignerKey
-from .time_bounds import TimeBounds
+from .duration import Duration
 from .uint32 import Uint32
-
-__all__ = ["PreconditionsV2"]
-
-
+from .signer_key import SignerKey
+__all__ = ['PreconditionsV2']
 class PreconditionsV2:
     """
     XDR Source Code::
@@ -54,7 +53,6 @@ class PreconditionsV2:
             SignerKey extraSigners<2>;
         };
     """
-
     def __init__(
         self,
         time_bounds: Optional[TimeBounds],
@@ -66,16 +64,13 @@ class PreconditionsV2:
     ) -> None:
         _expect_max_length = 2
         if extra_signers and len(extra_signers) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `extra_signers` should be {_expect_max_length}, but got {len(extra_signers)}."
-            )
+            raise ValueError(f"The maximum length of `extra_signers` should be {_expect_max_length}, but got {len(extra_signers)}.")
         self.time_bounds = time_bounds
         self.ledger_bounds = ledger_bounds
         self.min_seq_num = min_seq_num
         self.min_seq_age = min_seq_age
         self.min_seq_ledger_gap = min_seq_ledger_gap
         self.extra_signers = extra_signers
-
     def pack(self, packer: Packer) -> None:
         if self.time_bounds is None:
             packer.pack_uint(0)
@@ -97,16 +92,11 @@ class PreconditionsV2:
         packer.pack_uint(len(self.extra_signers))
         for extra_signers_item in self.extra_signers:
             extra_signers_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> PreconditionsV2:
         time_bounds = TimeBounds.unpack(unpacker) if unpacker.unpack_uint() else None
-        ledger_bounds = (
-            LedgerBounds.unpack(unpacker) if unpacker.unpack_uint() else None
-        )
-        min_seq_num = (
-            SequenceNumber.unpack(unpacker) if unpacker.unpack_uint() else None
-        )
+        ledger_bounds = LedgerBounds.unpack(unpacker) if unpacker.unpack_uint() else None
+        min_seq_num = SequenceNumber.unpack(unpacker) if unpacker.unpack_uint() else None
         min_seq_age = Duration.unpack(unpacker)
         min_seq_ledger_gap = Uint32.unpack(unpacker)
         length = unpacker.unpack_uint()
@@ -121,7 +111,6 @@ class PreconditionsV2:
             min_seq_ledger_gap=min_seq_ledger_gap,
             extra_signers=extra_signers,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -140,38 +129,19 @@ class PreconditionsV2:
     def from_xdr(cls, xdr: str) -> PreconditionsV2:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.time_bounds,
-                self.ledger_bounds,
-                self.min_seq_num,
-                self.min_seq_age,
-                self.min_seq_ledger_gap,
-                self.extra_signers,
-            )
-        )
-
+        return hash((self.time_bounds, self.ledger_bounds, self.min_seq_num, self.min_seq_age, self.min_seq_ledger_gap, self.extra_signers,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.time_bounds == other.time_bounds
-            and self.ledger_bounds == other.ledger_bounds
-            and self.min_seq_num == other.min_seq_num
-            and self.min_seq_age == other.min_seq_age
-            and self.min_seq_ledger_gap == other.min_seq_ledger_gap
-            and self.extra_signers == other.extra_signers
-        )
-
+        return self.time_bounds== other.time_bounds and self.ledger_bounds== other.ledger_bounds and self.min_seq_num== other.min_seq_num and self.min_seq_age== other.min_seq_age and self.min_seq_ledger_gap== other.min_seq_ledger_gap and self.extra_signers== other.extra_signers
     def __str__(self):
         out = [
-            f"time_bounds={self.time_bounds}",
-            f"ledger_bounds={self.ledger_bounds}",
-            f"min_seq_num={self.min_seq_num}",
-            f"min_seq_age={self.min_seq_age}",
-            f"min_seq_ledger_gap={self.min_seq_ledger_gap}",
-            f"extra_signers={self.extra_signers}",
+            f'time_bounds={self.time_bounds}',
+            f'ledger_bounds={self.ledger_bounds}',
+            f'min_seq_num={self.min_seq_num}',
+            f'min_seq_age={self.min_seq_age}',
+            f'min_seq_ledger_gap={self.min_seq_ledger_gap}',
+            f'extra_signers={self.extra_signers}',
         ]
         return f"<PreconditionsV2 [{', '.join(out)}]>"

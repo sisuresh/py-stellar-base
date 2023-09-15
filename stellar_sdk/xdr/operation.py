@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .muxed_account import MuxedAccount
 from .operation_body import OperationBody
-
-__all__ = ["Operation"]
-
-
+__all__ = ['Operation']
 class Operation:
     """
     XDR Source Code::
@@ -84,7 +83,6 @@ class Operation:
             body;
         };
     """
-
     def __init__(
         self,
         source_account: Optional[MuxedAccount],
@@ -92,7 +90,6 @@ class Operation:
     ) -> None:
         self.source_account = source_account
         self.body = body
-
     def pack(self, packer: Packer) -> None:
         if self.source_account is None:
             packer.pack_uint(0)
@@ -100,18 +97,14 @@ class Operation:
             packer.pack_uint(1)
             self.source_account.pack(packer)
         self.body.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Operation:
-        source_account = (
-            MuxedAccount.unpack(unpacker) if unpacker.unpack_uint() else None
-        )
+        source_account = MuxedAccount.unpack(unpacker) if unpacker.unpack_uint() else None
         body = OperationBody.unpack(unpacker)
         return cls(
             source_account=source_account,
             body=body,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -130,23 +123,15 @@ class Operation:
     def from_xdr(cls, xdr: str) -> Operation:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.source_account,
-                self.body,
-            )
-        )
-
+        return hash((self.source_account, self.body,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.source_account == other.source_account and self.body == other.body
-
+        return self.source_account== other.source_account and self.body== other.body
     def __str__(self):
         out = [
-            f"source_account={self.source_account}",
-            f"body={self.body}",
+            f'source_account={self.source_account}',
+            f'body={self.body}',
         ]
         return f"<Operation [{', '.join(out)}]>"

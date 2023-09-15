@@ -3,18 +3,17 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .hash import Hash
-from .stellar_value_ext import StellarValueExt
 from .time_point import TimePoint
 from .upgrade_type import UpgradeType
-
-__all__ = ["StellarValue"]
-
-
+from .stellar_value_ext import StellarValueExt
+__all__ = ['StellarValue']
 class StellarValue:
     """
     XDR Source Code::
@@ -42,7 +41,6 @@ class StellarValue:
             ext;
         };
     """
-
     def __init__(
         self,
         tx_set_hash: Hash,
@@ -52,14 +50,11 @@ class StellarValue:
     ) -> None:
         _expect_max_length = 6
         if upgrades and len(upgrades) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `upgrades` should be {_expect_max_length}, but got {len(upgrades)}."
-            )
+            raise ValueError(f"The maximum length of `upgrades` should be {_expect_max_length}, but got {len(upgrades)}.")
         self.tx_set_hash = tx_set_hash
         self.close_time = close_time
         self.upgrades = upgrades
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.tx_set_hash.pack(packer)
         self.close_time.pack(packer)
@@ -67,7 +62,6 @@ class StellarValue:
         for upgrades_item in self.upgrades:
             upgrades_item.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> StellarValue:
         tx_set_hash = Hash.unpack(unpacker)
@@ -83,7 +77,6 @@ class StellarValue:
             upgrades=upgrades,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -102,32 +95,17 @@ class StellarValue:
     def from_xdr(cls, xdr: str) -> StellarValue:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.tx_set_hash,
-                self.close_time,
-                self.upgrades,
-                self.ext,
-            )
-        )
-
+        return hash((self.tx_set_hash, self.close_time, self.upgrades, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.tx_set_hash == other.tx_set_hash
-            and self.close_time == other.close_time
-            and self.upgrades == other.upgrades
-            and self.ext == other.ext
-        )
-
+        return self.tx_set_hash== other.tx_set_hash and self.close_time== other.close_time and self.upgrades== other.upgrades and self.ext== other.ext
     def __str__(self):
         out = [
-            f"tx_set_hash={self.tx_set_hash}",
-            f"close_time={self.close_time}",
-            f"upgrades={self.upgrades}",
-            f"ext={self.ext}",
+            f'tx_set_hash={self.tx_set_hash}',
+            f'close_time={self.close_time}',
+            f'upgrades={self.upgrades}',
+            f'ext={self.ext}',
         ]
         return f"<StellarValue [{', '.join(out)}]>"

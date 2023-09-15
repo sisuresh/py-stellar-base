@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["BumpFootprintExpirationResultCode"]
-
-
+__all__ = ['BumpFootprintExpirationResultCode']
 class BumpFootprintExpirationResultCode(IntEnum):
     """
     XDR Source Code::
@@ -25,12 +25,10 @@ class BumpFootprintExpirationResultCode(IntEnum):
             BUMP_FOOTPRINT_EXPIRATION_INSUFFICIENT_REFUNDABLE_FEE = -3
         };
     """
-
     BUMP_FOOTPRINT_EXPIRATION_SUCCESS = 0
     BUMP_FOOTPRINT_EXPIRATION_MALFORMED = -1
     BUMP_FOOTPRINT_EXPIRATION_RESOURCE_LIMIT_EXCEEDED = -2
     BUMP_FOOTPRINT_EXPIRATION_INSUFFICIENT_REFUNDABLE_FEE = -3
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -38,7 +36,6 @@ class BumpFootprintExpirationResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> BumpFootprintExpirationResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

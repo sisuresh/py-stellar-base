@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .soroban_authorized_invocation import SorobanAuthorizedInvocation
 from .soroban_credentials import SorobanCredentials
-
-__all__ = ["SorobanAuthorizationEntry"]
-
-
+from .soroban_authorized_invocation import SorobanAuthorizedInvocation
+__all__ = ['SorobanAuthorizationEntry']
 class SorobanAuthorizationEntry:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class SorobanAuthorizationEntry:
             SorobanAuthorizedInvocation rootInvocation;
         };
     """
-
     def __init__(
         self,
         credentials: SorobanCredentials,
@@ -30,11 +29,9 @@ class SorobanAuthorizationEntry:
     ) -> None:
         self.credentials = credentials
         self.root_invocation = root_invocation
-
     def pack(self, packer: Packer) -> None:
         self.credentials.pack(packer)
         self.root_invocation.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SorobanAuthorizationEntry:
         credentials = SorobanCredentials.unpack(unpacker)
@@ -43,7 +40,6 @@ class SorobanAuthorizationEntry:
             credentials=credentials,
             root_invocation=root_invocation,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,26 +58,15 @@ class SorobanAuthorizationEntry:
     def from_xdr(cls, xdr: str) -> SorobanAuthorizationEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.credentials,
-                self.root_invocation,
-            )
-        )
-
+        return hash((self.credentials, self.root_invocation,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.credentials == other.credentials
-            and self.root_invocation == other.root_invocation
-        )
-
+        return self.credentials== other.credentials and self.root_invocation== other.root_invocation
     def __str__(self):
         out = [
-            f"credentials={self.credentials}",
-            f"root_invocation={self.root_invocation}",
+            f'credentials={self.credentials}',
+            f'root_invocation={self.root_invocation}',
         ]
         return f"<SorobanAuthorizationEntry [{', '.join(out)}]>"

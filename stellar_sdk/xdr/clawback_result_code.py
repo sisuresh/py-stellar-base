@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["ClawbackResultCode"]
-
-
+__all__ = ['ClawbackResultCode']
 class ClawbackResultCode(IntEnum):
     """
     XDR Source Code::
@@ -26,13 +26,11 @@ class ClawbackResultCode(IntEnum):
             CLAWBACK_UNDERFUNDED = -4
         };
     """
-
     CLAWBACK_SUCCESS = 0
     CLAWBACK_MALFORMED = -1
     CLAWBACK_NOT_CLAWBACK_ENABLED = -2
     CLAWBACK_NO_TRUST = -3
     CLAWBACK_UNDERFUNDED = -4
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -40,7 +38,6 @@ class ClawbackResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> ClawbackResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

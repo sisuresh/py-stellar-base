@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .operation_result_code import OperationResultCode
 from .operation_result_tr import OperationResultTr
-
-__all__ = ["OperationResult"]
-
-
+__all__ = ['OperationResult']
 class OperationResult:
     """
     XDR Source Code::
@@ -86,7 +86,6 @@ class OperationResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: OperationResultCode,
@@ -94,7 +93,6 @@ class OperationResult:
     ) -> None:
         self.code = code
         self.tr = tr
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == OperationResultCode.opINNER:
@@ -114,7 +112,6 @@ class OperationResult:
             return
         if self.code == OperationResultCode.opTOO_MANY_SPONSORING:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> OperationResult:
         code = OperationResultCode.unpack(unpacker)
@@ -134,7 +131,6 @@ class OperationResult:
         if code == OperationResultCode.opTOO_MANY_SPONSORING:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -153,22 +149,14 @@ class OperationResult:
     def from_xdr(cls, xdr: str) -> OperationResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.code,
-                self.tr,
-            )
-        )
-
+        return hash((self.code, self.tr,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code and self.tr == other.tr
-
+        return self.code== other.code and self.tr== other.tr
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
-        out.append(f"tr={self.tr}") if self.tr is not None else None
+        out.append(f'code={self.code}')
+        out.append(f'tr={self.tr}') if self.tr is not None else None
         return f"<OperationResult [{', '.join(out)}]>"

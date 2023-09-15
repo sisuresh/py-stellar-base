@@ -3,32 +3,28 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .public_key import PublicKey
-
-__all__ = ["AccountID"]
-
-
+__all__ = ['AccountID']
 class AccountID:
     """
     XDR Source Code::
 
         typedef PublicKey AccountID;
     """
-
     def __init__(self, account_id: PublicKey) -> None:
         self.account_id = account_id
-
     def pack(self, packer: Packer) -> None:
         self.account_id.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AccountID:
         account_id = PublicKey.unpack(unpacker)
         return cls(account_id)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -47,10 +43,8 @@ class AccountID:
     def from_xdr(cls, xdr: str) -> AccountID:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.account_id)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

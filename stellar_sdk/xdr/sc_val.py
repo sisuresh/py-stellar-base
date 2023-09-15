@@ -3,36 +3,34 @@
 from __future__ import annotations
 
 import base64
-from typing import TYPE_CHECKING, Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Boolean
 from .sc_val_type import SCValType
-
 if TYPE_CHECKING:
-    from .duration import Duration
-    from .int32 import Int32
-    from .int64 import Int64
-    from .int128_parts import Int128Parts
-    from .int256_parts import Int256Parts
-    from .sc_address import SCAddress
-    from .sc_bytes import SCBytes
-    from .sc_contract_instance import SCContractInstance
     from .sc_error import SCError
-    from .sc_map import SCMap
-    from .sc_nonce_key import SCNonceKey
+    from .uint32 import Uint32
+    from .int32 import Int32
+    from .uint64 import Uint64
+    from .int64 import Int64
+    from .time_point import TimePoint
+    from .duration import Duration
+    from .u_int128_parts import UInt128Parts
+    from .int128_parts import Int128Parts
+    from .u_int256_parts import UInt256Parts
+    from .int256_parts import Int256Parts
+    from .sc_bytes import SCBytes
     from .sc_string import SCString
     from .sc_symbol import SCSymbol
     from .sc_vec import SCVec
-    from .time_point import TimePoint
-    from .u_int128_parts import UInt128Parts
-    from .u_int256_parts import UInt256Parts
-    from .uint32 import Uint32
-    from .uint64 import Uint64
-__all__ = ["SCVal"]
-
-
+    from .sc_map import SCMap
+    from .sc_address import SCAddress
+    from .sc_nonce_key import SCNonceKey
+    from .sc_contract_instance import SCContractInstance
+__all__ = ['SCVal']
 class SCVal:
     """
     XDR Source Code::
@@ -99,7 +97,6 @@ class SCVal:
             SCContractInstance instance;
         };
     """
-
     def __init__(
         self,
         type: SCValType,
@@ -145,7 +142,6 @@ class SCVal:
         self.address = address
         self.nonce_key = nonce_key
         self.instance = instance
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == SCValType.SCV_BOOL:
@@ -260,7 +256,6 @@ class SCVal:
                 raise ValueError("instance should not be None.")
             self.instance.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCVal:
         type = SCValType.unpack(unpacker)
@@ -271,103 +266,83 @@ class SCVal:
             return cls(type=type)
         if type == SCValType.SCV_ERROR:
             from .sc_error import SCError
-
             error = SCError.unpack(unpacker)
             return cls(type=type, error=error)
         if type == SCValType.SCV_U32:
             from .uint32 import Uint32
-
             u32 = Uint32.unpack(unpacker)
             return cls(type=type, u32=u32)
         if type == SCValType.SCV_I32:
             from .int32 import Int32
-
             i32 = Int32.unpack(unpacker)
             return cls(type=type, i32=i32)
         if type == SCValType.SCV_U64:
             from .uint64 import Uint64
-
             u64 = Uint64.unpack(unpacker)
             return cls(type=type, u64=u64)
         if type == SCValType.SCV_I64:
             from .int64 import Int64
-
             i64 = Int64.unpack(unpacker)
             return cls(type=type, i64=i64)
         if type == SCValType.SCV_TIMEPOINT:
             from .time_point import TimePoint
-
             timepoint = TimePoint.unpack(unpacker)
             return cls(type=type, timepoint=timepoint)
         if type == SCValType.SCV_DURATION:
             from .duration import Duration
-
             duration = Duration.unpack(unpacker)
             return cls(type=type, duration=duration)
         if type == SCValType.SCV_U128:
             from .u_int128_parts import UInt128Parts
-
             u128 = UInt128Parts.unpack(unpacker)
             return cls(type=type, u128=u128)
         if type == SCValType.SCV_I128:
             from .int128_parts import Int128Parts
-
             i128 = Int128Parts.unpack(unpacker)
             return cls(type=type, i128=i128)
         if type == SCValType.SCV_U256:
             from .u_int256_parts import UInt256Parts
-
             u256 = UInt256Parts.unpack(unpacker)
             return cls(type=type, u256=u256)
         if type == SCValType.SCV_I256:
             from .int256_parts import Int256Parts
-
             i256 = Int256Parts.unpack(unpacker)
             return cls(type=type, i256=i256)
         if type == SCValType.SCV_BYTES:
             from .sc_bytes import SCBytes
-
             bytes = SCBytes.unpack(unpacker)
             return cls(type=type, bytes=bytes)
         if type == SCValType.SCV_STRING:
             from .sc_string import SCString
-
             str = SCString.unpack(unpacker)
             return cls(type=type, str=str)
         if type == SCValType.SCV_SYMBOL:
             from .sc_symbol import SCSymbol
-
             sym = SCSymbol.unpack(unpacker)
             return cls(type=type, sym=sym)
         if type == SCValType.SCV_VEC:
             from .sc_vec import SCVec
-
             vec = SCVec.unpack(unpacker) if unpacker.unpack_uint() else None
             return cls(type=type, vec=vec)
         if type == SCValType.SCV_MAP:
             from .sc_map import SCMap
-
             map = SCMap.unpack(unpacker) if unpacker.unpack_uint() else None
             return cls(type=type, map=map)
         if type == SCValType.SCV_ADDRESS:
             from .sc_address import SCAddress
-
             address = SCAddress.unpack(unpacker)
             return cls(type=type, address=address)
         if type == SCValType.SCV_LEDGER_KEY_CONTRACT_INSTANCE:
             return cls(type=type)
         if type == SCValType.SCV_LEDGER_KEY_NONCE:
             from .sc_nonce_key import SCNonceKey
-
             nonce_key = SCNonceKey.unpack(unpacker)
             return cls(type=type, nonce_key=nonce_key)
         if type == SCValType.SCV_CONTRACT_INSTANCE:
             from .sc_contract_instance import SCContractInstance
-
             instance = SCContractInstance.unpack(unpacker)
             return cls(type=type, instance=instance)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -386,86 +361,33 @@ class SCVal:
     def from_xdr(cls, xdr: str) -> SCVal:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.b,
-                self.error,
-                self.u32,
-                self.i32,
-                self.u64,
-                self.i64,
-                self.timepoint,
-                self.duration,
-                self.u128,
-                self.i128,
-                self.u256,
-                self.i256,
-                self.bytes,
-                self.str,
-                self.sym,
-                self.vec,
-                self.map,
-                self.address,
-                self.nonce_key,
-                self.instance,
-            )
-        )
-
+        return hash((self.type, self.b, self.error, self.u32, self.i32, self.u64, self.i64, self.timepoint, self.duration, self.u128, self.i128, self.u256, self.i256, self.bytes, self.str, self.sym, self.vec, self.map, self.address, self.nonce_key, self.instance,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.b == other.b
-            and self.error == other.error
-            and self.u32 == other.u32
-            and self.i32 == other.i32
-            and self.u64 == other.u64
-            and self.i64 == other.i64
-            and self.timepoint == other.timepoint
-            and self.duration == other.duration
-            and self.u128 == other.u128
-            and self.i128 == other.i128
-            and self.u256 == other.u256
-            and self.i256 == other.i256
-            and self.bytes == other.bytes
-            and self.str == other.str
-            and self.sym == other.sym
-            and self.vec == other.vec
-            and self.map == other.map
-            and self.address == other.address
-            and self.nonce_key == other.nonce_key
-            and self.instance == other.instance
-        )
-
+        return self.type== other.type and self.b== other.b and self.error== other.error and self.u32== other.u32 and self.i32== other.i32 and self.u64== other.u64 and self.i64== other.i64 and self.timepoint== other.timepoint and self.duration== other.duration and self.u128== other.u128 and self.i128== other.i128 and self.u256== other.u256 and self.i256== other.i256 and self.bytes== other.bytes and self.str== other.str and self.sym== other.sym and self.vec== other.vec and self.map== other.map and self.address== other.address and self.nonce_key== other.nonce_key and self.instance== other.instance
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"b={self.b}") if self.b is not None else None
-        out.append(f"error={self.error}") if self.error is not None else None
-        out.append(f"u32={self.u32}") if self.u32 is not None else None
-        out.append(f"i32={self.i32}") if self.i32 is not None else None
-        out.append(f"u64={self.u64}") if self.u64 is not None else None
-        out.append(f"i64={self.i64}") if self.i64 is not None else None
-        out.append(
-            f"timepoint={self.timepoint}"
-        ) if self.timepoint is not None else None
-        out.append(f"duration={self.duration}") if self.duration is not None else None
-        out.append(f"u128={self.u128}") if self.u128 is not None else None
-        out.append(f"i128={self.i128}") if self.i128 is not None else None
-        out.append(f"u256={self.u256}") if self.u256 is not None else None
-        out.append(f"i256={self.i256}") if self.i256 is not None else None
-        out.append(f"bytes={self.bytes}") if self.bytes is not None else None
-        out.append(f"str={self.str}") if self.str is not None else None
-        out.append(f"sym={self.sym}") if self.sym is not None else None
-        out.append(f"vec={self.vec}") if self.vec is not None else None
-        out.append(f"map={self.map}") if self.map is not None else None
-        out.append(f"address={self.address}") if self.address is not None else None
-        out.append(
-            f"nonce_key={self.nonce_key}"
-        ) if self.nonce_key is not None else None
-        out.append(f"instance={self.instance}") if self.instance is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'b={self.b}') if self.b is not None else None
+        out.append(f'error={self.error}') if self.error is not None else None
+        out.append(f'u32={self.u32}') if self.u32 is not None else None
+        out.append(f'i32={self.i32}') if self.i32 is not None else None
+        out.append(f'u64={self.u64}') if self.u64 is not None else None
+        out.append(f'i64={self.i64}') if self.i64 is not None else None
+        out.append(f'timepoint={self.timepoint}') if self.timepoint is not None else None
+        out.append(f'duration={self.duration}') if self.duration is not None else None
+        out.append(f'u128={self.u128}') if self.u128 is not None else None
+        out.append(f'i128={self.i128}') if self.i128 is not None else None
+        out.append(f'u256={self.u256}') if self.u256 is not None else None
+        out.append(f'i256={self.i256}') if self.i256 is not None else None
+        out.append(f'bytes={self.bytes}') if self.bytes is not None else None
+        out.append(f'str={self.str}') if self.str is not None else None
+        out.append(f'sym={self.sym}') if self.sym is not None else None
+        out.append(f'vec={self.vec}') if self.vec is not None else None
+        out.append(f'map={self.map}') if self.map is not None else None
+        out.append(f'address={self.address}') if self.address is not None else None
+        out.append(f'nonce_key={self.nonce_key}') if self.nonce_key is not None else None
+        out.append(f'instance={self.instance}') if self.instance is not None else None
         return f"<SCVal [{', '.join(out)}]>"

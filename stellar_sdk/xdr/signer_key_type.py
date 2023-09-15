@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["SignerKeyType"]
-
-
+__all__ = ['SignerKeyType']
 class SignerKeyType(IntEnum):
     """
     XDR Source Code::
@@ -22,12 +22,10 @@ class SignerKeyType(IntEnum):
             SIGNER_KEY_TYPE_ED25519_SIGNED_PAYLOAD = KEY_TYPE_ED25519_SIGNED_PAYLOAD
         };
     """
-
     SIGNER_KEY_TYPE_ED25519 = 0
     SIGNER_KEY_TYPE_PRE_AUTH_TX = 1
     SIGNER_KEY_TYPE_HASH_X = 2
     SIGNER_KEY_TYPE_ED25519_SIGNED_PAYLOAD = 3
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -35,7 +33,6 @@ class SignerKeyType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> SignerKeyType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

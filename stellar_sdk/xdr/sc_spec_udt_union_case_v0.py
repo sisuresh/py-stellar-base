@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .sc_spec_udt_union_case_tuple_v0 import SCSpecUDTUnionCaseTupleV0
 from .sc_spec_udt_union_case_v0_kind import SCSpecUDTUnionCaseV0Kind
 from .sc_spec_udt_union_case_void_v0 import SCSpecUDTUnionCaseVoidV0
-
-__all__ = ["SCSpecUDTUnionCaseV0"]
-
-
+from .sc_spec_udt_union_case_tuple_v0 import SCSpecUDTUnionCaseTupleV0
+__all__ = ['SCSpecUDTUnionCaseV0']
 class SCSpecUDTUnionCaseV0:
     """
     XDR Source Code::
@@ -25,7 +25,6 @@ class SCSpecUDTUnionCaseV0:
             SCSpecUDTUnionCaseTupleV0 tupleCase;
         };
     """
-
     def __init__(
         self,
         kind: SCSpecUDTUnionCaseV0Kind,
@@ -35,7 +34,6 @@ class SCSpecUDTUnionCaseV0:
         self.kind = kind
         self.void_case = void_case
         self.tuple_case = tuple_case
-
     def pack(self, packer: Packer) -> None:
         self.kind.pack(packer)
         if self.kind == SCSpecUDTUnionCaseV0Kind.SC_SPEC_UDT_UNION_CASE_VOID_V0:
@@ -48,7 +46,6 @@ class SCSpecUDTUnionCaseV0:
                 raise ValueError("tuple_case should not be None.")
             self.tuple_case.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecUDTUnionCaseV0:
         kind = SCSpecUDTUnionCaseV0Kind.unpack(unpacker)
@@ -59,7 +56,6 @@ class SCSpecUDTUnionCaseV0:
             tuple_case = SCSpecUDTUnionCaseTupleV0.unpack(unpacker)
             return cls(kind=kind, tuple_case=tuple_case)
         return cls(kind=kind)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -78,32 +74,15 @@ class SCSpecUDTUnionCaseV0:
     def from_xdr(cls, xdr: str) -> SCSpecUDTUnionCaseV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.kind,
-                self.void_case,
-                self.tuple_case,
-            )
-        )
-
+        return hash((self.kind, self.void_case, self.tuple_case,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.kind == other.kind
-            and self.void_case == other.void_case
-            and self.tuple_case == other.tuple_case
-        )
-
+        return self.kind== other.kind and self.void_case== other.void_case and self.tuple_case== other.tuple_case
     def __str__(self):
         out = []
-        out.append(f"kind={self.kind}")
-        out.append(
-            f"void_case={self.void_case}"
-        ) if self.void_case is not None else None
-        out.append(
-            f"tuple_case={self.tuple_case}"
-        ) if self.tuple_case is not None else None
+        out.append(f'kind={self.kind}')
+        out.append(f'void_case={self.void_case}') if self.void_case is not None else None
+        out.append(f'tuple_case={self.tuple_case}') if self.tuple_case is not None else None
         return f"<SCSpecUDTUnionCaseV0 [{', '.join(out)}]>"

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["ChangeTrustResultCode"]
-
-
+__all__ = ['ChangeTrustResultCode']
 class ChangeTrustResultCode(IntEnum):
     """
     XDR Source Code::
@@ -33,7 +33,6 @@ class ChangeTrustResultCode(IntEnum):
                 -8 // Asset trustline is deauthorized
         };
     """
-
     CHANGE_TRUST_SUCCESS = 0
     CHANGE_TRUST_MALFORMED = -1
     CHANGE_TRUST_NO_ISSUER = -2
@@ -43,7 +42,6 @@ class ChangeTrustResultCode(IntEnum):
     CHANGE_TRUST_TRUST_LINE_MISSING = -6
     CHANGE_TRUST_CANNOT_DELETE = -7
     CHANGE_TRUST_NOT_AUTH_MAINTAIN_LIABILITIES = -8
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -51,7 +49,6 @@ class ChangeTrustResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> ChangeTrustResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

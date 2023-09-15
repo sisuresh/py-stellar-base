@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .signer_key import SignerKey
 from .uint32 import Uint32
-
-__all__ = ["Signer"]
-
-
+__all__ = ['Signer']
 class Signer:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class Signer:
             uint32 weight; // really only need 1 byte
         };
     """
-
     def __init__(
         self,
         key: SignerKey,
@@ -30,11 +29,9 @@ class Signer:
     ) -> None:
         self.key = key
         self.weight = weight
-
     def pack(self, packer: Packer) -> None:
         self.key.pack(packer)
         self.weight.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Signer:
         key = SignerKey.unpack(unpacker)
@@ -43,7 +40,6 @@ class Signer:
             key=key,
             weight=weight,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class Signer:
     def from_xdr(cls, xdr: str) -> Signer:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.key,
-                self.weight,
-            )
-        )
-
+        return hash((self.key, self.weight,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.key == other.key and self.weight == other.weight
-
+        return self.key== other.key and self.weight== other.weight
     def __str__(self):
         out = [
-            f"key={self.key}",
-            f"weight={self.weight}",
+            f'key={self.key}',
+            f'weight={self.weight}',
         ]
         return f"<Signer [{', '.join(out)}]>"

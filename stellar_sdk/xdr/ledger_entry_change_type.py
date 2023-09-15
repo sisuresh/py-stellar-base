@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["LedgerEntryChangeType"]
-
-
+__all__ = ['LedgerEntryChangeType']
 class LedgerEntryChangeType(IntEnum):
     """
     XDR Source Code::
@@ -22,12 +22,10 @@ class LedgerEntryChangeType(IntEnum):
             LEDGER_ENTRY_STATE = 3    // value of the entry
         };
     """
-
     LEDGER_ENTRY_CREATED = 0
     LEDGER_ENTRY_UPDATED = 1
     LEDGER_ENTRY_REMOVED = 2
     LEDGER_ENTRY_STATE = 3
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -35,7 +33,6 @@ class LedgerEntryChangeType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> LedgerEntryChangeType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

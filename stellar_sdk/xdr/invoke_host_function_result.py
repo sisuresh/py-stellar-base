@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .hash import Hash
 from .invoke_host_function_result_code import InvokeHostFunctionResultCode
-
-__all__ = ["InvokeHostFunctionResult"]
-
-
+from .hash import Hash
+__all__ = ['InvokeHostFunctionResult']
 class InvokeHostFunctionResult:
     """
     XDR Source Code::
@@ -28,7 +28,6 @@ class InvokeHostFunctionResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: InvokeHostFunctionResultCode,
@@ -36,7 +35,6 @@ class InvokeHostFunctionResult:
     ) -> None:
         self.code = code
         self.success = success
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_SUCCESS:
@@ -48,19 +46,12 @@ class InvokeHostFunctionResult:
             return
         if self.code == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_TRAPPED:
             return
-        if (
-            self.code
-            == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_RESOURCE_LIMIT_EXCEEDED
-        ):
+        if self.code == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_RESOURCE_LIMIT_EXCEEDED:
             return
         if self.code == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_ENTRY_EXPIRED:
             return
-        if (
-            self.code
-            == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_INSUFFICIENT_REFUNDABLE_FEE
-        ):
+        if self.code == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_INSUFFICIENT_REFUNDABLE_FEE:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> InvokeHostFunctionResult:
         code = InvokeHostFunctionResultCode.unpack(unpacker)
@@ -71,20 +62,13 @@ class InvokeHostFunctionResult:
             return cls(code=code)
         if code == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_TRAPPED:
             return cls(code=code)
-        if (
-            code
-            == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_RESOURCE_LIMIT_EXCEEDED
-        ):
+        if code == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_RESOURCE_LIMIT_EXCEEDED:
             return cls(code=code)
         if code == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_ENTRY_EXPIRED:
             return cls(code=code)
-        if (
-            code
-            == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_INSUFFICIENT_REFUNDABLE_FEE
-        ):
+        if code == InvokeHostFunctionResultCode.INVOKE_HOST_FUNCTION_INSUFFICIENT_REFUNDABLE_FEE:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -103,22 +87,14 @@ class InvokeHostFunctionResult:
     def from_xdr(cls, xdr: str) -> InvokeHostFunctionResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.code,
-                self.success,
-            )
-        )
-
+        return hash((self.code, self.success,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code and self.success == other.success
-
+        return self.code== other.code and self.success== other.success
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
-        out.append(f"success={self.success}") if self.success is not None else None
+        out.append(f'code={self.code}')
+        out.append(f'success={self.success}') if self.success is not None else None
         return f"<InvokeHostFunctionResult [{', '.join(out)}]>"

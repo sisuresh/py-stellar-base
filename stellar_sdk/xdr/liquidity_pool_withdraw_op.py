@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .int64 import Int64
 from .pool_id import PoolID
-
-__all__ = ["LiquidityPoolWithdrawOp"]
-
-
+from .int64 import Int64
+from .int64 import Int64
+from .int64 import Int64
+__all__ = ['LiquidityPoolWithdrawOp']
 class LiquidityPoolWithdrawOp:
     """
     XDR Source Code::
@@ -24,7 +26,6 @@ class LiquidityPoolWithdrawOp:
             int64 minAmountB; // minimum amount of second asset to withdraw
         };
     """
-
     def __init__(
         self,
         liquidity_pool_id: PoolID,
@@ -36,13 +37,11 @@ class LiquidityPoolWithdrawOp:
         self.amount = amount
         self.min_amount_a = min_amount_a
         self.min_amount_b = min_amount_b
-
     def pack(self, packer: Packer) -> None:
         self.liquidity_pool_id.pack(packer)
         self.amount.pack(packer)
         self.min_amount_a.pack(packer)
         self.min_amount_b.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LiquidityPoolWithdrawOp:
         liquidity_pool_id = PoolID.unpack(unpacker)
@@ -55,7 +54,6 @@ class LiquidityPoolWithdrawOp:
             min_amount_a=min_amount_a,
             min_amount_b=min_amount_b,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -74,32 +72,17 @@ class LiquidityPoolWithdrawOp:
     def from_xdr(cls, xdr: str) -> LiquidityPoolWithdrawOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.liquidity_pool_id,
-                self.amount,
-                self.min_amount_a,
-                self.min_amount_b,
-            )
-        )
-
+        return hash((self.liquidity_pool_id, self.amount, self.min_amount_a, self.min_amount_b,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.liquidity_pool_id == other.liquidity_pool_id
-            and self.amount == other.amount
-            and self.min_amount_a == other.min_amount_a
-            and self.min_amount_b == other.min_amount_b
-        )
-
+        return self.liquidity_pool_id== other.liquidity_pool_id and self.amount== other.amount and self.min_amount_a== other.min_amount_a and self.min_amount_b== other.min_amount_b
     def __str__(self):
         out = [
-            f"liquidity_pool_id={self.liquidity_pool_id}",
-            f"amount={self.amount}",
-            f"min_amount_a={self.min_amount_a}",
-            f"min_amount_b={self.min_amount_b}",
+            f'liquidity_pool_id={self.liquidity_pool_id}',
+            f'amount={self.amount}',
+            f'min_amount_a={self.min_amount_a}',
+            f'min_amount_b={self.min_amount_b}',
         ]
         return f"<LiquidityPoolWithdrawOp [{', '.join(out)}]>"

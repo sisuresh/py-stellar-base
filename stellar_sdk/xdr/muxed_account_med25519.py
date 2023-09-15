@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .uint64 import Uint64
 from .uint256 import Uint256
-
-__all__ = ["MuxedAccountMed25519"]
-
-
+__all__ = ['MuxedAccountMed25519']
 class MuxedAccountMed25519:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class MuxedAccountMed25519:
                 uint256 ed25519;
             }
     """
-
     def __init__(
         self,
         id: Uint64,
@@ -30,11 +29,9 @@ class MuxedAccountMed25519:
     ) -> None:
         self.id = id
         self.ed25519 = ed25519
-
     def pack(self, packer: Packer) -> None:
         self.id.pack(packer)
         self.ed25519.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> MuxedAccountMed25519:
         id = Uint64.unpack(unpacker)
@@ -43,7 +40,6 @@ class MuxedAccountMed25519:
             id=id,
             ed25519=ed25519,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class MuxedAccountMed25519:
     def from_xdr(cls, xdr: str) -> MuxedAccountMed25519:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.id,
-                self.ed25519,
-            )
-        )
-
+        return hash((self.id, self.ed25519,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.id == other.id and self.ed25519 == other.ed25519
-
+        return self.id== other.id and self.ed25519== other.ed25519
     def __str__(self):
         out = [
-            f"id={self.id}",
-            f"ed25519={self.ed25519}",
+            f'id={self.id}',
+            f'ed25519={self.ed25519}',
         ]
         return f"<MuxedAccountMed25519 [{', '.join(out)}]>"

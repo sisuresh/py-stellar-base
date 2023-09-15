@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .extension_point import ExtensionPoint
-
-__all__ = ["RestoreFootprintOp"]
-
-
+__all__ = ['RestoreFootprintOp']
 class RestoreFootprintOp:
     """
     XDR Source Code::
@@ -20,23 +20,19 @@ class RestoreFootprintOp:
             ExtensionPoint ext;
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
     ) -> None:
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> RestoreFootprintOp:
         ext = ExtensionPoint.unpack(unpacker)
         return cls(
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +51,14 @@ class RestoreFootprintOp:
     def from_xdr(cls, xdr: str) -> RestoreFootprintOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.ext,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.ext == other.ext
-
+        return self.ext== other.ext
     def __str__(self):
         out = [
-            f"ext={self.ext}",
+            f'ext={self.ext}',
         ]
         return f"<RestoreFootprintOp [{', '.join(out)}]>"

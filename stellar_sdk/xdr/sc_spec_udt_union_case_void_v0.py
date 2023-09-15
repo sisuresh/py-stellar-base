@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
-
-from .base import String
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
 from .constants import *
 
-__all__ = ["SCSpecUDTUnionCaseVoidV0"]
-
-
+__all__ = ['SCSpecUDTUnionCaseVoidV0']
 class SCSpecUDTUnionCaseVoidV0:
     """
     XDR Source Code::
@@ -22,7 +20,6 @@ class SCSpecUDTUnionCaseVoidV0:
             string name<60>;
         };
     """
-
     def __init__(
         self,
         doc: bytes,
@@ -30,11 +27,9 @@ class SCSpecUDTUnionCaseVoidV0:
     ) -> None:
         self.doc = doc
         self.name = name
-
     def pack(self, packer: Packer) -> None:
         String(self.doc, SC_SPEC_DOC_LIMIT).pack(packer)
         String(self.name, 60).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecUDTUnionCaseVoidV0:
         doc = String.unpack(unpacker)
@@ -43,7 +38,6 @@ class SCSpecUDTUnionCaseVoidV0:
             doc=doc,
             name=name,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +56,15 @@ class SCSpecUDTUnionCaseVoidV0:
     def from_xdr(cls, xdr: str) -> SCSpecUDTUnionCaseVoidV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.doc,
-                self.name,
-            )
-        )
-
+        return hash((self.doc, self.name,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.doc == other.doc and self.name == other.name
-
+        return self.doc== other.doc and self.name== other.name
     def __str__(self):
         out = [
-            f"doc={self.doc}",
-            f"name={self.name}",
+            f'doc={self.doc}',
+            f'name={self.name}',
         ]
         return f"<SCSpecUDTUnionCaseVoidV0 [{', '.join(out)}]>"

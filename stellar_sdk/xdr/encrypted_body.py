@@ -3,32 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Opaque
-
-__all__ = ["EncryptedBody"]
-
-
+__all__ = ['EncryptedBody']
 class EncryptedBody:
     """
     XDR Source Code::
 
         typedef opaque EncryptedBody<64000>;
     """
-
     def __init__(self, encrypted_body: bytes) -> None:
         self.encrypted_body = encrypted_body
-
     def pack(self, packer: Packer) -> None:
         Opaque(self.encrypted_body, 64000, False).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> EncryptedBody:
         encrypted_body = Opaque.unpack(unpacker, 64000, False)
         return cls(encrypted_body)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -47,10 +42,8 @@ class EncryptedBody:
     def from_xdr(cls, xdr: str) -> EncryptedBody:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.encrypted_body)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

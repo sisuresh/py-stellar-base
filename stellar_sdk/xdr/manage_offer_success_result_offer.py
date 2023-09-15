@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .manage_offer_effect import ManageOfferEffect
 from .offer_entry import OfferEntry
-
-__all__ = ["ManageOfferSuccessResultOffer"]
-
-
+__all__ = ['ManageOfferSuccessResultOffer']
 class ManageOfferSuccessResultOffer:
     """
     XDR Source Code::
@@ -25,7 +25,6 @@ class ManageOfferSuccessResultOffer:
                 void;
             }
     """
-
     def __init__(
         self,
         effect: ManageOfferEffect,
@@ -33,7 +32,6 @@ class ManageOfferSuccessResultOffer:
     ) -> None:
         self.effect = effect
         self.offer = offer
-
     def pack(self, packer: Packer) -> None:
         self.effect.pack(packer)
         if self.effect == ManageOfferEffect.MANAGE_OFFER_CREATED:
@@ -48,7 +46,6 @@ class ManageOfferSuccessResultOffer:
             return
         if self.effect == ManageOfferEffect.MANAGE_OFFER_DELETED:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ManageOfferSuccessResultOffer:
         effect = ManageOfferEffect.unpack(unpacker)
@@ -61,7 +58,6 @@ class ManageOfferSuccessResultOffer:
         if effect == ManageOfferEffect.MANAGE_OFFER_DELETED:
             return cls(effect=effect)
         return cls(effect=effect)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -80,22 +76,14 @@ class ManageOfferSuccessResultOffer:
     def from_xdr(cls, xdr: str) -> ManageOfferSuccessResultOffer:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.effect,
-                self.offer,
-            )
-        )
-
+        return hash((self.effect, self.offer,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.effect == other.effect and self.offer == other.offer
-
+        return self.effect== other.effect and self.offer== other.offer
     def __str__(self):
         out = []
-        out.append(f"effect={self.effect}")
-        out.append(f"offer={self.offer}") if self.offer is not None else None
+        out.append(f'effect={self.effect}')
+        out.append(f'offer={self.offer}') if self.offer is not None else None
         return f"<ManageOfferSuccessResultOffer [{', '.join(out)}]>"

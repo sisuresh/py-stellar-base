@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .decorated_signature import DecoratedSignature
 from .fee_bump_transaction import FeeBumpTransaction
-
-__all__ = ["FeeBumpTransactionEnvelope"]
-
-
+from .decorated_signature import DecoratedSignature
+__all__ = ['FeeBumpTransactionEnvelope']
 class FeeBumpTransactionEnvelope:
     """
     XDR Source Code::
@@ -25,7 +24,6 @@ class FeeBumpTransactionEnvelope:
             DecoratedSignature signatures<20>;
         };
     """
-
     def __init__(
         self,
         tx: FeeBumpTransaction,
@@ -33,18 +31,14 @@ class FeeBumpTransactionEnvelope:
     ) -> None:
         _expect_max_length = 20
         if signatures and len(signatures) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `signatures` should be {_expect_max_length}, but got {len(signatures)}."
-            )
+            raise ValueError(f"The maximum length of `signatures` should be {_expect_max_length}, but got {len(signatures)}.")
         self.tx = tx
         self.signatures = signatures
-
     def pack(self, packer: Packer) -> None:
         self.tx.pack(packer)
         packer.pack_uint(len(self.signatures))
         for signatures_item in self.signatures:
             signatures_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> FeeBumpTransactionEnvelope:
         tx = FeeBumpTransaction.unpack(unpacker)
@@ -56,7 +50,6 @@ class FeeBumpTransactionEnvelope:
             tx=tx,
             signatures=signatures,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -75,23 +68,15 @@ class FeeBumpTransactionEnvelope:
     def from_xdr(cls, xdr: str) -> FeeBumpTransactionEnvelope:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.tx,
-                self.signatures,
-            )
-        )
-
+        return hash((self.tx, self.signatures,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.tx == other.tx and self.signatures == other.signatures
-
+        return self.tx== other.tx and self.signatures== other.signatures
     def __str__(self):
         out = [
-            f"tx={self.tx}",
-            f"signatures={self.signatures}",
+            f'tx={self.tx}',
+            f'signatures={self.signatures}',
         ]
         return f"<FeeBumpTransactionEnvelope [{', '.join(out)}]>"

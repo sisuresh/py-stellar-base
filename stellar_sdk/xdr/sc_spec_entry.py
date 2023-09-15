@@ -3,19 +3,19 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_spec_entry_kind import SCSpecEntryKind
 from .sc_spec_function_v0 import SCSpecFunctionV0
-from .sc_spec_udt_enum_v0 import SCSpecUDTEnumV0
-from .sc_spec_udt_error_enum_v0 import SCSpecUDTErrorEnumV0
 from .sc_spec_udt_struct_v0 import SCSpecUDTStructV0
 from .sc_spec_udt_union_v0 import SCSpecUDTUnionV0
-
-__all__ = ["SCSpecEntry"]
-
-
+from .sc_spec_udt_enum_v0 import SCSpecUDTEnumV0
+from .sc_spec_udt_error_enum_v0 import SCSpecUDTErrorEnumV0
+__all__ = ['SCSpecEntry']
 class SCSpecEntry:
     """
     XDR Source Code::
@@ -34,7 +34,6 @@ class SCSpecEntry:
             SCSpecUDTErrorEnumV0 udtErrorEnumV0;
         };
     """
-
     def __init__(
         self,
         kind: SCSpecEntryKind,
@@ -50,7 +49,6 @@ class SCSpecEntry:
         self.udt_union_v0 = udt_union_v0
         self.udt_enum_v0 = udt_enum_v0
         self.udt_error_enum_v0 = udt_error_enum_v0
-
     def pack(self, packer: Packer) -> None:
         self.kind.pack(packer)
         if self.kind == SCSpecEntryKind.SC_SPEC_ENTRY_FUNCTION_V0:
@@ -78,7 +76,6 @@ class SCSpecEntry:
                 raise ValueError("udt_error_enum_v0 should not be None.")
             self.udt_error_enum_v0.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecEntry:
         kind = SCSpecEntryKind.unpack(unpacker)
@@ -98,7 +95,6 @@ class SCSpecEntry:
             udt_error_enum_v0 = SCSpecUDTErrorEnumV0.unpack(unpacker)
             return cls(kind=kind, udt_error_enum_v0=udt_error_enum_v0)
         return cls(kind=kind)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -117,47 +113,18 @@ class SCSpecEntry:
     def from_xdr(cls, xdr: str) -> SCSpecEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.kind,
-                self.function_v0,
-                self.udt_struct_v0,
-                self.udt_union_v0,
-                self.udt_enum_v0,
-                self.udt_error_enum_v0,
-            )
-        )
-
+        return hash((self.kind, self.function_v0, self.udt_struct_v0, self.udt_union_v0, self.udt_enum_v0, self.udt_error_enum_v0,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.kind == other.kind
-            and self.function_v0 == other.function_v0
-            and self.udt_struct_v0 == other.udt_struct_v0
-            and self.udt_union_v0 == other.udt_union_v0
-            and self.udt_enum_v0 == other.udt_enum_v0
-            and self.udt_error_enum_v0 == other.udt_error_enum_v0
-        )
-
+        return self.kind== other.kind and self.function_v0== other.function_v0 and self.udt_struct_v0== other.udt_struct_v0 and self.udt_union_v0== other.udt_union_v0 and self.udt_enum_v0== other.udt_enum_v0 and self.udt_error_enum_v0== other.udt_error_enum_v0
     def __str__(self):
         out = []
-        out.append(f"kind={self.kind}")
-        out.append(
-            f"function_v0={self.function_v0}"
-        ) if self.function_v0 is not None else None
-        out.append(
-            f"udt_struct_v0={self.udt_struct_v0}"
-        ) if self.udt_struct_v0 is not None else None
-        out.append(
-            f"udt_union_v0={self.udt_union_v0}"
-        ) if self.udt_union_v0 is not None else None
-        out.append(
-            f"udt_enum_v0={self.udt_enum_v0}"
-        ) if self.udt_enum_v0 is not None else None
-        out.append(
-            f"udt_error_enum_v0={self.udt_error_enum_v0}"
-        ) if self.udt_error_enum_v0 is not None else None
+        out.append(f'kind={self.kind}')
+        out.append(f'function_v0={self.function_v0}') if self.function_v0 is not None else None
+        out.append(f'udt_struct_v0={self.udt_struct_v0}') if self.udt_struct_v0 is not None else None
+        out.append(f'udt_union_v0={self.udt_union_v0}') if self.udt_union_v0 is not None else None
+        out.append(f'udt_enum_v0={self.udt_enum_v0}') if self.udt_enum_v0 is not None else None
+        out.append(f'udt_error_enum_v0={self.udt_error_enum_v0}') if self.udt_error_enum_v0 is not None else None
         return f"<SCSpecEntry [{', '.join(out)}]>"

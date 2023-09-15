@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
-
-from .base import String
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
 from .constants import *
+
 from .sc_spec_type_def import SCSpecTypeDef
-
-__all__ = ["SCSpecFunctionInputV0"]
-
-
+__all__ = ['SCSpecFunctionInputV0']
 class SCSpecFunctionInputV0:
     """
     XDR Source Code::
@@ -24,7 +22,6 @@ class SCSpecFunctionInputV0:
             SCSpecTypeDef type;
         };
     """
-
     def __init__(
         self,
         doc: bytes,
@@ -34,12 +31,10 @@ class SCSpecFunctionInputV0:
         self.doc = doc
         self.name = name
         self.type = type
-
     def pack(self, packer: Packer) -> None:
         String(self.doc, SC_SPEC_DOC_LIMIT).pack(packer)
         String(self.name, 30).pack(packer)
         self.type.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecFunctionInputV0:
         doc = String.unpack(unpacker)
@@ -50,7 +45,6 @@ class SCSpecFunctionInputV0:
             name=name,
             type=type,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +63,16 @@ class SCSpecFunctionInputV0:
     def from_xdr(cls, xdr: str) -> SCSpecFunctionInputV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.doc,
-                self.name,
-                self.type,
-            )
-        )
-
+        return hash((self.doc, self.name, self.type,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.doc == other.doc
-            and self.name == other.name
-            and self.type == other.type
-        )
-
+        return self.doc== other.doc and self.name== other.name and self.type== other.type
     def __str__(self):
         out = [
-            f"doc={self.doc}",
-            f"name={self.name}",
-            f"type={self.type}",
+            f'doc={self.doc}',
+            f'name={self.name}',
+            f'type={self.type}',
         ]
         return f"<SCSpecFunctionInputV0 [{', '.join(out)}]>"

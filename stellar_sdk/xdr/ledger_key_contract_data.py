@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .contract_data_durability import ContractDataDurability
 from .sc_address import SCAddress
 from .sc_val import SCVal
-
-__all__ = ["LedgerKeyContractData"]
-
-
+from .contract_data_durability import ContractDataDurability
+__all__ = ['LedgerKeyContractData']
 class LedgerKeyContractData:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class LedgerKeyContractData:
                 ContractDataDurability durability;
             }
     """
-
     def __init__(
         self,
         contract: SCAddress,
@@ -34,12 +33,10 @@ class LedgerKeyContractData:
         self.contract = contract
         self.key = key
         self.durability = durability
-
     def pack(self, packer: Packer) -> None:
         self.contract.pack(packer)
         self.key.pack(packer)
         self.durability.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerKeyContractData:
         contract = SCAddress.unpack(unpacker)
@@ -50,7 +47,6 @@ class LedgerKeyContractData:
             key=key,
             durability=durability,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +65,16 @@ class LedgerKeyContractData:
     def from_xdr(cls, xdr: str) -> LedgerKeyContractData:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.contract,
-                self.key,
-                self.durability,
-            )
-        )
-
+        return hash((self.contract, self.key, self.durability,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.contract == other.contract
-            and self.key == other.key
-            and self.durability == other.durability
-        )
-
+        return self.contract== other.contract and self.key== other.key and self.durability== other.durability
     def __str__(self):
         out = [
-            f"contract={self.contract}",
-            f"key={self.key}",
-            f"durability={self.durability}",
+            f'contract={self.contract}',
+            f'key={self.key}',
+            f'durability={self.durability}',
         ]
         return f"<LedgerKeyContractData [{', '.join(out)}]>"

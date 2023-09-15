@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .int64 import Int64
 from .uint64 import Uint64
-
-__all__ = ["Int256Parts"]
-
-
+from .uint64 import Uint64
+from .uint64 import Uint64
+__all__ = ['Int256Parts']
 class Int256Parts:
     """
     XDR Source Code::
@@ -23,7 +25,6 @@ class Int256Parts:
             uint64 lo_lo;
         };
     """
-
     def __init__(
         self,
         hi_hi: Int64,
@@ -35,13 +36,11 @@ class Int256Parts:
         self.hi_lo = hi_lo
         self.lo_hi = lo_hi
         self.lo_lo = lo_lo
-
     def pack(self, packer: Packer) -> None:
         self.hi_hi.pack(packer)
         self.hi_lo.pack(packer)
         self.lo_hi.pack(packer)
         self.lo_lo.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Int256Parts:
         hi_hi = Int64.unpack(unpacker)
@@ -54,7 +53,6 @@ class Int256Parts:
             lo_hi=lo_hi,
             lo_lo=lo_lo,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -73,32 +71,17 @@ class Int256Parts:
     def from_xdr(cls, xdr: str) -> Int256Parts:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.hi_hi,
-                self.hi_lo,
-                self.lo_hi,
-                self.lo_lo,
-            )
-        )
-
+        return hash((self.hi_hi, self.hi_lo, self.lo_hi, self.lo_lo,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.hi_hi == other.hi_hi
-            and self.hi_lo == other.hi_lo
-            and self.lo_hi == other.lo_hi
-            and self.lo_lo == other.lo_lo
-        )
-
+        return self.hi_hi== other.hi_hi and self.hi_lo== other.hi_lo and self.lo_hi== other.lo_hi and self.lo_lo== other.lo_lo
     def __str__(self):
         out = [
-            f"hi_hi={self.hi_hi}",
-            f"hi_lo={self.hi_lo}",
-            f"lo_hi={self.lo_hi}",
-            f"lo_lo={self.lo_lo}",
+            f'hi_hi={self.hi_hi}',
+            f'hi_lo={self.hi_lo}',
+            f'lo_hi={self.lo_hi}',
+            f'lo_lo={self.lo_lo}',
         ]
         return f"<Int256Parts [{', '.join(out)}]>"

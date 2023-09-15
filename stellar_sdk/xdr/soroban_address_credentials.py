@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .int64 import Int64
 from .sc_address import SCAddress
-from .sc_val import SCVal
+from .int64 import Int64
 from .uint32 import Uint32
-
-__all__ = ["SorobanAddressCredentials"]
-
-
+from .sc_val import SCVal
+__all__ = ['SorobanAddressCredentials']
 class SorobanAddressCredentials:
     """
     XDR Source Code::
@@ -22,11 +22,10 @@ class SorobanAddressCredentials:
         {
             SCAddress address;
             int64 nonce;
-            uint32 signatureExpirationLedger;
+            uint32 signatureExpirationLedger;    
             SCVal signature;
         };
     """
-
     def __init__(
         self,
         address: SCAddress,
@@ -38,13 +37,11 @@ class SorobanAddressCredentials:
         self.nonce = nonce
         self.signature_expiration_ledger = signature_expiration_ledger
         self.signature = signature
-
     def pack(self, packer: Packer) -> None:
         self.address.pack(packer)
         self.nonce.pack(packer)
         self.signature_expiration_ledger.pack(packer)
         self.signature.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SorobanAddressCredentials:
         address = SCAddress.unpack(unpacker)
@@ -57,7 +54,6 @@ class SorobanAddressCredentials:
             signature_expiration_ledger=signature_expiration_ledger,
             signature=signature,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -76,32 +72,17 @@ class SorobanAddressCredentials:
     def from_xdr(cls, xdr: str) -> SorobanAddressCredentials:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.address,
-                self.nonce,
-                self.signature_expiration_ledger,
-                self.signature,
-            )
-        )
-
+        return hash((self.address, self.nonce, self.signature_expiration_ledger, self.signature,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.address == other.address
-            and self.nonce == other.nonce
-            and self.signature_expiration_ledger == other.signature_expiration_ledger
-            and self.signature == other.signature
-        )
-
+        return self.address== other.address and self.nonce== other.nonce and self.signature_expiration_ledger== other.signature_expiration_ledger and self.signature== other.signature
     def __str__(self):
         out = [
-            f"address={self.address}",
-            f"nonce={self.nonce}",
-            f"signature_expiration_ledger={self.signature_expiration_ledger}",
-            f"signature={self.signature}",
+            f'address={self.address}',
+            f'nonce={self.nonce}',
+            f'signature_expiration_ledger={self.signature_expiration_ledger}',
+            f'signature={self.signature}',
         ]
         return f"<SorobanAddressCredentials [{', '.join(out)}]>"

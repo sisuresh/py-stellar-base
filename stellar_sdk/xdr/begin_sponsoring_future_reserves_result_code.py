@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["BeginSponsoringFutureReservesResultCode"]
-
-
+__all__ = ['BeginSponsoringFutureReservesResultCode']
 class BeginSponsoringFutureReservesResultCode(IntEnum):
     """
     XDR Source Code::
@@ -25,12 +25,10 @@ class BeginSponsoringFutureReservesResultCode(IntEnum):
             BEGIN_SPONSORING_FUTURE_RESERVES_RECURSIVE = -3
         };
     """
-
     BEGIN_SPONSORING_FUTURE_RESERVES_SUCCESS = 0
     BEGIN_SPONSORING_FUTURE_RESERVES_MALFORMED = -1
     BEGIN_SPONSORING_FUTURE_RESERVES_ALREADY_SPONSORED = -2
     BEGIN_SPONSORING_FUTURE_RESERVES_RECURSIVE = -3
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -38,7 +36,6 @@ class BeginSponsoringFutureReservesResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> BeginSponsoringFutureReservesResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

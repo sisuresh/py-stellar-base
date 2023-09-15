@@ -3,16 +3,18 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .ledger_entry import LedgerEntry
 from .ledger_entry_change_type import LedgerEntryChangeType
+from .ledger_entry import LedgerEntry
+from .ledger_entry import LedgerEntry
 from .ledger_key import LedgerKey
-
-__all__ = ["LedgerEntryChange"]
-
-
+from .ledger_entry import LedgerEntry
+__all__ = ['LedgerEntryChange']
 class LedgerEntryChange:
     """
     XDR Source Code::
@@ -29,7 +31,6 @@ class LedgerEntryChange:
             LedgerEntry state;
         };
     """
-
     def __init__(
         self,
         type: LedgerEntryChangeType,
@@ -43,7 +44,6 @@ class LedgerEntryChange:
         self.updated = updated
         self.removed = removed
         self.state = state
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == LedgerEntryChangeType.LEDGER_ENTRY_CREATED:
@@ -66,7 +66,6 @@ class LedgerEntryChange:
                 raise ValueError("state should not be None.")
             self.state.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerEntryChange:
         type = LedgerEntryChangeType.unpack(unpacker)
@@ -83,7 +82,6 @@ class LedgerEntryChange:
             state = LedgerEntry.unpack(unpacker)
             return cls(type=type, state=state)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -102,34 +100,17 @@ class LedgerEntryChange:
     def from_xdr(cls, xdr: str) -> LedgerEntryChange:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.created,
-                self.updated,
-                self.removed,
-                self.state,
-            )
-        )
-
+        return hash((self.type, self.created, self.updated, self.removed, self.state,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.created == other.created
-            and self.updated == other.updated
-            and self.removed == other.removed
-            and self.state == other.state
-        )
-
+        return self.type== other.type and self.created== other.created and self.updated== other.updated and self.removed== other.removed and self.state== other.state
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"created={self.created}") if self.created is not None else None
-        out.append(f"updated={self.updated}") if self.updated is not None else None
-        out.append(f"removed={self.removed}") if self.removed is not None else None
-        out.append(f"state={self.state}") if self.state is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'created={self.created}') if self.created is not None else None
+        out.append(f'updated={self.updated}') if self.updated is not None else None
+        out.append(f'removed={self.removed}') if self.removed is not None else None
+        out.append(f'state={self.state}') if self.state is not None else None
         return f"<LedgerEntryChange [{', '.join(out)}]>"

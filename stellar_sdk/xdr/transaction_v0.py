@@ -3,22 +3,20 @@
 from __future__ import annotations
 
 import base64
-from typing import List, Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
-
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
 from .constants import *
-from .memo import Memo
-from .operation import Operation
+
+from .uint256 import Uint256
+from .uint32 import Uint32
 from .sequence_number import SequenceNumber
 from .time_bounds import TimeBounds
+from .memo import Memo
+from .operation import Operation
 from .transaction_v0_ext import TransactionV0Ext
-from .uint32 import Uint32
-from .uint256 import Uint256
-
-__all__ = ["TransactionV0"]
-
-
+__all__ = ['TransactionV0']
 class TransactionV0:
     """
     XDR Source Code::
@@ -39,7 +37,6 @@ class TransactionV0:
             ext;
         };
     """
-
     def __init__(
         self,
         source_account_ed25519: Uint256,
@@ -52,9 +49,7 @@ class TransactionV0:
     ) -> None:
         _expect_max_length = MAX_OPS_PER_TX
         if operations and len(operations) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}."
-            )
+            raise ValueError(f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}.")
         self.source_account_ed25519 = source_account_ed25519
         self.fee = fee
         self.seq_num = seq_num
@@ -62,7 +57,6 @@ class TransactionV0:
         self.memo = memo
         self.operations = operations
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.source_account_ed25519.pack(packer)
         self.fee.pack(packer)
@@ -77,7 +71,6 @@ class TransactionV0:
         for operations_item in self.operations:
             operations_item.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionV0:
         source_account_ed25519 = Uint256.unpack(unpacker)
@@ -99,7 +92,6 @@ class TransactionV0:
             operations=operations,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -118,41 +110,20 @@ class TransactionV0:
     def from_xdr(cls, xdr: str) -> TransactionV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.source_account_ed25519,
-                self.fee,
-                self.seq_num,
-                self.time_bounds,
-                self.memo,
-                self.operations,
-                self.ext,
-            )
-        )
-
+        return hash((self.source_account_ed25519, self.fee, self.seq_num, self.time_bounds, self.memo, self.operations, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.source_account_ed25519 == other.source_account_ed25519
-            and self.fee == other.fee
-            and self.seq_num == other.seq_num
-            and self.time_bounds == other.time_bounds
-            and self.memo == other.memo
-            and self.operations == other.operations
-            and self.ext == other.ext
-        )
-
+        return self.source_account_ed25519== other.source_account_ed25519 and self.fee== other.fee and self.seq_num== other.seq_num and self.time_bounds== other.time_bounds and self.memo== other.memo and self.operations== other.operations and self.ext== other.ext
     def __str__(self):
         out = [
-            f"source_account_ed25519={self.source_account_ed25519}",
-            f"fee={self.fee}",
-            f"seq_num={self.seq_num}",
-            f"time_bounds={self.time_bounds}",
-            f"memo={self.memo}",
-            f"operations={self.operations}",
-            f"ext={self.ext}",
+            f'source_account_ed25519={self.source_account_ed25519}',
+            f'fee={self.fee}',
+            f'seq_num={self.seq_num}',
+            f'time_bounds={self.time_bounds}',
+            f'memo={self.memo}',
+            f'operations={self.operations}',
+            f'ext={self.ext}',
         ]
         return f"<TransactionV0 [{', '.join(out)}]>"

@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .transaction_result_pair import TransactionResultPair
 from .ledger_entry_changes import LedgerEntryChanges
 from .transaction_meta import TransactionMeta
-from .transaction_result_pair import TransactionResultPair
-
-__all__ = ["TransactionResultMeta"]
-
-
+__all__ = ['TransactionResultMeta']
 class TransactionResultMeta:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class TransactionResultMeta:
             TransactionMeta txApplyProcessing;
         };
     """
-
     def __init__(
         self,
         result: TransactionResultPair,
@@ -34,12 +33,10 @@ class TransactionResultMeta:
         self.result = result
         self.fee_processing = fee_processing
         self.tx_apply_processing = tx_apply_processing
-
     def pack(self, packer: Packer) -> None:
         self.result.pack(packer)
         self.fee_processing.pack(packer)
         self.tx_apply_processing.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionResultMeta:
         result = TransactionResultPair.unpack(unpacker)
@@ -50,7 +47,6 @@ class TransactionResultMeta:
             fee_processing=fee_processing,
             tx_apply_processing=tx_apply_processing,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +65,16 @@ class TransactionResultMeta:
     def from_xdr(cls, xdr: str) -> TransactionResultMeta:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.result,
-                self.fee_processing,
-                self.tx_apply_processing,
-            )
-        )
-
+        return hash((self.result, self.fee_processing, self.tx_apply_processing,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.result == other.result
-            and self.fee_processing == other.fee_processing
-            and self.tx_apply_processing == other.tx_apply_processing
-        )
-
+        return self.result== other.result and self.fee_processing== other.fee_processing and self.tx_apply_processing== other.tx_apply_processing
     def __str__(self):
         out = [
-            f"result={self.result}",
-            f"fee_processing={self.fee_processing}",
-            f"tx_apply_processing={self.tx_apply_processing}",
+            f'result={self.result}',
+            f'fee_processing={self.fee_processing}',
+            f'tx_apply_processing={self.tx_apply_processing}',
         ]
         return f"<TransactionResultMeta [{', '.join(out)}]>"

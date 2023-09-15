@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .int64 import Int64
+from .int64 import Int64
+from .int64 import Int64
 from .uint32 import Uint32
-
-__all__ = ["ConfigSettingContractComputeV0"]
-
-
+__all__ = ['ConfigSettingContractComputeV0']
 class ConfigSettingContractComputeV0:
     """
     XDR Source Code::
@@ -30,7 +32,6 @@ class ConfigSettingContractComputeV0:
             uint32 txMemoryLimit;
         };
     """
-
     def __init__(
         self,
         ledger_max_instructions: Int64,
@@ -42,13 +43,11 @@ class ConfigSettingContractComputeV0:
         self.tx_max_instructions = tx_max_instructions
         self.fee_rate_per_instructions_increment = fee_rate_per_instructions_increment
         self.tx_memory_limit = tx_memory_limit
-
     def pack(self, packer: Packer) -> None:
         self.ledger_max_instructions.pack(packer)
         self.tx_max_instructions.pack(packer)
         self.fee_rate_per_instructions_increment.pack(packer)
         self.tx_memory_limit.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ConfigSettingContractComputeV0:
         ledger_max_instructions = Int64.unpack(unpacker)
@@ -61,7 +60,6 @@ class ConfigSettingContractComputeV0:
             fee_rate_per_instructions_increment=fee_rate_per_instructions_increment,
             tx_memory_limit=tx_memory_limit,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -80,33 +78,17 @@ class ConfigSettingContractComputeV0:
     def from_xdr(cls, xdr: str) -> ConfigSettingContractComputeV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ledger_max_instructions,
-                self.tx_max_instructions,
-                self.fee_rate_per_instructions_increment,
-                self.tx_memory_limit,
-            )
-        )
-
+        return hash((self.ledger_max_instructions, self.tx_max_instructions, self.fee_rate_per_instructions_increment, self.tx_memory_limit,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ledger_max_instructions == other.ledger_max_instructions
-            and self.tx_max_instructions == other.tx_max_instructions
-            and self.fee_rate_per_instructions_increment
-            == other.fee_rate_per_instructions_increment
-            and self.tx_memory_limit == other.tx_memory_limit
-        )
-
+        return self.ledger_max_instructions== other.ledger_max_instructions and self.tx_max_instructions== other.tx_max_instructions and self.fee_rate_per_instructions_increment== other.fee_rate_per_instructions_increment and self.tx_memory_limit== other.tx_memory_limit
     def __str__(self):
         out = [
-            f"ledger_max_instructions={self.ledger_max_instructions}",
-            f"tx_max_instructions={self.tx_max_instructions}",
-            f"fee_rate_per_instructions_increment={self.fee_rate_per_instructions_increment}",
-            f"tx_memory_limit={self.tx_memory_limit}",
+            f'ledger_max_instructions={self.ledger_max_instructions}',
+            f'tx_max_instructions={self.tx_max_instructions}',
+            f'fee_rate_per_instructions_increment={self.fee_rate_per_instructions_increment}',
+            f'tx_memory_limit={self.tx_memory_limit}',
         ]
         return f"<ConfigSettingContractComputeV0 [{', '.join(out)}]>"

@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_spec_type_def import SCSpecTypeDef
-
-__all__ = ["SCSpecTypeResult"]
-
-
+from .sc_spec_type_def import SCSpecTypeDef
+__all__ = ['SCSpecTypeResult']
 class SCSpecTypeResult:
     """
     XDR Source Code::
@@ -21,7 +22,6 @@ class SCSpecTypeResult:
             SCSpecTypeDef errorType;
         };
     """
-
     def __init__(
         self,
         ok_type: SCSpecTypeDef,
@@ -29,11 +29,9 @@ class SCSpecTypeResult:
     ) -> None:
         self.ok_type = ok_type
         self.error_type = error_type
-
     def pack(self, packer: Packer) -> None:
         self.ok_type.pack(packer)
         self.error_type.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecTypeResult:
         ok_type = SCSpecTypeDef.unpack(unpacker)
@@ -42,7 +40,6 @@ class SCSpecTypeResult:
             ok_type=ok_type,
             error_type=error_type,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -61,23 +58,15 @@ class SCSpecTypeResult:
     def from_xdr(cls, xdr: str) -> SCSpecTypeResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ok_type,
-                self.error_type,
-            )
-        )
-
+        return hash((self.ok_type, self.error_type,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.ok_type == other.ok_type and self.error_type == other.error_type
-
+        return self.ok_type== other.ok_type and self.error_type== other.error_type
     def __str__(self):
         out = [
-            f"ok_type={self.ok_type}",
-            f"error_type={self.error_type}",
+            f'ok_type={self.ok_type}',
+            f'error_type={self.error_type}',
         ]
         return f"<SCSpecTypeResult [{', '.join(out)}]>"

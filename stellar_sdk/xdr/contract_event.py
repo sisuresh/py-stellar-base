@@ -3,18 +3,17 @@
 from __future__ import annotations
 
 import base64
-from typing import Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .contract_event_body import ContractEventBody
-from .contract_event_type import ContractEventType
 from .extension_point import ExtensionPoint
 from .hash import Hash
-
-__all__ = ["ContractEvent"]
-
-
+from .contract_event_type import ContractEventType
+from .contract_event_body import ContractEventBody
+__all__ = ['ContractEvent']
 class ContractEvent:
     """
     XDR Source Code::
@@ -40,7 +39,6 @@ class ContractEvent:
             body;
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
@@ -52,7 +50,6 @@ class ContractEvent:
         self.contract_id = contract_id
         self.type = type
         self.body = body
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         if self.contract_id is None:
@@ -62,7 +59,6 @@ class ContractEvent:
             self.contract_id.pack(packer)
         self.type.pack(packer)
         self.body.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ContractEvent:
         ext = ExtensionPoint.unpack(unpacker)
@@ -75,7 +71,6 @@ class ContractEvent:
             type=type,
             body=body,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -94,32 +89,17 @@ class ContractEvent:
     def from_xdr(cls, xdr: str) -> ContractEvent:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.contract_id,
-                self.type,
-                self.body,
-            )
-        )
-
+        return hash((self.ext, self.contract_id, self.type, self.body,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ext == other.ext
-            and self.contract_id == other.contract_id
-            and self.type == other.type
-            and self.body == other.body
-        )
-
+        return self.ext== other.ext and self.contract_id== other.contract_id and self.type== other.type and self.body== other.body
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"contract_id={self.contract_id}",
-            f"type={self.type}",
-            f"body={self.body}",
+            f'ext={self.ext}',
+            f'contract_id={self.contract_id}',
+            f'type={self.type}',
+            f'body={self.body}',
         ]
         return f"<ContractEvent [{', '.join(out)}]>"

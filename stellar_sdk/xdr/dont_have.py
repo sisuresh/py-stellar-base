@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .message_type import MessageType
 from .uint256 import Uint256
-
-__all__ = ["DontHave"]
-
-
+__all__ = ['DontHave']
 class DontHave:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class DontHave:
             uint256 reqHash;
         };
     """
-
     def __init__(
         self,
         type: MessageType,
@@ -30,11 +29,9 @@ class DontHave:
     ) -> None:
         self.type = type
         self.req_hash = req_hash
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         self.req_hash.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> DontHave:
         type = MessageType.unpack(unpacker)
@@ -43,7 +40,6 @@ class DontHave:
             type=type,
             req_hash=req_hash,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class DontHave:
     def from_xdr(cls, xdr: str) -> DontHave:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.req_hash,
-            )
-        )
-
+        return hash((self.type, self.req_hash,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.type == other.type and self.req_hash == other.req_hash
-
+        return self.type== other.type and self.req_hash== other.req_hash
     def __str__(self):
         out = [
-            f"type={self.type}",
-            f"req_hash={self.req_hash}",
+            f'type={self.type}',
+            f'req_hash={self.req_hash}',
         ]
         return f"<DontHave [{', '.join(out)}]>"

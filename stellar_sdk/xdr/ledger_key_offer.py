@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
 from .int64 import Int64
-
-__all__ = ["LedgerKeyOffer"]
-
-
+__all__ = ['LedgerKeyOffer']
 class LedgerKeyOffer:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class LedgerKeyOffer:
                 int64 offerID;
             }
     """
-
     def __init__(
         self,
         seller_id: AccountID,
@@ -30,11 +29,9 @@ class LedgerKeyOffer:
     ) -> None:
         self.seller_id = seller_id
         self.offer_id = offer_id
-
     def pack(self, packer: Packer) -> None:
         self.seller_id.pack(packer)
         self.offer_id.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerKeyOffer:
         seller_id = AccountID.unpack(unpacker)
@@ -43,7 +40,6 @@ class LedgerKeyOffer:
             seller_id=seller_id,
             offer_id=offer_id,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class LedgerKeyOffer:
     def from_xdr(cls, xdr: str) -> LedgerKeyOffer:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.seller_id,
-                self.offer_id,
-            )
-        )
-
+        return hash((self.seller_id, self.offer_id,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.seller_id == other.seller_id and self.offer_id == other.offer_id
-
+        return self.seller_id== other.seller_id and self.offer_id== other.offer_id
     def __str__(self):
         out = [
-            f"seller_id={self.seller_id}",
-            f"offer_id={self.offer_id}",
+            f'seller_id={self.seller_id}',
+            f'offer_id={self.offer_id}',
         ]
         return f"<LedgerKeyOffer [{', '.join(out)}]>"

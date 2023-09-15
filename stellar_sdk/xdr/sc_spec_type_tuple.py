@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_spec_type_def import SCSpecTypeDef
-
-__all__ = ["SCSpecTypeTuple"]
-
-
+__all__ = ['SCSpecTypeTuple']
 class SCSpecTypeTuple:
     """
     XDR Source Code::
@@ -21,23 +20,18 @@ class SCSpecTypeTuple:
             SCSpecTypeDef valueTypes<12>;
         };
     """
-
     def __init__(
         self,
         value_types: List[SCSpecTypeDef],
     ) -> None:
         _expect_max_length = 12
         if value_types and len(value_types) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `value_types` should be {_expect_max_length}, but got {len(value_types)}."
-            )
+            raise ValueError(f"The maximum length of `value_types` should be {_expect_max_length}, but got {len(value_types)}.")
         self.value_types = value_types
-
     def pack(self, packer: Packer) -> None:
         packer.pack_uint(len(self.value_types))
         for value_types_item in self.value_types:
             value_types_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecTypeTuple:
         length = unpacker.unpack_uint()
@@ -47,7 +41,6 @@ class SCSpecTypeTuple:
         return cls(
             value_types=value_types,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -66,17 +59,14 @@ class SCSpecTypeTuple:
     def from_xdr(cls, xdr: str) -> SCSpecTypeTuple:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.value_types,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.value_types == other.value_types
-
+        return self.value_types== other.value_types
     def __str__(self):
         out = [
-            f"value_types={self.value_types}",
+            f'value_types={self.value_types}',
         ]
         return f"<SCSpecTypeTuple [{', '.join(out)}]>"

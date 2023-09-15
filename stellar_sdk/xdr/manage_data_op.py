@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .data_value import DataValue
 from .string64 import String64
-
-__all__ = ["ManageDataOp"]
-
-
+from .data_value import DataValue
+__all__ = ['ManageDataOp']
 class ManageDataOp:
     """
     XDR Source Code::
@@ -23,7 +22,6 @@ class ManageDataOp:
             DataValue* dataValue; // set to null to clear
         };
     """
-
     def __init__(
         self,
         data_name: String64,
@@ -31,7 +29,6 @@ class ManageDataOp:
     ) -> None:
         self.data_name = data_name
         self.data_value = data_value
-
     def pack(self, packer: Packer) -> None:
         self.data_name.pack(packer)
         if self.data_value is None:
@@ -39,7 +36,6 @@ class ManageDataOp:
         else:
             packer.pack_uint(1)
             self.data_value.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ManageDataOp:
         data_name = String64.unpack(unpacker)
@@ -48,7 +44,6 @@ class ManageDataOp:
             data_name=data_name,
             data_value=data_value,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -67,23 +62,15 @@ class ManageDataOp:
     def from_xdr(cls, xdr: str) -> ManageDataOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.data_name,
-                self.data_value,
-            )
-        )
-
+        return hash((self.data_name, self.data_value,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.data_name == other.data_name and self.data_value == other.data_value
-
+        return self.data_name== other.data_name and self.data_value== other.data_value
     def __str__(self):
         out = [
-            f"data_name={self.data_name}",
-            f"data_value={self.data_value}",
+            f'data_name={self.data_name}',
+            f'data_value={self.data_value}',
         ]
         return f"<ManageDataOp [{', '.join(out)}]>"

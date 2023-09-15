@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .ledger_scp_messages import LedgerSCPMessages
 from .scp_quorum_set import SCPQuorumSet
-
-__all__ = ["SCPHistoryEntryV0"]
-
-
+from .ledger_scp_messages import LedgerSCPMessages
+__all__ = ['SCPHistoryEntryV0']
 class SCPHistoryEntryV0:
     """
     XDR Source Code::
@@ -23,7 +22,6 @@ class SCPHistoryEntryV0:
             LedgerSCPMessages ledgerMessages;
         };
     """
-
     def __init__(
         self,
         quorum_sets: List[SCPQuorumSet],
@@ -31,18 +29,14 @@ class SCPHistoryEntryV0:
     ) -> None:
         _expect_max_length = 4294967295
         if quorum_sets and len(quorum_sets) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `quorum_sets` should be {_expect_max_length}, but got {len(quorum_sets)}."
-            )
+            raise ValueError(f"The maximum length of `quorum_sets` should be {_expect_max_length}, but got {len(quorum_sets)}.")
         self.quorum_sets = quorum_sets
         self.ledger_messages = ledger_messages
-
     def pack(self, packer: Packer) -> None:
         packer.pack_uint(len(self.quorum_sets))
         for quorum_sets_item in self.quorum_sets:
             quorum_sets_item.pack(packer)
         self.ledger_messages.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCPHistoryEntryV0:
         length = unpacker.unpack_uint()
@@ -54,7 +48,6 @@ class SCPHistoryEntryV0:
             quorum_sets=quorum_sets,
             ledger_messages=ledger_messages,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -73,26 +66,15 @@ class SCPHistoryEntryV0:
     def from_xdr(cls, xdr: str) -> SCPHistoryEntryV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.quorum_sets,
-                self.ledger_messages,
-            )
-        )
-
+        return hash((self.quorum_sets, self.ledger_messages,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.quorum_sets == other.quorum_sets
-            and self.ledger_messages == other.ledger_messages
-        )
-
+        return self.quorum_sets== other.quorum_sets and self.ledger_messages== other.ledger_messages
     def __str__(self):
         out = [
-            f"quorum_sets={self.quorum_sets}",
-            f"ledger_messages={self.ledger_messages}",
+            f'quorum_sets={self.quorum_sets}',
+            f'ledger_messages={self.ledger_messages}',
         ]
         return f"<SCPHistoryEntryV0 [{', '.join(out)}]>"

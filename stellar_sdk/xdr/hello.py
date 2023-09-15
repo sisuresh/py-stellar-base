@@ -3,19 +3,20 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .auth_cert import AuthCert
-from .base import Integer, String
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
 from .hash import Hash
 from .node_id import NodeID
-from .uint32 import Uint32
+from .auth_cert import AuthCert
 from .uint256 import Uint256
-
-__all__ = ["Hello"]
-
-
+__all__ = ['Hello']
 class Hello:
     """
     XDR Source Code::
@@ -33,7 +34,6 @@ class Hello:
             uint256 nonce;
         };
     """
-
     def __init__(
         self,
         ledger_version: Uint32,
@@ -55,7 +55,6 @@ class Hello:
         self.peer_id = peer_id
         self.cert = cert
         self.nonce = nonce
-
     def pack(self, packer: Packer) -> None:
         self.ledger_version.pack(packer)
         self.overlay_version.pack(packer)
@@ -66,7 +65,6 @@ class Hello:
         self.peer_id.pack(packer)
         self.cert.pack(packer)
         self.nonce.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Hello:
         ledger_version = Uint32.unpack(unpacker)
@@ -89,7 +87,6 @@ class Hello:
             cert=cert,
             nonce=nonce,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -108,47 +105,22 @@ class Hello:
     def from_xdr(cls, xdr: str) -> Hello:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ledger_version,
-                self.overlay_version,
-                self.overlay_min_version,
-                self.network_id,
-                self.version_str,
-                self.listening_port,
-                self.peer_id,
-                self.cert,
-                self.nonce,
-            )
-        )
-
+        return hash((self.ledger_version, self.overlay_version, self.overlay_min_version, self.network_id, self.version_str, self.listening_port, self.peer_id, self.cert, self.nonce,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ledger_version == other.ledger_version
-            and self.overlay_version == other.overlay_version
-            and self.overlay_min_version == other.overlay_min_version
-            and self.network_id == other.network_id
-            and self.version_str == other.version_str
-            and self.listening_port == other.listening_port
-            and self.peer_id == other.peer_id
-            and self.cert == other.cert
-            and self.nonce == other.nonce
-        )
-
+        return self.ledger_version== other.ledger_version and self.overlay_version== other.overlay_version and self.overlay_min_version== other.overlay_min_version and self.network_id== other.network_id and self.version_str== other.version_str and self.listening_port== other.listening_port and self.peer_id== other.peer_id and self.cert== other.cert and self.nonce== other.nonce
     def __str__(self):
         out = [
-            f"ledger_version={self.ledger_version}",
-            f"overlay_version={self.overlay_version}",
-            f"overlay_min_version={self.overlay_min_version}",
-            f"network_id={self.network_id}",
-            f"version_str={self.version_str}",
-            f"listening_port={self.listening_port}",
-            f"peer_id={self.peer_id}",
-            f"cert={self.cert}",
-            f"nonce={self.nonce}",
+            f'ledger_version={self.ledger_version}',
+            f'overlay_version={self.overlay_version}',
+            f'overlay_min_version={self.overlay_min_version}',
+            f'network_id={self.network_id}',
+            f'version_str={self.version_str}',
+            f'listening_port={self.listening_port}',
+            f'peer_id={self.peer_id}',
+            f'cert={self.cert}',
+            f'nonce={self.nonce}',
         ]
         return f"<Hello [{', '.join(out)}]>"

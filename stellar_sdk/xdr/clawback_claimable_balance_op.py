@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .claimable_balance_id import ClaimableBalanceID
-
-__all__ = ["ClawbackClaimableBalanceOp"]
-
-
+__all__ = ['ClawbackClaimableBalanceOp']
 class ClawbackClaimableBalanceOp:
     """
     XDR Source Code::
@@ -20,23 +20,19 @@ class ClawbackClaimableBalanceOp:
             ClaimableBalanceID balanceID;
         };
     """
-
     def __init__(
         self,
         balance_id: ClaimableBalanceID,
     ) -> None:
         self.balance_id = balance_id
-
     def pack(self, packer: Packer) -> None:
         self.balance_id.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ClawbackClaimableBalanceOp:
         balance_id = ClaimableBalanceID.unpack(unpacker)
         return cls(
             balance_id=balance_id,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +51,14 @@ class ClawbackClaimableBalanceOp:
     def from_xdr(cls, xdr: str) -> ClawbackClaimableBalanceOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.balance_id,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.balance_id == other.balance_id
-
+        return self.balance_id== other.balance_id
     def __str__(self):
         out = [
-            f"balance_id={self.balance_id}",
+            f'balance_id={self.balance_id}',
         ]
         return f"<ClawbackClaimableBalanceOp [{', '.join(out)}]>"

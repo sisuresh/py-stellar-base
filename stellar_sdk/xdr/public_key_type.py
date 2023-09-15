@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["PublicKeyType"]
-
-
+__all__ = ['PublicKeyType']
 class PublicKeyType(IntEnum):
     """
     XDR Source Code::
@@ -19,9 +19,7 @@ class PublicKeyType(IntEnum):
             PUBLIC_KEY_TYPE_ED25519 = KEY_TYPE_ED25519
         };
     """
-
     PUBLIC_KEY_TYPE_ED25519 = 0
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -29,7 +27,6 @@ class PublicKeyType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> PublicKeyType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

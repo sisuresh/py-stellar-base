@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .config_setting_id import ConfigSettingID
-
-__all__ = ["LedgerKeyConfigSetting"]
-
-
+__all__ = ['LedgerKeyConfigSetting']
 class LedgerKeyConfigSetting:
     """
     XDR Source Code::
@@ -20,23 +20,19 @@ class LedgerKeyConfigSetting:
                 ConfigSettingID configSettingID;
             }
     """
-
     def __init__(
         self,
         config_setting_id: ConfigSettingID,
     ) -> None:
         self.config_setting_id = config_setting_id
-
     def pack(self, packer: Packer) -> None:
         self.config_setting_id.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerKeyConfigSetting:
         config_setting_id = ConfigSettingID.unpack(unpacker)
         return cls(
             config_setting_id=config_setting_id,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +51,14 @@ class LedgerKeyConfigSetting:
     def from_xdr(cls, xdr: str) -> LedgerKeyConfigSetting:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.config_setting_id,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.config_setting_id == other.config_setting_id
-
+        return self.config_setting_id== other.config_setting_id
     def __str__(self):
         out = [
-            f"config_setting_id={self.config_setting_id}",
+            f'config_setting_id={self.config_setting_id}',
         ]
         return f"<LedgerKeyConfigSetting [{', '.join(out)}]>"

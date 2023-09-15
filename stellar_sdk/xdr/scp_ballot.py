@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .uint32 import Uint32
 from .value import Value
-
-__all__ = ["SCPBallot"]
-
-
+__all__ = ['SCPBallot']
 class SCPBallot:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class SCPBallot:
             Value value;    // x
         };
     """
-
     def __init__(
         self,
         counter: Uint32,
@@ -30,11 +29,9 @@ class SCPBallot:
     ) -> None:
         self.counter = counter
         self.value = value
-
     def pack(self, packer: Packer) -> None:
         self.counter.pack(packer)
         self.value.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCPBallot:
         counter = Uint32.unpack(unpacker)
@@ -43,7 +40,6 @@ class SCPBallot:
             counter=counter,
             value=value,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class SCPBallot:
     def from_xdr(cls, xdr: str) -> SCPBallot:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.counter,
-                self.value,
-            )
-        )
-
+        return hash((self.counter, self.value,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.counter == other.counter and self.value == other.value
-
+        return self.counter== other.counter and self.value== other.value
     def __str__(self):
         out = [
-            f"counter={self.counter}",
-            f"value={self.value}",
+            f'counter={self.counter}',
+            f'value={self.value}',
         ]
         return f"<SCPBallot [{', '.join(out)}]>"

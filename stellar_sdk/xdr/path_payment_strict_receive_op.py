@@ -3,17 +3,19 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .asset import Asset
 from .int64 import Int64
 from .muxed_account import MuxedAccount
-
-__all__ = ["PathPaymentStrictReceiveOp"]
-
-
+from .asset import Asset
+from .int64 import Int64
+from .asset import Asset
+__all__ = ['PathPaymentStrictReceiveOp']
 class PathPaymentStrictReceiveOp:
     """
     XDR Source Code::
@@ -32,7 +34,6 @@ class PathPaymentStrictReceiveOp:
             Asset path<5>; // additional hops it must go through to get there
         };
     """
-
     def __init__(
         self,
         send_asset: Asset,
@@ -44,16 +45,13 @@ class PathPaymentStrictReceiveOp:
     ) -> None:
         _expect_max_length = 5
         if path and len(path) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `path` should be {_expect_max_length}, but got {len(path)}."
-            )
+            raise ValueError(f"The maximum length of `path` should be {_expect_max_length}, but got {len(path)}.")
         self.send_asset = send_asset
         self.send_max = send_max
         self.destination = destination
         self.dest_asset = dest_asset
         self.dest_amount = dest_amount
         self.path = path
-
     def pack(self, packer: Packer) -> None:
         self.send_asset.pack(packer)
         self.send_max.pack(packer)
@@ -63,7 +61,6 @@ class PathPaymentStrictReceiveOp:
         packer.pack_uint(len(self.path))
         for path_item in self.path:
             path_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> PathPaymentStrictReceiveOp:
         send_asset = Asset.unpack(unpacker)
@@ -83,7 +80,6 @@ class PathPaymentStrictReceiveOp:
             dest_amount=dest_amount,
             path=path,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -102,38 +98,19 @@ class PathPaymentStrictReceiveOp:
     def from_xdr(cls, xdr: str) -> PathPaymentStrictReceiveOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.send_asset,
-                self.send_max,
-                self.destination,
-                self.dest_asset,
-                self.dest_amount,
-                self.path,
-            )
-        )
-
+        return hash((self.send_asset, self.send_max, self.destination, self.dest_asset, self.dest_amount, self.path,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.send_asset == other.send_asset
-            and self.send_max == other.send_max
-            and self.destination == other.destination
-            and self.dest_asset == other.dest_asset
-            and self.dest_amount == other.dest_amount
-            and self.path == other.path
-        )
-
+        return self.send_asset== other.send_asset and self.send_max== other.send_max and self.destination== other.destination and self.dest_asset== other.dest_asset and self.dest_amount== other.dest_amount and self.path== other.path
     def __str__(self):
         out = [
-            f"send_asset={self.send_asset}",
-            f"send_max={self.send_max}",
-            f"destination={self.destination}",
-            f"dest_asset={self.dest_asset}",
-            f"dest_amount={self.dest_amount}",
-            f"path={self.path}",
+            f'send_asset={self.send_asset}',
+            f'send_max={self.send_max}',
+            f'destination={self.destination}',
+            f'dest_asset={self.dest_asset}',
+            f'dest_amount={self.dest_amount}',
+            f'path={self.path}',
         ]
         return f"<PathPaymentStrictReceiveOp [{', '.join(out)}]>"

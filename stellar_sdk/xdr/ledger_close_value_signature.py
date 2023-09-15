@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .node_id import NodeID
 from .signature import Signature
-
-__all__ = ["LedgerCloseValueSignature"]
-
-
+__all__ = ['LedgerCloseValueSignature']
 class LedgerCloseValueSignature:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class LedgerCloseValueSignature:
             Signature signature; // nodeID's signature
         };
     """
-
     def __init__(
         self,
         node_id: NodeID,
@@ -30,11 +29,9 @@ class LedgerCloseValueSignature:
     ) -> None:
         self.node_id = node_id
         self.signature = signature
-
     def pack(self, packer: Packer) -> None:
         self.node_id.pack(packer)
         self.signature.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerCloseValueSignature:
         node_id = NodeID.unpack(unpacker)
@@ -43,7 +40,6 @@ class LedgerCloseValueSignature:
             node_id=node_id,
             signature=signature,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class LedgerCloseValueSignature:
     def from_xdr(cls, xdr: str) -> LedgerCloseValueSignature:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.node_id,
-                self.signature,
-            )
-        )
-
+        return hash((self.node_id, self.signature,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.node_id == other.node_id and self.signature == other.signature
-
+        return self.node_id== other.node_id and self.signature== other.signature
     def __str__(self):
         out = [
-            f"node_id={self.node_id}",
-            f"signature={self.signature}",
+            f'node_id={self.node_id}',
+            f'signature={self.signature}',
         ]
         return f"<LedgerCloseValueSignature [{', '.join(out)}]>"

@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .hmac_sha256_mac import HmacSha256Mac
-from .stellar_message import StellarMessage
 from .uint64 import Uint64
-
-__all__ = ["AuthenticatedMessageV0"]
-
-
+from .stellar_message import StellarMessage
+from .hmac_sha256_mac import HmacSha256Mac
+__all__ = ['AuthenticatedMessageV0']
 class AuthenticatedMessageV0:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class AuthenticatedMessageV0:
                 HmacSha256Mac mac;
             }
     """
-
     def __init__(
         self,
         sequence: Uint64,
@@ -34,12 +33,10 @@ class AuthenticatedMessageV0:
         self.sequence = sequence
         self.message = message
         self.mac = mac
-
     def pack(self, packer: Packer) -> None:
         self.sequence.pack(packer)
         self.message.pack(packer)
         self.mac.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AuthenticatedMessageV0:
         sequence = Uint64.unpack(unpacker)
@@ -50,7 +47,6 @@ class AuthenticatedMessageV0:
             message=message,
             mac=mac,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +65,16 @@ class AuthenticatedMessageV0:
     def from_xdr(cls, xdr: str) -> AuthenticatedMessageV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.sequence,
-                self.message,
-                self.mac,
-            )
-        )
-
+        return hash((self.sequence, self.message, self.mac,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.sequence == other.sequence
-            and self.message == other.message
-            and self.mac == other.mac
-        )
-
+        return self.sequence== other.sequence and self.message== other.message and self.mac== other.mac
     def __str__(self):
         out = [
-            f"sequence={self.sequence}",
-            f"message={self.message}",
-            f"mac={self.mac}",
+            f'sequence={self.sequence}',
+            f'message={self.message}',
+            f'mac={self.mac}',
         ]
         return f"<AuthenticatedMessageV0 [{', '.join(out)}]>"

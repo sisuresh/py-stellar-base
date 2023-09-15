@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .uint32 import Uint32
-
-__all__ = ["LedgerBounds"]
-
-
+from .uint32 import Uint32
+__all__ = ['LedgerBounds']
 class LedgerBounds:
     """
     XDR Source Code::
@@ -21,7 +22,6 @@ class LedgerBounds:
             uint32 maxLedger; // 0 here means no maxLedger
         };
     """
-
     def __init__(
         self,
         min_ledger: Uint32,
@@ -29,11 +29,9 @@ class LedgerBounds:
     ) -> None:
         self.min_ledger = min_ledger
         self.max_ledger = max_ledger
-
     def pack(self, packer: Packer) -> None:
         self.min_ledger.pack(packer)
         self.max_ledger.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerBounds:
         min_ledger = Uint32.unpack(unpacker)
@@ -42,7 +40,6 @@ class LedgerBounds:
             min_ledger=min_ledger,
             max_ledger=max_ledger,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -61,25 +58,15 @@ class LedgerBounds:
     def from_xdr(cls, xdr: str) -> LedgerBounds:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.min_ledger,
-                self.max_ledger,
-            )
-        )
-
+        return hash((self.min_ledger, self.max_ledger,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.min_ledger == other.min_ledger and self.max_ledger == other.max_ledger
-        )
-
+        return self.min_ledger== other.min_ledger and self.max_ledger== other.max_ledger
     def __str__(self):
         out = [
-            f"min_ledger={self.min_ledger}",
-            f"max_ledger={self.max_ledger}",
+            f'min_ledger={self.min_ledger}',
+            f'max_ledger={self.max_ledger}',
         ]
         return f"<LedgerBounds [{', '.join(out)}]>"

@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Boolean
 from .contract_event import ContractEvent
-
-__all__ = ["DiagnosticEvent"]
-
-
+__all__ = ['DiagnosticEvent']
 class DiagnosticEvent:
     """
     XDR Source Code::
@@ -22,7 +21,6 @@ class DiagnosticEvent:
             ContractEvent event;
         };
     """
-
     def __init__(
         self,
         in_successful_contract_call: bool,
@@ -30,11 +28,9 @@ class DiagnosticEvent:
     ) -> None:
         self.in_successful_contract_call = in_successful_contract_call
         self.event = event
-
     def pack(self, packer: Packer) -> None:
         Boolean(self.in_successful_contract_call).pack(packer)
         self.event.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> DiagnosticEvent:
         in_successful_contract_call = Boolean.unpack(unpacker)
@@ -43,7 +39,6 @@ class DiagnosticEvent:
             in_successful_contract_call=in_successful_contract_call,
             event=event,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,26 +57,15 @@ class DiagnosticEvent:
     def from_xdr(cls, xdr: str) -> DiagnosticEvent:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.in_successful_contract_call,
-                self.event,
-            )
-        )
-
+        return hash((self.in_successful_contract_call, self.event,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.in_successful_contract_call == other.in_successful_contract_call
-            and self.event == other.event
-        )
-
+        return self.in_successful_contract_call== other.in_successful_contract_call and self.event== other.event
     def __str__(self):
         out = [
-            f"in_successful_contract_call={self.in_successful_contract_call}",
-            f"event={self.event}",
+            f'in_successful_contract_call={self.in_successful_contract_call}',
+            f'event={self.event}',
         ]
         return f"<DiagnosticEvent [{', '.join(out)}]>"

@@ -3,33 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
-
-from .base import String
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
 from .constants import *
 
-__all__ = ["SCSymbol"]
-
-
+__all__ = ['SCSymbol']
 class SCSymbol:
     """
     XDR Source Code::
 
         typedef string SCSymbol<SCSYMBOL_LIMIT>;
     """
-
     def __init__(self, sc_symbol: bytes) -> None:
         self.sc_symbol = sc_symbol
-
     def pack(self, packer: Packer) -> None:
         String(self.sc_symbol, SCSYMBOL_LIMIT).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSymbol:
         sc_symbol = String.unpack(unpacker)
         return cls(sc_symbol)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -48,10 +42,8 @@ class SCSymbol:
     def from_xdr(cls, xdr: str) -> SCSymbol:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.sc_symbol)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

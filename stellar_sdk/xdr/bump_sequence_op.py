@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sequence_number import SequenceNumber
-
-__all__ = ["BumpSequenceOp"]
-
-
+__all__ = ['BumpSequenceOp']
 class BumpSequenceOp:
     """
     XDR Source Code::
@@ -20,23 +20,19 @@ class BumpSequenceOp:
             SequenceNumber bumpTo;
         };
     """
-
     def __init__(
         self,
         bump_to: SequenceNumber,
     ) -> None:
         self.bump_to = bump_to
-
     def pack(self, packer: Packer) -> None:
         self.bump_to.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> BumpSequenceOp:
         bump_to = SequenceNumber.unpack(unpacker)
         return cls(
             bump_to=bump_to,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +51,14 @@ class BumpSequenceOp:
     def from_xdr(cls, xdr: str) -> BumpSequenceOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.bump_to,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.bump_to == other.bump_to
-
+        return self.bump_to== other.bump_to
     def __str__(self):
         out = [
-            f"bump_to={self.bump_to}",
+            f'bump_to={self.bump_to}',
         ]
         return f"<BumpSequenceOp [{', '.join(out)}]>"

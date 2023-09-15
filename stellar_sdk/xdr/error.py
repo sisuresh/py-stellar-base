@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import String
 from .error_code import ErrorCode
-
-__all__ = ["Error"]
-
-
+__all__ = ['Error']
 class Error:
     """
     XDR Source Code::
@@ -22,7 +21,6 @@ class Error:
             string msg<100>;
         };
     """
-
     def __init__(
         self,
         code: ErrorCode,
@@ -30,11 +28,9 @@ class Error:
     ) -> None:
         self.code = code
         self.msg = msg
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         String(self.msg, 100).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Error:
         code = ErrorCode.unpack(unpacker)
@@ -43,7 +39,6 @@ class Error:
             code=code,
             msg=msg,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +57,15 @@ class Error:
     def from_xdr(cls, xdr: str) -> Error:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.code,
-                self.msg,
-            )
-        )
-
+        return hash((self.code, self.msg,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code and self.msg == other.msg
-
+        return self.code== other.code and self.msg== other.msg
     def __str__(self):
         out = [
-            f"code={self.code}",
-            f"msg={self.msg}",
+            f'code={self.code}',
+            f'msg={self.msg}',
         ]
         return f"<Error [{', '.join(out)}]>"

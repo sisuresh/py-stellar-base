@@ -3,32 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Opaque
-
-__all__ = ["Thresholds"]
-
-
+__all__ = ['Thresholds']
 class Thresholds:
     """
     XDR Source Code::
 
         typedef opaque Thresholds[4];
     """
-
     def __init__(self, thresholds: bytes) -> None:
         self.thresholds = thresholds
-
     def pack(self, packer: Packer) -> None:
         Opaque(self.thresholds, 4, True).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Thresholds:
         thresholds = Opaque.unpack(unpacker, 4, True)
         return cls(thresholds)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -47,10 +42,8 @@ class Thresholds:
     def from_xdr(cls, xdr: str) -> Thresholds:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.thresholds)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

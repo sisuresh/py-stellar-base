@@ -3,23 +3,22 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .extension_point import ExtensionPoint
-from .generalized_transaction_set import GeneralizedTransactionSet
-from .ledger_entry import LedgerEntry
 from .ledger_header_history_entry import LedgerHeaderHistoryEntry
-from .ledger_key import LedgerKey
-from .scp_history_entry import SCPHistoryEntry
+from .generalized_transaction_set import GeneralizedTransactionSet
 from .transaction_result_meta import TransactionResultMeta
-from .uint64 import Uint64
 from .upgrade_entry_meta import UpgradeEntryMeta
-
-__all__ = ["LedgerCloseMetaV2"]
-
-
+from .scp_history_entry import SCPHistoryEntry
+from .uint64 import Uint64
+from .ledger_key import LedgerKey
+from .ledger_entry import LedgerEntry
+__all__ = ['LedgerCloseMetaV2']
 class LedgerCloseMetaV2:
     """
     XDR Source Code::
@@ -57,7 +56,6 @@ class LedgerCloseMetaV2:
             LedgerEntry evictedPersistentLedgerEntries<>;
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
@@ -72,35 +70,19 @@ class LedgerCloseMetaV2:
     ) -> None:
         _expect_max_length = 4294967295
         if tx_processing and len(tx_processing) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `tx_processing` should be {_expect_max_length}, but got {len(tx_processing)}."
-            )
+            raise ValueError(f"The maximum length of `tx_processing` should be {_expect_max_length}, but got {len(tx_processing)}.")
         _expect_max_length = 4294967295
         if upgrades_processing and len(upgrades_processing) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `upgrades_processing` should be {_expect_max_length}, but got {len(upgrades_processing)}."
-            )
+            raise ValueError(f"The maximum length of `upgrades_processing` should be {_expect_max_length}, but got {len(upgrades_processing)}.")
         _expect_max_length = 4294967295
         if scp_info and len(scp_info) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `scp_info` should be {_expect_max_length}, but got {len(scp_info)}."
-            )
+            raise ValueError(f"The maximum length of `scp_info` should be {_expect_max_length}, but got {len(scp_info)}.")
         _expect_max_length = 4294967295
-        if (
-            evicted_temporary_ledger_keys
-            and len(evicted_temporary_ledger_keys) > _expect_max_length
-        ):
-            raise ValueError(
-                f"The maximum length of `evicted_temporary_ledger_keys` should be {_expect_max_length}, but got {len(evicted_temporary_ledger_keys)}."
-            )
+        if evicted_temporary_ledger_keys and len(evicted_temporary_ledger_keys) > _expect_max_length:
+            raise ValueError(f"The maximum length of `evicted_temporary_ledger_keys` should be {_expect_max_length}, but got {len(evicted_temporary_ledger_keys)}.")
         _expect_max_length = 4294967295
-        if (
-            evicted_persistent_ledger_entries
-            and len(evicted_persistent_ledger_entries) > _expect_max_length
-        ):
-            raise ValueError(
-                f"The maximum length of `evicted_persistent_ledger_entries` should be {_expect_max_length}, but got {len(evicted_persistent_ledger_entries)}."
-            )
+        if evicted_persistent_ledger_entries and len(evicted_persistent_ledger_entries) > _expect_max_length:
+            raise ValueError(f"The maximum length of `evicted_persistent_ledger_entries` should be {_expect_max_length}, but got {len(evicted_persistent_ledger_entries)}.")
         self.ext = ext
         self.ledger_header = ledger_header
         self.tx_set = tx_set
@@ -110,7 +92,6 @@ class LedgerCloseMetaV2:
         self.total_byte_size_of_bucket_list = total_byte_size_of_bucket_list
         self.evicted_temporary_ledger_keys = evicted_temporary_ledger_keys
         self.evicted_persistent_ledger_entries = evicted_persistent_ledger_entries
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         self.ledger_header.pack(packer)
@@ -129,11 +110,8 @@ class LedgerCloseMetaV2:
         for evicted_temporary_ledger_keys_item in self.evicted_temporary_ledger_keys:
             evicted_temporary_ledger_keys_item.pack(packer)
         packer.pack_uint(len(self.evicted_persistent_ledger_entries))
-        for (
-            evicted_persistent_ledger_entries_item
-        ) in self.evicted_persistent_ledger_entries:
+        for evicted_persistent_ledger_entries_item in self.evicted_persistent_ledger_entries:
             evicted_persistent_ledger_entries_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerCloseMetaV2:
         ext = ExtensionPoint.unpack(unpacker)
@@ -171,7 +149,6 @@ class LedgerCloseMetaV2:
             evicted_temporary_ledger_keys=evicted_temporary_ledger_keys,
             evicted_persistent_ledger_entries=evicted_persistent_ledger_entries,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -190,50 +167,22 @@ class LedgerCloseMetaV2:
     def from_xdr(cls, xdr: str) -> LedgerCloseMetaV2:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.ledger_header,
-                self.tx_set,
-                self.tx_processing,
-                self.upgrades_processing,
-                self.scp_info,
-                self.total_byte_size_of_bucket_list,
-                self.evicted_temporary_ledger_keys,
-                self.evicted_persistent_ledger_entries,
-            )
-        )
-
+        return hash((self.ext, self.ledger_header, self.tx_set, self.tx_processing, self.upgrades_processing, self.scp_info, self.total_byte_size_of_bucket_list, self.evicted_temporary_ledger_keys, self.evicted_persistent_ledger_entries,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ext == other.ext
-            and self.ledger_header == other.ledger_header
-            and self.tx_set == other.tx_set
-            and self.tx_processing == other.tx_processing
-            and self.upgrades_processing == other.upgrades_processing
-            and self.scp_info == other.scp_info
-            and self.total_byte_size_of_bucket_list
-            == other.total_byte_size_of_bucket_list
-            and self.evicted_temporary_ledger_keys
-            == other.evicted_temporary_ledger_keys
-            and self.evicted_persistent_ledger_entries
-            == other.evicted_persistent_ledger_entries
-        )
-
+        return self.ext== other.ext and self.ledger_header== other.ledger_header and self.tx_set== other.tx_set and self.tx_processing== other.tx_processing and self.upgrades_processing== other.upgrades_processing and self.scp_info== other.scp_info and self.total_byte_size_of_bucket_list== other.total_byte_size_of_bucket_list and self.evicted_temporary_ledger_keys== other.evicted_temporary_ledger_keys and self.evicted_persistent_ledger_entries== other.evicted_persistent_ledger_entries
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"ledger_header={self.ledger_header}",
-            f"tx_set={self.tx_set}",
-            f"tx_processing={self.tx_processing}",
-            f"upgrades_processing={self.upgrades_processing}",
-            f"scp_info={self.scp_info}",
-            f"total_byte_size_of_bucket_list={self.total_byte_size_of_bucket_list}",
-            f"evicted_temporary_ledger_keys={self.evicted_temporary_ledger_keys}",
-            f"evicted_persistent_ledger_entries={self.evicted_persistent_ledger_entries}",
+            f'ext={self.ext}',
+            f'ledger_header={self.ledger_header}',
+            f'tx_set={self.tx_set}',
+            f'tx_processing={self.tx_processing}',
+            f'upgrades_processing={self.upgrades_processing}',
+            f'scp_info={self.scp_info}',
+            f'total_byte_size_of_bucket_list={self.total_byte_size_of_bucket_list}',
+            f'evicted_temporary_ledger_keys={self.evicted_temporary_ledger_keys}',
+            f'evicted_persistent_ledger_entries={self.evicted_persistent_ledger_entries}',
         ]
         return f"<LedgerCloseMetaV2 [{', '.join(out)}]>"

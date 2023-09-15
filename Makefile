@@ -18,7 +18,7 @@ XDRNEXT_COMMIT=9ac02641139e6717924fdad716f6e958d0168491
 UNAME := $(shell uname)
 SED := sed
 ifeq ($(UNAME), Darwin)
-	SED := sed -i ''
+	SED := sed -i
 endif
 
 # default target does nothing
@@ -79,7 +79,7 @@ xdr-generate: $(XDRS)
 			--output stellar_sdk/xdr \
 			$(XDRS)'
 	$(SED) '/stellar_sdk\.xdr/,$$d' docs/en/api.rst
-	python docs/gen_xdr_api.py >> docs/en/api.rst
+	python3 docs/gen_xdr_api.py >> docs/en/api.rst
 .PHONY: xdr-generate
 
 xdr/%.x:

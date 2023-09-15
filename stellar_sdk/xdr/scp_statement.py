@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .node_id import NodeID
-from .scp_statement_pledges import SCPStatementPledges
 from .uint64 import Uint64
-
-__all__ = ["SCPStatement"]
-
-
+from .scp_statement_pledges import SCPStatementPledges
+__all__ = ['SCPStatement']
 class SCPStatement:
     """
     XDR Source Code::
@@ -56,7 +56,6 @@ class SCPStatement:
             pledges;
         };
     """
-
     def __init__(
         self,
         node_id: NodeID,
@@ -66,12 +65,10 @@ class SCPStatement:
         self.node_id = node_id
         self.slot_index = slot_index
         self.pledges = pledges
-
     def pack(self, packer: Packer) -> None:
         self.node_id.pack(packer)
         self.slot_index.pack(packer)
         self.pledges.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCPStatement:
         node_id = NodeID.unpack(unpacker)
@@ -82,7 +79,6 @@ class SCPStatement:
             slot_index=slot_index,
             pledges=pledges,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -101,29 +97,16 @@ class SCPStatement:
     def from_xdr(cls, xdr: str) -> SCPStatement:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.node_id,
-                self.slot_index,
-                self.pledges,
-            )
-        )
-
+        return hash((self.node_id, self.slot_index, self.pledges,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.node_id == other.node_id
-            and self.slot_index == other.slot_index
-            and self.pledges == other.pledges
-        )
-
+        return self.node_id== other.node_id and self.slot_index== other.slot_index and self.pledges== other.pledges
     def __str__(self):
         out = [
-            f"node_id={self.node_id}",
-            f"slot_index={self.slot_index}",
-            f"pledges={self.pledges}",
+            f'node_id={self.node_id}',
+            f'slot_index={self.slot_index}',
+            f'pledges={self.pledges}',
         ]
         return f"<SCPStatement [{', '.join(out)}]>"

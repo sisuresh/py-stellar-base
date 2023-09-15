@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .ledger_entry_changes import LedgerEntryChanges
-
-__all__ = ["OperationMeta"]
-
-
+__all__ = ['OperationMeta']
 class OperationMeta:
     """
     XDR Source Code::
@@ -20,23 +20,19 @@ class OperationMeta:
             LedgerEntryChanges changes;
         };
     """
-
     def __init__(
         self,
         changes: LedgerEntryChanges,
     ) -> None:
         self.changes = changes
-
     def pack(self, packer: Packer) -> None:
         self.changes.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> OperationMeta:
         changes = LedgerEntryChanges.unpack(unpacker)
         return cls(
             changes=changes,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +51,14 @@ class OperationMeta:
     def from_xdr(cls, xdr: str) -> OperationMeta:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.changes,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.changes == other.changes
-
+        return self.changes== other.changes
     def __str__(self):
         out = [
-            f"changes={self.changes}",
+            f'changes={self.changes}',
         ]
         return f"<OperationMeta [{', '.join(out)}]>"

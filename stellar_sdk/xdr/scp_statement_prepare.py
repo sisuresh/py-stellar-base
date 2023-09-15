@@ -3,17 +3,19 @@
 from __future__ import annotations
 
 import base64
-from typing import Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .hash import Hash
 from .scp_ballot import SCPBallot
+from .scp_ballot import SCPBallot
+from .scp_ballot import SCPBallot
 from .uint32 import Uint32
-
-__all__ = ["SCPStatementPrepare"]
-
-
+from .uint32 import Uint32
+__all__ = ['SCPStatementPrepare']
 class SCPStatementPrepare:
     """
     XDR Source Code::
@@ -28,7 +30,6 @@ class SCPStatementPrepare:
                     uint32 nH;                // h.n
                 }
     """
-
     def __init__(
         self,
         quorum_set_hash: Hash,
@@ -44,7 +45,6 @@ class SCPStatementPrepare:
         self.prepared_prime = prepared_prime
         self.n_c = n_c
         self.n_h = n_h
-
     def pack(self, packer: Packer) -> None:
         self.quorum_set_hash.pack(packer)
         self.ballot.pack(packer)
@@ -60,7 +60,6 @@ class SCPStatementPrepare:
             self.prepared_prime.pack(packer)
         self.n_c.pack(packer)
         self.n_h.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCPStatementPrepare:
         quorum_set_hash = Hash.unpack(unpacker)
@@ -77,7 +76,6 @@ class SCPStatementPrepare:
             n_c=n_c,
             n_h=n_h,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -96,38 +94,19 @@ class SCPStatementPrepare:
     def from_xdr(cls, xdr: str) -> SCPStatementPrepare:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.quorum_set_hash,
-                self.ballot,
-                self.prepared,
-                self.prepared_prime,
-                self.n_c,
-                self.n_h,
-            )
-        )
-
+        return hash((self.quorum_set_hash, self.ballot, self.prepared, self.prepared_prime, self.n_c, self.n_h,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.quorum_set_hash == other.quorum_set_hash
-            and self.ballot == other.ballot
-            and self.prepared == other.prepared
-            and self.prepared_prime == other.prepared_prime
-            and self.n_c == other.n_c
-            and self.n_h == other.n_h
-        )
-
+        return self.quorum_set_hash== other.quorum_set_hash and self.ballot== other.ballot and self.prepared== other.prepared and self.prepared_prime== other.prepared_prime and self.n_c== other.n_c and self.n_h== other.n_h
     def __str__(self):
         out = [
-            f"quorum_set_hash={self.quorum_set_hash}",
-            f"ballot={self.ballot}",
-            f"prepared={self.prepared}",
-            f"prepared_prime={self.prepared_prime}",
-            f"n_c={self.n_c}",
-            f"n_h={self.n_h}",
+            f'quorum_set_hash={self.quorum_set_hash}',
+            f'ballot={self.ballot}',
+            f'prepared={self.prepared}',
+            f'prepared_prime={self.prepared_prime}',
+            f'n_c={self.n_c}',
+            f'n_h={self.n_h}',
         ]
         return f"<SCPStatementPrepare [{', '.join(out)}]>"

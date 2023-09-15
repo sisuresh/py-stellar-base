@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .transaction_result_pair import TransactionResultPair
-
-__all__ = ["TransactionResultSet"]
-
-
+__all__ = ['TransactionResultSet']
 class TransactionResultSet:
     """
     XDR Source Code::
@@ -21,23 +20,18 @@ class TransactionResultSet:
             TransactionResultPair results<>;
         };
     """
-
     def __init__(
         self,
         results: List[TransactionResultPair],
     ) -> None:
         _expect_max_length = 4294967295
         if results and len(results) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `results` should be {_expect_max_length}, but got {len(results)}."
-            )
+            raise ValueError(f"The maximum length of `results` should be {_expect_max_length}, but got {len(results)}.")
         self.results = results
-
     def pack(self, packer: Packer) -> None:
         packer.pack_uint(len(self.results))
         for results_item in self.results:
             results_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionResultSet:
         length = unpacker.unpack_uint()
@@ -47,7 +41,6 @@ class TransactionResultSet:
         return cls(
             results=results,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -66,17 +59,14 @@ class TransactionResultSet:
     def from_xdr(cls, xdr: str) -> TransactionResultSet:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.results,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.results == other.results
-
+        return self.results== other.results
     def __str__(self):
         out = [
-            f"results={self.results}",
+            f'results={self.results}',
         ]
         return f"<TransactionResultSet [{', '.join(out)}]>"

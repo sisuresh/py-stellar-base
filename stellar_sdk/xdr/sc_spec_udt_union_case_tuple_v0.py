@@ -3,17 +3,14 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
-
-from .base import String
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
 from .constants import *
+
 from .sc_spec_type_def import SCSpecTypeDef
-
-__all__ = ["SCSpecUDTUnionCaseTupleV0"]
-
-
+__all__ = ['SCSpecUDTUnionCaseTupleV0']
 class SCSpecUDTUnionCaseTupleV0:
     """
     XDR Source Code::
@@ -25,7 +22,6 @@ class SCSpecUDTUnionCaseTupleV0:
             SCSpecTypeDef type<12>;
         };
     """
-
     def __init__(
         self,
         doc: bytes,
@@ -34,20 +30,16 @@ class SCSpecUDTUnionCaseTupleV0:
     ) -> None:
         _expect_max_length = 12
         if type and len(type) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `type` should be {_expect_max_length}, but got {len(type)}."
-            )
+            raise ValueError(f"The maximum length of `type` should be {_expect_max_length}, but got {len(type)}.")
         self.doc = doc
         self.name = name
         self.type = type
-
     def pack(self, packer: Packer) -> None:
         String(self.doc, SC_SPEC_DOC_LIMIT).pack(packer)
         String(self.name, 60).pack(packer)
         packer.pack_uint(len(self.type))
         for type_item in self.type:
             type_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecUDTUnionCaseTupleV0:
         doc = String.unpack(unpacker)
@@ -61,7 +53,6 @@ class SCSpecUDTUnionCaseTupleV0:
             name=name,
             type=type,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -80,29 +71,16 @@ class SCSpecUDTUnionCaseTupleV0:
     def from_xdr(cls, xdr: str) -> SCSpecUDTUnionCaseTupleV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.doc,
-                self.name,
-                self.type,
-            )
-        )
-
+        return hash((self.doc, self.name, self.type,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.doc == other.doc
-            and self.name == other.name
-            and self.type == other.type
-        )
-
+        return self.doc== other.doc and self.name== other.name and self.type== other.type
     def __str__(self):
         out = [
-            f"doc={self.doc}",
-            f"name={self.name}",
-            f"type={self.type}",
+            f'doc={self.doc}',
+            f'name={self.name}',
+            f'type={self.type}',
         ]
         return f"<SCSpecUDTUnionCaseTupleV0 [{', '.join(out)}]>"

@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import base64
-from typing import List, Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .extension_point import ExtensionPoint
 from .ledger_entry_changes import LedgerEntryChanges
 from .operation_meta import OperationMeta
+from .ledger_entry_changes import LedgerEntryChanges
 from .soroban_transaction_meta import SorobanTransactionMeta
-
-__all__ = ["TransactionMetaV3"]
-
-
+__all__ = ['TransactionMetaV3']
 class TransactionMetaV3:
     """
     XDR Source Code::
@@ -28,11 +28,10 @@ class TransactionMetaV3:
             OperationMeta operations<>;          // meta for each operation
             LedgerEntryChanges txChangesAfter;   // tx level changes after operations are
                                                  // applied if any
-            SorobanTransactionMeta* sorobanMeta; // Soroban-specific meta (only for
+            SorobanTransactionMeta* sorobanMeta; // Soroban-specific meta (only for 
                                                  // Soroban transactions).
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
@@ -43,15 +42,12 @@ class TransactionMetaV3:
     ) -> None:
         _expect_max_length = 4294967295
         if operations and len(operations) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}."
-            )
+            raise ValueError(f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}.")
         self.ext = ext
         self.tx_changes_before = tx_changes_before
         self.operations = operations
         self.tx_changes_after = tx_changes_after
         self.soroban_meta = soroban_meta
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         self.tx_changes_before.pack(packer)
@@ -64,7 +60,6 @@ class TransactionMetaV3:
         else:
             packer.pack_uint(1)
             self.soroban_meta.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionMetaV3:
         ext = ExtensionPoint.unpack(unpacker)
@@ -74,9 +69,7 @@ class TransactionMetaV3:
         for _ in range(length):
             operations.append(OperationMeta.unpack(unpacker))
         tx_changes_after = LedgerEntryChanges.unpack(unpacker)
-        soroban_meta = (
-            SorobanTransactionMeta.unpack(unpacker) if unpacker.unpack_uint() else None
-        )
+        soroban_meta = SorobanTransactionMeta.unpack(unpacker) if unpacker.unpack_uint() else None
         return cls(
             ext=ext,
             tx_changes_before=tx_changes_before,
@@ -84,7 +77,6 @@ class TransactionMetaV3:
             tx_changes_after=tx_changes_after,
             soroban_meta=soroban_meta,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -103,35 +95,18 @@ class TransactionMetaV3:
     def from_xdr(cls, xdr: str) -> TransactionMetaV3:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.tx_changes_before,
-                self.operations,
-                self.tx_changes_after,
-                self.soroban_meta,
-            )
-        )
-
+        return hash((self.ext, self.tx_changes_before, self.operations, self.tx_changes_after, self.soroban_meta,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ext == other.ext
-            and self.tx_changes_before == other.tx_changes_before
-            and self.operations == other.operations
-            and self.tx_changes_after == other.tx_changes_after
-            and self.soroban_meta == other.soroban_meta
-        )
-
+        return self.ext== other.ext and self.tx_changes_before== other.tx_changes_before and self.operations== other.operations and self.tx_changes_after== other.tx_changes_after and self.soroban_meta== other.soroban_meta
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"tx_changes_before={self.tx_changes_before}",
-            f"operations={self.operations}",
-            f"tx_changes_after={self.tx_changes_after}",
-            f"soroban_meta={self.soroban_meta}",
+            f'ext={self.ext}',
+            f'tx_changes_before={self.tx_changes_before}',
+            f'operations={self.operations}',
+            f'tx_changes_after={self.tx_changes_after}',
+            f'soroban_meta={self.soroban_meta}',
         ]
         return f"<TransactionMetaV3 [{', '.join(out)}]>"

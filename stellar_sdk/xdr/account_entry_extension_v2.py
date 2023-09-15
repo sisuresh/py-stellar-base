@@ -3,18 +3,17 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
-
-from .account_entry_extension_v2_ext import AccountEntryExtensionV2Ext
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
 from .constants import *
-from .sponsorship_descriptor import SponsorshipDescriptor
+
 from .uint32 import Uint32
-
-__all__ = ["AccountEntryExtensionV2"]
-
-
+from .uint32 import Uint32
+from .sponsorship_descriptor import SponsorshipDescriptor
+from .account_entry_extension_v2_ext import AccountEntryExtensionV2Ext
+__all__ = ['AccountEntryExtensionV2']
 class AccountEntryExtensionV2:
     """
     XDR Source Code::
@@ -35,7 +34,6 @@ class AccountEntryExtensionV2:
             ext;
         };
     """
-
     def __init__(
         self,
         num_sponsored: Uint32,
@@ -45,14 +43,11 @@ class AccountEntryExtensionV2:
     ) -> None:
         _expect_max_length = MAX_SIGNERS
         if signer_sponsoring_i_ds and len(signer_sponsoring_i_ds) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `signer_sponsoring_i_ds` should be {_expect_max_length}, but got {len(signer_sponsoring_i_ds)}."
-            )
+            raise ValueError(f"The maximum length of `signer_sponsoring_i_ds` should be {_expect_max_length}, but got {len(signer_sponsoring_i_ds)}.")
         self.num_sponsored = num_sponsored
         self.num_sponsoring = num_sponsoring
         self.signer_sponsoring_i_ds = signer_sponsoring_i_ds
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.num_sponsored.pack(packer)
         self.num_sponsoring.pack(packer)
@@ -60,7 +55,6 @@ class AccountEntryExtensionV2:
         for signer_sponsoring_i_ds_item in self.signer_sponsoring_i_ds:
             signer_sponsoring_i_ds_item.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AccountEntryExtensionV2:
         num_sponsored = Uint32.unpack(unpacker)
@@ -76,7 +70,6 @@ class AccountEntryExtensionV2:
             signer_sponsoring_i_ds=signer_sponsoring_i_ds,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -95,32 +88,17 @@ class AccountEntryExtensionV2:
     def from_xdr(cls, xdr: str) -> AccountEntryExtensionV2:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.num_sponsored,
-                self.num_sponsoring,
-                self.signer_sponsoring_i_ds,
-                self.ext,
-            )
-        )
-
+        return hash((self.num_sponsored, self.num_sponsoring, self.signer_sponsoring_i_ds, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.num_sponsored == other.num_sponsored
-            and self.num_sponsoring == other.num_sponsoring
-            and self.signer_sponsoring_i_ds == other.signer_sponsoring_i_ds
-            and self.ext == other.ext
-        )
-
+        return self.num_sponsored== other.num_sponsored and self.num_sponsoring== other.num_sponsoring and self.signer_sponsoring_i_ds== other.signer_sponsoring_i_ds and self.ext== other.ext
     def __str__(self):
         out = [
-            f"num_sponsored={self.num_sponsored}",
-            f"num_sponsoring={self.num_sponsoring}",
-            f"signer_sponsoring_i_ds={self.signer_sponsoring_i_ds}",
-            f"ext={self.ext}",
+            f'num_sponsored={self.num_sponsored}',
+            f'num_sponsoring={self.num_sponsoring}',
+            f'signer_sponsoring_i_ds={self.signer_sponsoring_i_ds}',
+            f'ext={self.ext}',
         ]
         return f"<AccountEntryExtensionV2 [{', '.join(out)}]>"

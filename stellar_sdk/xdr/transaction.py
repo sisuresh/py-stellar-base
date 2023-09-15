@@ -3,22 +3,20 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
-
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
 from .constants import *
-from .memo import Memo
+
 from .muxed_account import MuxedAccount
-from .operation import Operation
-from .preconditions import Preconditions
-from .sequence_number import SequenceNumber
-from .transaction_ext import TransactionExt
 from .uint32 import Uint32
-
-__all__ = ["Transaction"]
-
-
+from .sequence_number import SequenceNumber
+from .preconditions import Preconditions
+from .memo import Memo
+from .operation import Operation
+from .transaction_ext import TransactionExt
+__all__ = ['Transaction']
 class Transaction:
     """
     XDR Source Code::
@@ -52,7 +50,6 @@ class Transaction:
             ext;
         };
     """
-
     def __init__(
         self,
         source_account: MuxedAccount,
@@ -65,9 +62,7 @@ class Transaction:
     ) -> None:
         _expect_max_length = MAX_OPS_PER_TX
         if operations and len(operations) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}."
-            )
+            raise ValueError(f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}.")
         self.source_account = source_account
         self.fee = fee
         self.seq_num = seq_num
@@ -75,7 +70,6 @@ class Transaction:
         self.memo = memo
         self.operations = operations
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.source_account.pack(packer)
         self.fee.pack(packer)
@@ -86,7 +80,6 @@ class Transaction:
         for operations_item in self.operations:
             operations_item.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Transaction:
         source_account = MuxedAccount.unpack(unpacker)
@@ -108,7 +101,6 @@ class Transaction:
             operations=operations,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -127,41 +119,20 @@ class Transaction:
     def from_xdr(cls, xdr: str) -> Transaction:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.source_account,
-                self.fee,
-                self.seq_num,
-                self.cond,
-                self.memo,
-                self.operations,
-                self.ext,
-            )
-        )
-
+        return hash((self.source_account, self.fee, self.seq_num, self.cond, self.memo, self.operations, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.source_account == other.source_account
-            and self.fee == other.fee
-            and self.seq_num == other.seq_num
-            and self.cond == other.cond
-            and self.memo == other.memo
-            and self.operations == other.operations
-            and self.ext == other.ext
-        )
-
+        return self.source_account== other.source_account and self.fee== other.fee and self.seq_num== other.seq_num and self.cond== other.cond and self.memo== other.memo and self.operations== other.operations and self.ext== other.ext
     def __str__(self):
         out = [
-            f"source_account={self.source_account}",
-            f"fee={self.fee}",
-            f"seq_num={self.seq_num}",
-            f"cond={self.cond}",
-            f"memo={self.memo}",
-            f"operations={self.operations}",
-            f"ext={self.ext}",
+            f'source_account={self.source_account}',
+            f'fee={self.fee}',
+            f'seq_num={self.seq_num}',
+            f'cond={self.cond}',
+            f'memo={self.memo}',
+            f'operations={self.operations}',
+            f'ext={self.ext}',
         ]
         return f"<Transaction [{', '.join(out)}]>"

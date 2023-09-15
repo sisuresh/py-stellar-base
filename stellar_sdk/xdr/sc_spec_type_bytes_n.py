@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .uint32 import Uint32
-
-__all__ = ["SCSpecTypeBytesN"]
-
-
+__all__ = ['SCSpecTypeBytesN']
 class SCSpecTypeBytesN:
     """
     XDR Source Code::
@@ -20,23 +20,19 @@ class SCSpecTypeBytesN:
             uint32 n;
         };
     """
-
     def __init__(
         self,
         n: Uint32,
     ) -> None:
         self.n = n
-
     def pack(self, packer: Packer) -> None:
         self.n.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecTypeBytesN:
         n = Uint32.unpack(unpacker)
         return cls(
             n=n,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +51,14 @@ class SCSpecTypeBytesN:
     def from_xdr(cls, xdr: str) -> SCSpecTypeBytesN:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.n,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.n == other.n
-
+        return self.n== other.n
     def __str__(self):
         out = [
-            f"n={self.n}",
+            f'n={self.n}',
         ]
         return f"<SCSpecTypeBytesN [{', '.join(out)}]>"

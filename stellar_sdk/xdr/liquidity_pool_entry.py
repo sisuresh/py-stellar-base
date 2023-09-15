@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .liquidity_pool_entry_body import LiquidityPoolEntryBody
 from .pool_id import PoolID
-
-__all__ = ["LiquidityPoolEntry"]
-
-
+from .liquidity_pool_entry_body import LiquidityPoolEntryBody
+__all__ = ['LiquidityPoolEntry']
 class LiquidityPoolEntry:
     """
     XDR Source Code::
@@ -37,7 +37,6 @@ class LiquidityPoolEntry:
             body;
         };
     """
-
     def __init__(
         self,
         liquidity_pool_id: PoolID,
@@ -45,11 +44,9 @@ class LiquidityPoolEntry:
     ) -> None:
         self.liquidity_pool_id = liquidity_pool_id
         self.body = body
-
     def pack(self, packer: Packer) -> None:
         self.liquidity_pool_id.pack(packer)
         self.body.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LiquidityPoolEntry:
         liquidity_pool_id = PoolID.unpack(unpacker)
@@ -58,7 +55,6 @@ class LiquidityPoolEntry:
             liquidity_pool_id=liquidity_pool_id,
             body=body,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -77,26 +73,15 @@ class LiquidityPoolEntry:
     def from_xdr(cls, xdr: str) -> LiquidityPoolEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.liquidity_pool_id,
-                self.body,
-            )
-        )
-
+        return hash((self.liquidity_pool_id, self.body,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.liquidity_pool_id == other.liquidity_pool_id
-            and self.body == other.body
-        )
-
+        return self.liquidity_pool_id== other.liquidity_pool_id and self.body== other.body
     def __str__(self):
         out = [
-            f"liquidity_pool_id={self.liquidity_pool_id}",
-            f"body={self.body}",
+            f'liquidity_pool_id={self.liquidity_pool_id}',
+            f'body={self.body}',
         ]
         return f"<LiquidityPoolEntry [{', '.join(out)}]>"

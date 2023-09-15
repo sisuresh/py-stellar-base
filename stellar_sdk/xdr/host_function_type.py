@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["HostFunctionType"]
-
-
+__all__ = ['HostFunctionType']
 class HostFunctionType(IntEnum):
     """
     XDR Source Code::
@@ -21,11 +21,9 @@ class HostFunctionType(IntEnum):
             HOST_FUNCTION_TYPE_UPLOAD_CONTRACT_WASM = 2
         };
     """
-
     HOST_FUNCTION_TYPE_INVOKE_CONTRACT = 0
     HOST_FUNCTION_TYPE_CREATE_CONTRACT = 1
     HOST_FUNCTION_TYPE_UPLOAD_CONTRACT_WASM = 2
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -33,7 +31,6 @@ class HostFunctionType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> HostFunctionType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

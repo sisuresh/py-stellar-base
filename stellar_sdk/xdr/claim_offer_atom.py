@@ -3,16 +3,19 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
+from .int64 import Int64
 from .asset import Asset
 from .int64 import Int64
-
-__all__ = ["ClaimOfferAtom"]
-
-
+from .asset import Asset
+from .int64 import Int64
+__all__ = ['ClaimOfferAtom']
 class ClaimOfferAtom:
     """
     XDR Source Code::
@@ -32,7 +35,6 @@ class ClaimOfferAtom:
             int64 amountBought;
         };
     """
-
     def __init__(
         self,
         seller_id: AccountID,
@@ -48,7 +50,6 @@ class ClaimOfferAtom:
         self.amount_sold = amount_sold
         self.asset_bought = asset_bought
         self.amount_bought = amount_bought
-
     def pack(self, packer: Packer) -> None:
         self.seller_id.pack(packer)
         self.offer_id.pack(packer)
@@ -56,7 +57,6 @@ class ClaimOfferAtom:
         self.amount_sold.pack(packer)
         self.asset_bought.pack(packer)
         self.amount_bought.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ClaimOfferAtom:
         seller_id = AccountID.unpack(unpacker)
@@ -73,7 +73,6 @@ class ClaimOfferAtom:
             asset_bought=asset_bought,
             amount_bought=amount_bought,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -92,38 +91,19 @@ class ClaimOfferAtom:
     def from_xdr(cls, xdr: str) -> ClaimOfferAtom:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.seller_id,
-                self.offer_id,
-                self.asset_sold,
-                self.amount_sold,
-                self.asset_bought,
-                self.amount_bought,
-            )
-        )
-
+        return hash((self.seller_id, self.offer_id, self.asset_sold, self.amount_sold, self.asset_bought, self.amount_bought,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.seller_id == other.seller_id
-            and self.offer_id == other.offer_id
-            and self.asset_sold == other.asset_sold
-            and self.amount_sold == other.amount_sold
-            and self.asset_bought == other.asset_bought
-            and self.amount_bought == other.amount_bought
-        )
-
+        return self.seller_id== other.seller_id and self.offer_id== other.offer_id and self.asset_sold== other.asset_sold and self.amount_sold== other.amount_sold and self.asset_bought== other.asset_bought and self.amount_bought== other.amount_bought
     def __str__(self):
         out = [
-            f"seller_id={self.seller_id}",
-            f"offer_id={self.offer_id}",
-            f"asset_sold={self.asset_sold}",
-            f"amount_sold={self.amount_sold}",
-            f"asset_bought={self.asset_bought}",
-            f"amount_bought={self.amount_bought}",
+            f'seller_id={self.seller_id}',
+            f'offer_id={self.offer_id}',
+            f'asset_sold={self.asset_sold}',
+            f'amount_sold={self.amount_sold}',
+            f'asset_bought={self.asset_bought}',
+            f'amount_bought={self.amount_bought}',
         ]
         return f"<ClaimOfferAtom [{', '.join(out)}]>"

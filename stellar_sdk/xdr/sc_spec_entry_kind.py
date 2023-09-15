@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["SCSpecEntryKind"]
-
-
+__all__ = ['SCSpecEntryKind']
 class SCSpecEntryKind(IntEnum):
     """
     XDR Source Code::
@@ -23,13 +23,11 @@ class SCSpecEntryKind(IntEnum):
             SC_SPEC_ENTRY_UDT_ERROR_ENUM_V0 = 4
         };
     """
-
     SC_SPEC_ENTRY_FUNCTION_V0 = 0
     SC_SPEC_ENTRY_UDT_STRUCT_V0 = 1
     SC_SPEC_ENTRY_UDT_UNION_V0 = 2
     SC_SPEC_ENTRY_UDT_ENUM_V0 = 3
     SC_SPEC_ENTRY_UDT_ERROR_ENUM_V0 = 4
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -37,7 +35,6 @@ class SCSpecEntryKind(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> SCSpecEntryKind:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

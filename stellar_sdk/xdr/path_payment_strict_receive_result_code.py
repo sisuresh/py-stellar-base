@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["PathPaymentStrictReceiveResultCode"]
-
-
+__all__ = ['PathPaymentStrictReceiveResultCode']
 class PathPaymentStrictReceiveResultCode(IntEnum):
     """
     XDR Source Code::
@@ -43,7 +43,6 @@ class PathPaymentStrictReceiveResultCode(IntEnum):
             PATH_PAYMENT_STRICT_RECEIVE_OVER_SENDMAX = -12 // could not satisfy sendmax
         };
     """
-
     PATH_PAYMENT_STRICT_RECEIVE_SUCCESS = 0
     PATH_PAYMENT_STRICT_RECEIVE_MALFORMED = -1
     PATH_PAYMENT_STRICT_RECEIVE_UNDERFUNDED = -2
@@ -57,7 +56,6 @@ class PathPaymentStrictReceiveResultCode(IntEnum):
     PATH_PAYMENT_STRICT_RECEIVE_TOO_FEW_OFFERS = -10
     PATH_PAYMENT_STRICT_RECEIVE_OFFER_CROSS_SELF = -11
     PATH_PAYMENT_STRICT_RECEIVE_OVER_SENDMAX = -12
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -65,7 +63,6 @@ class PathPaymentStrictReceiveResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> PathPaymentStrictReceiveResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

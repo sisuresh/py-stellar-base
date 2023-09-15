@@ -3,16 +3,18 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .signer_key_ed25519_signed_payload import SignerKeyEd25519SignedPayload
 from .signer_key_type import SignerKeyType
 from .uint256 import Uint256
-
-__all__ = ["SignerKey"]
-
-
+from .uint256 import Uint256
+from .uint256 import Uint256
+from .signer_key_ed25519_signed_payload import SignerKeyEd25519SignedPayload
+__all__ = ['SignerKey']
 class SignerKey:
     """
     XDR Source Code::
@@ -37,7 +39,6 @@ class SignerKey:
             } ed25519SignedPayload;
         };
     """
-
     def __init__(
         self,
         type: SignerKeyType,
@@ -51,7 +52,6 @@ class SignerKey:
         self.pre_auth_tx = pre_auth_tx
         self.hash_x = hash_x
         self.ed25519_signed_payload = ed25519_signed_payload
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == SignerKeyType.SIGNER_KEY_TYPE_ED25519:
@@ -74,7 +74,6 @@ class SignerKey:
                 raise ValueError("ed25519_signed_payload should not be None.")
             self.ed25519_signed_payload.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SignerKey:
         type = SignerKeyType.unpack(unpacker)
@@ -91,7 +90,6 @@ class SignerKey:
             ed25519_signed_payload = SignerKeyEd25519SignedPayload.unpack(unpacker)
             return cls(type=type, ed25519_signed_payload=ed25519_signed_payload)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -110,38 +108,17 @@ class SignerKey:
     def from_xdr(cls, xdr: str) -> SignerKey:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.ed25519,
-                self.pre_auth_tx,
-                self.hash_x,
-                self.ed25519_signed_payload,
-            )
-        )
-
+        return hash((self.type, self.ed25519, self.pre_auth_tx, self.hash_x, self.ed25519_signed_payload,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.ed25519 == other.ed25519
-            and self.pre_auth_tx == other.pre_auth_tx
-            and self.hash_x == other.hash_x
-            and self.ed25519_signed_payload == other.ed25519_signed_payload
-        )
-
+        return self.type== other.type and self.ed25519== other.ed25519 and self.pre_auth_tx== other.pre_auth_tx and self.hash_x== other.hash_x and self.ed25519_signed_payload== other.ed25519_signed_payload
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"ed25519={self.ed25519}") if self.ed25519 is not None else None
-        out.append(
-            f"pre_auth_tx={self.pre_auth_tx}"
-        ) if self.pre_auth_tx is not None else None
-        out.append(f"hash_x={self.hash_x}") if self.hash_x is not None else None
-        out.append(
-            f"ed25519_signed_payload={self.ed25519_signed_payload}"
-        ) if self.ed25519_signed_payload is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'ed25519={self.ed25519}') if self.ed25519 is not None else None
+        out.append(f'pre_auth_tx={self.pre_auth_tx}') if self.pre_auth_tx is not None else None
+        out.append(f'hash_x={self.hash_x}') if self.hash_x is not None else None
+        out.append(f'ed25519_signed_payload={self.ed25519_signed_payload}') if self.ed25519_signed_payload is not None else None
         return f"<SignerKey [{', '.join(out)}]>"

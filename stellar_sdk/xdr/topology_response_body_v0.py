@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .peer_stat_list import PeerStatList
+from .peer_stat_list import PeerStatList
 from .uint32 import Uint32
-
-__all__ = ["TopologyResponseBodyV0"]
-
-
+from .uint32 import Uint32
+__all__ = ['TopologyResponseBodyV0']
 class TopologyResponseBodyV0:
     """
     XDR Source Code::
@@ -25,7 +27,6 @@ class TopologyResponseBodyV0:
             uint32 totalOutboundPeerCount;
         };
     """
-
     def __init__(
         self,
         inbound_peers: PeerStatList,
@@ -37,13 +38,11 @@ class TopologyResponseBodyV0:
         self.outbound_peers = outbound_peers
         self.total_inbound_peer_count = total_inbound_peer_count
         self.total_outbound_peer_count = total_outbound_peer_count
-
     def pack(self, packer: Packer) -> None:
         self.inbound_peers.pack(packer)
         self.outbound_peers.pack(packer)
         self.total_inbound_peer_count.pack(packer)
         self.total_outbound_peer_count.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TopologyResponseBodyV0:
         inbound_peers = PeerStatList.unpack(unpacker)
@@ -56,7 +55,6 @@ class TopologyResponseBodyV0:
             total_inbound_peer_count=total_inbound_peer_count,
             total_outbound_peer_count=total_outbound_peer_count,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -75,32 +73,17 @@ class TopologyResponseBodyV0:
     def from_xdr(cls, xdr: str) -> TopologyResponseBodyV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.inbound_peers,
-                self.outbound_peers,
-                self.total_inbound_peer_count,
-                self.total_outbound_peer_count,
-            )
-        )
-
+        return hash((self.inbound_peers, self.outbound_peers, self.total_inbound_peer_count, self.total_outbound_peer_count,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.inbound_peers == other.inbound_peers
-            and self.outbound_peers == other.outbound_peers
-            and self.total_inbound_peer_count == other.total_inbound_peer_count
-            and self.total_outbound_peer_count == other.total_outbound_peer_count
-        )
-
+        return self.inbound_peers== other.inbound_peers and self.outbound_peers== other.outbound_peers and self.total_inbound_peer_count== other.total_inbound_peer_count and self.total_outbound_peer_count== other.total_outbound_peer_count
     def __str__(self):
         out = [
-            f"inbound_peers={self.inbound_peers}",
-            f"outbound_peers={self.outbound_peers}",
-            f"total_inbound_peer_count={self.total_inbound_peer_count}",
-            f"total_outbound_peer_count={self.total_outbound_peer_count}",
+            f'inbound_peers={self.inbound_peers}',
+            f'outbound_peers={self.outbound_peers}',
+            f'total_inbound_peer_count={self.total_inbound_peer_count}',
+            f'total_outbound_peer_count={self.total_outbound_peer_count}',
         ]
         return f"<TopologyResponseBodyV0 [{', '.join(out)}]>"

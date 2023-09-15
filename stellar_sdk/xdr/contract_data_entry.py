@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .contract_data_durability import ContractDataDurability
 from .extension_point import ExtensionPoint
 from .sc_address import SCAddress
 from .sc_val import SCVal
-
-__all__ = ["ContractDataEntry"]
-
-
+from .contract_data_durability import ContractDataDurability
+from .sc_val import SCVal
+__all__ = ['ContractDataEntry']
 class ContractDataEntry:
     """
     XDR Source Code::
@@ -27,7 +28,6 @@ class ContractDataEntry:
             SCVal val;
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
@@ -41,14 +41,12 @@ class ContractDataEntry:
         self.key = key
         self.durability = durability
         self.val = val
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         self.contract.pack(packer)
         self.key.pack(packer)
         self.durability.pack(packer)
         self.val.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ContractDataEntry:
         ext = ExtensionPoint.unpack(unpacker)
@@ -63,7 +61,6 @@ class ContractDataEntry:
             durability=durability,
             val=val,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -82,35 +79,18 @@ class ContractDataEntry:
     def from_xdr(cls, xdr: str) -> ContractDataEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.contract,
-                self.key,
-                self.durability,
-                self.val,
-            )
-        )
-
+        return hash((self.ext, self.contract, self.key, self.durability, self.val,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ext == other.ext
-            and self.contract == other.contract
-            and self.key == other.key
-            and self.durability == other.durability
-            and self.val == other.val
-        )
-
+        return self.ext== other.ext and self.contract== other.contract and self.key== other.key and self.durability== other.durability and self.val== other.val
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"contract={self.contract}",
-            f"key={self.key}",
-            f"durability={self.durability}",
-            f"val={self.val}",
+            f'ext={self.ext}',
+            f'contract={self.contract}',
+            f'key={self.key}',
+            f'durability={self.durability}',
+            f'val={self.val}',
         ]
         return f"<ContractDataEntry [{', '.join(out)}]>"

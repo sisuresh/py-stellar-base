@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_val import SCVal
-
-__all__ = ["ContractEventV0"]
-
-
+from .sc_val import SCVal
+__all__ = ['ContractEventV0']
 class ContractEventV0:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class ContractEventV0:
                     SCVal data;
                 }
     """
-
     def __init__(
         self,
         topics: List[SCVal],
@@ -30,18 +29,14 @@ class ContractEventV0:
     ) -> None:
         _expect_max_length = 4294967295
         if topics and len(topics) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `topics` should be {_expect_max_length}, but got {len(topics)}."
-            )
+            raise ValueError(f"The maximum length of `topics` should be {_expect_max_length}, but got {len(topics)}.")
         self.topics = topics
         self.data = data
-
     def pack(self, packer: Packer) -> None:
         packer.pack_uint(len(self.topics))
         for topics_item in self.topics:
             topics_item.pack(packer)
         self.data.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ContractEventV0:
         length = unpacker.unpack_uint()
@@ -53,7 +48,6 @@ class ContractEventV0:
             topics=topics,
             data=data,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -72,23 +66,15 @@ class ContractEventV0:
     def from_xdr(cls, xdr: str) -> ContractEventV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.topics,
-                self.data,
-            )
-        )
-
+        return hash((self.topics, self.data,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.topics == other.topics and self.data == other.data
-
+        return self.topics== other.topics and self.data== other.data
     def __str__(self):
         out = [
-            f"topics={self.topics}",
-            f"data={self.data}",
+            f'topics={self.topics}',
+            f'data={self.data}',
         ]
         return f"<ContractEventV0 [{', '.join(out)}]>"

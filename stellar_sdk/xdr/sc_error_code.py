@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["SCErrorCode"]
-
-
+__all__ = ['SCErrorCode']
 class SCErrorCode(IntEnum):
     """
     XDR Source Code::
@@ -28,7 +28,6 @@ class SCErrorCode(IntEnum):
             SCEC_UNEXPECTED_SIZE = 9    // Something's size wasn't as expected.
         };
     """
-
     SCEC_ARITH_DOMAIN = 0
     SCEC_INDEX_BOUNDS = 1
     SCEC_INVALID_INPUT = 2
@@ -39,7 +38,6 @@ class SCErrorCode(IntEnum):
     SCEC_INTERNAL_ERROR = 7
     SCEC_UNEXPECTED_TYPE = 8
     SCEC_UNEXPECTED_SIZE = 9
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -47,7 +45,6 @@ class SCErrorCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> SCErrorCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

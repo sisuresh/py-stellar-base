@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .asset_type import AssetType
 from .alpha_num4 import AlphaNum4
 from .alpha_num12 import AlphaNum12
-from .asset_type import AssetType
 from .pool_id import PoolID
-
-__all__ = ["TrustLineAsset"]
-
-
+__all__ = ['TrustLineAsset']
 class TrustLineAsset:
     """
     XDR Source Code::
@@ -35,7 +35,6 @@ class TrustLineAsset:
             // add other asset types here in the future
         };
     """
-
     def __init__(
         self,
         type: AssetType,
@@ -47,7 +46,6 @@ class TrustLineAsset:
         self.alpha_num4 = alpha_num4
         self.alpha_num12 = alpha_num12
         self.liquidity_pool_id = liquidity_pool_id
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == AssetType.ASSET_TYPE_NATIVE:
@@ -67,7 +65,6 @@ class TrustLineAsset:
                 raise ValueError("liquidity_pool_id should not be None.")
             self.liquidity_pool_id.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TrustLineAsset:
         type = AssetType.unpack(unpacker)
@@ -83,7 +80,6 @@ class TrustLineAsset:
             liquidity_pool_id = PoolID.unpack(unpacker)
             return cls(type=type, liquidity_pool_id=liquidity_pool_id)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -102,37 +98,16 @@ class TrustLineAsset:
     def from_xdr(cls, xdr: str) -> TrustLineAsset:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.alpha_num4,
-                self.alpha_num12,
-                self.liquidity_pool_id,
-            )
-        )
-
+        return hash((self.type, self.alpha_num4, self.alpha_num12, self.liquidity_pool_id,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.alpha_num4 == other.alpha_num4
-            and self.alpha_num12 == other.alpha_num12
-            and self.liquidity_pool_id == other.liquidity_pool_id
-        )
-
+        return self.type== other.type and self.alpha_num4== other.alpha_num4 and self.alpha_num12== other.alpha_num12 and self.liquidity_pool_id== other.liquidity_pool_id
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"alpha_num4={self.alpha_num4}"
-        ) if self.alpha_num4 is not None else None
-        out.append(
-            f"alpha_num12={self.alpha_num12}"
-        ) if self.alpha_num12 is not None else None
-        out.append(
-            f"liquidity_pool_id={self.liquidity_pool_id}"
-        ) if self.liquidity_pool_id is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'alpha_num4={self.alpha_num4}') if self.alpha_num4 is not None else None
+        out.append(f'alpha_num12={self.alpha_num12}') if self.alpha_num12 is not None else None
+        out.append(f'liquidity_pool_id={self.liquidity_pool_id}') if self.liquidity_pool_id is not None else None
         return f"<TrustLineAsset [{', '.join(out)}]>"

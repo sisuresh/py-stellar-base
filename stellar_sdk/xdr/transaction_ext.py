@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Integer
 from .soroban_transaction_data import SorobanTransactionData
-
-__all__ = ["TransactionExt"]
-
-
+__all__ = ['TransactionExt']
 class TransactionExt:
     """
     XDR Source Code::
@@ -24,7 +23,6 @@ class TransactionExt:
                 SorobanTransactionData sorobanData;
             }
     """
-
     def __init__(
         self,
         v: int,
@@ -32,7 +30,6 @@ class TransactionExt:
     ) -> None:
         self.v = v
         self.soroban_data = soroban_data
-
     def pack(self, packer: Packer) -> None:
         Integer(self.v).pack(packer)
         if self.v == 0:
@@ -42,7 +39,6 @@ class TransactionExt:
                 raise ValueError("soroban_data should not be None.")
             self.soroban_data.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionExt:
         v = Integer.unpack(unpacker)
@@ -52,7 +48,6 @@ class TransactionExt:
             soroban_data = SorobanTransactionData.unpack(unpacker)
             return cls(v=v, soroban_data=soroban_data)
         return cls(v=v)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -71,24 +66,14 @@ class TransactionExt:
     def from_xdr(cls, xdr: str) -> TransactionExt:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.v,
-                self.soroban_data,
-            )
-        )
-
+        return hash((self.v, self.soroban_data,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.v == other.v and self.soroban_data == other.soroban_data
-
+        return self.v== other.v and self.soroban_data== other.soroban_data
     def __str__(self):
         out = []
-        out.append(f"v={self.v}")
-        out.append(
-            f"soroban_data={self.soroban_data}"
-        ) if self.soroban_data is not None else None
+        out.append(f'v={self.v}')
+        out.append(f'soroban_data={self.soroban_data}') if self.soroban_data is not None else None
         return f"<TransactionExt [{', '.join(out)}]>"

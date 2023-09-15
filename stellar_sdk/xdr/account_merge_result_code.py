@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["AccountMergeResultCode"]
-
-
+__all__ = ['AccountMergeResultCode']
 class AccountMergeResultCode(IntEnum):
     """
     XDR Source Code::
@@ -29,7 +29,6 @@ class AccountMergeResultCode(IntEnum):
             ACCOUNT_MERGE_IS_SPONSOR = -7       // can't merge account that is a sponsor
         };
     """
-
     ACCOUNT_MERGE_SUCCESS = 0
     ACCOUNT_MERGE_MALFORMED = -1
     ACCOUNT_MERGE_NO_ACCOUNT = -2
@@ -38,7 +37,6 @@ class AccountMergeResultCode(IntEnum):
     ACCOUNT_MERGE_SEQNUM_TOO_FAR = -5
     ACCOUNT_MERGE_DEST_FULL = -6
     ACCOUNT_MERGE_IS_SPONSOR = -7
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -46,7 +44,6 @@ class AccountMergeResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> AccountMergeResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

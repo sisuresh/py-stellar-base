@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .uint32 import Uint32
-
-__all__ = ["SendMoreExtended"]
-
-
+from .uint32 import Uint32
+__all__ = ['SendMoreExtended']
 class SendMoreExtended:
     """
     XDR Source Code::
@@ -21,7 +22,6 @@ class SendMoreExtended:
             uint32 numBytes;
         };
     """
-
     def __init__(
         self,
         num_messages: Uint32,
@@ -29,11 +29,9 @@ class SendMoreExtended:
     ) -> None:
         self.num_messages = num_messages
         self.num_bytes = num_bytes
-
     def pack(self, packer: Packer) -> None:
         self.num_messages.pack(packer)
         self.num_bytes.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SendMoreExtended:
         num_messages = Uint32.unpack(unpacker)
@@ -42,7 +40,6 @@ class SendMoreExtended:
             num_messages=num_messages,
             num_bytes=num_bytes,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -61,26 +58,15 @@ class SendMoreExtended:
     def from_xdr(cls, xdr: str) -> SendMoreExtended:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.num_messages,
-                self.num_bytes,
-            )
-        )
-
+        return hash((self.num_messages, self.num_bytes,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.num_messages == other.num_messages
-            and self.num_bytes == other.num_bytes
-        )
-
+        return self.num_messages== other.num_messages and self.num_bytes== other.num_bytes
     def __str__(self):
         out = [
-            f"num_messages={self.num_messages}",
-            f"num_bytes={self.num_bytes}",
+            f'num_messages={self.num_messages}',
+            f'num_bytes={self.num_bytes}',
         ]
         return f"<SendMoreExtended [{', '.join(out)}]>"

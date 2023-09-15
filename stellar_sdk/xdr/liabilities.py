@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .int64 import Int64
-
-__all__ = ["Liabilities"]
-
-
+from .int64 import Int64
+__all__ = ['Liabilities']
 class Liabilities:
     """
     XDR Source Code::
@@ -21,7 +22,6 @@ class Liabilities:
             int64 selling;
         };
     """
-
     def __init__(
         self,
         buying: Int64,
@@ -29,11 +29,9 @@ class Liabilities:
     ) -> None:
         self.buying = buying
         self.selling = selling
-
     def pack(self, packer: Packer) -> None:
         self.buying.pack(packer)
         self.selling.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Liabilities:
         buying = Int64.unpack(unpacker)
@@ -42,7 +40,6 @@ class Liabilities:
             buying=buying,
             selling=selling,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -61,23 +58,15 @@ class Liabilities:
     def from_xdr(cls, xdr: str) -> Liabilities:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.buying,
-                self.selling,
-            )
-        )
-
+        return hash((self.buying, self.selling,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.buying == other.buying and self.selling == other.selling
-
+        return self.buying== other.buying and self.selling== other.selling
     def __str__(self):
         out = [
-            f"buying={self.buying}",
-            f"selling={self.selling}",
+            f'buying={self.buying}',
+            f'selling={self.selling}',
         ]
         return f"<Liabilities [{', '.join(out)}]>"

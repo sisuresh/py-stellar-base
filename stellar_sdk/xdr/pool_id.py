@@ -3,32 +3,28 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .hash import Hash
-
-__all__ = ["PoolID"]
-
-
+__all__ = ['PoolID']
 class PoolID:
     """
     XDR Source Code::
 
         typedef Hash PoolID;
     """
-
     def __init__(self, pool_id: Hash) -> None:
         self.pool_id = pool_id
-
     def pack(self, packer: Packer) -> None:
         self.pool_id.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> PoolID:
         pool_id = Hash.unpack(unpacker)
         return cls(pool_id)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -47,10 +43,8 @@ class PoolID:
     def from_xdr(cls, xdr: str) -> PoolID:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.pool_id)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

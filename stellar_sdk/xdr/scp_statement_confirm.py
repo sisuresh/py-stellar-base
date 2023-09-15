@@ -3,16 +3,18 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .hash import Hash
 from .scp_ballot import SCPBallot
 from .uint32 import Uint32
-
-__all__ = ["SCPStatementConfirm"]
-
-
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .hash import Hash
+__all__ = ['SCPStatementConfirm']
 class SCPStatementConfirm:
     """
     XDR Source Code::
@@ -26,7 +28,6 @@ class SCPStatementConfirm:
                     Hash quorumSetHash; // D
                 }
     """
-
     def __init__(
         self,
         ballot: SCPBallot,
@@ -40,14 +41,12 @@ class SCPStatementConfirm:
         self.n_commit = n_commit
         self.n_h = n_h
         self.quorum_set_hash = quorum_set_hash
-
     def pack(self, packer: Packer) -> None:
         self.ballot.pack(packer)
         self.n_prepared.pack(packer)
         self.n_commit.pack(packer)
         self.n_h.pack(packer)
         self.quorum_set_hash.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCPStatementConfirm:
         ballot = SCPBallot.unpack(unpacker)
@@ -62,7 +61,6 @@ class SCPStatementConfirm:
             n_h=n_h,
             quorum_set_hash=quorum_set_hash,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -81,35 +79,18 @@ class SCPStatementConfirm:
     def from_xdr(cls, xdr: str) -> SCPStatementConfirm:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ballot,
-                self.n_prepared,
-                self.n_commit,
-                self.n_h,
-                self.quorum_set_hash,
-            )
-        )
-
+        return hash((self.ballot, self.n_prepared, self.n_commit, self.n_h, self.quorum_set_hash,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ballot == other.ballot
-            and self.n_prepared == other.n_prepared
-            and self.n_commit == other.n_commit
-            and self.n_h == other.n_h
-            and self.quorum_set_hash == other.quorum_set_hash
-        )
-
+        return self.ballot== other.ballot and self.n_prepared== other.n_prepared and self.n_commit== other.n_commit and self.n_h== other.n_h and self.quorum_set_hash== other.quorum_set_hash
     def __str__(self):
         out = [
-            f"ballot={self.ballot}",
-            f"n_prepared={self.n_prepared}",
-            f"n_commit={self.n_commit}",
-            f"n_h={self.n_h}",
-            f"quorum_set_hash={self.quorum_set_hash}",
+            f'ballot={self.ballot}',
+            f'n_prepared={self.n_prepared}',
+            f'n_commit={self.n_commit}',
+            f'n_h={self.n_h}',
+            f'quorum_set_hash={self.quorum_set_hash}',
         ]
         return f"<SCPStatementConfirm [{', '.join(out)}]>"

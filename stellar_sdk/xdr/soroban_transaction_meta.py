@@ -3,23 +3,22 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .contract_event import ContractEvent
-from .diagnostic_event import DiagnosticEvent
 from .extension_point import ExtensionPoint
+from .contract_event import ContractEvent
 from .sc_val import SCVal
-
-__all__ = ["SorobanTransactionMeta"]
-
-
+from .diagnostic_event import DiagnosticEvent
+__all__ = ['SorobanTransactionMeta']
 class SorobanTransactionMeta:
     """
     XDR Source Code::
 
-        struct SorobanTransactionMeta
+        struct SorobanTransactionMeta 
         {
             ExtensionPoint ext;
 
@@ -33,7 +32,6 @@ class SorobanTransactionMeta:
             DiagnosticEvent diagnosticEvents<>;
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
@@ -43,19 +41,14 @@ class SorobanTransactionMeta:
     ) -> None:
         _expect_max_length = 4294967295
         if events and len(events) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `events` should be {_expect_max_length}, but got {len(events)}."
-            )
+            raise ValueError(f"The maximum length of `events` should be {_expect_max_length}, but got {len(events)}.")
         _expect_max_length = 4294967295
         if diagnostic_events and len(diagnostic_events) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `diagnostic_events` should be {_expect_max_length}, but got {len(diagnostic_events)}."
-            )
+            raise ValueError(f"The maximum length of `diagnostic_events` should be {_expect_max_length}, but got {len(diagnostic_events)}.")
         self.ext = ext
         self.events = events
         self.return_value = return_value
         self.diagnostic_events = diagnostic_events
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         packer.pack_uint(len(self.events))
@@ -65,7 +58,6 @@ class SorobanTransactionMeta:
         packer.pack_uint(len(self.diagnostic_events))
         for diagnostic_events_item in self.diagnostic_events:
             diagnostic_events_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SorobanTransactionMeta:
         ext = ExtensionPoint.unpack(unpacker)
@@ -84,7 +76,6 @@ class SorobanTransactionMeta:
             return_value=return_value,
             diagnostic_events=diagnostic_events,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -103,32 +94,17 @@ class SorobanTransactionMeta:
     def from_xdr(cls, xdr: str) -> SorobanTransactionMeta:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.events,
-                self.return_value,
-                self.diagnostic_events,
-            )
-        )
-
+        return hash((self.ext, self.events, self.return_value, self.diagnostic_events,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ext == other.ext
-            and self.events == other.events
-            and self.return_value == other.return_value
-            and self.diagnostic_events == other.diagnostic_events
-        )
-
+        return self.ext== other.ext and self.events== other.events and self.return_value== other.return_value and self.diagnostic_events== other.diagnostic_events
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"events={self.events}",
-            f"return_value={self.return_value}",
-            f"diagnostic_events={self.diagnostic_events}",
+            f'ext={self.ext}',
+            f'events={self.events}',
+            f'return_value={self.return_value}',
+            f'diagnostic_events={self.diagnostic_events}',
         ]
         return f"<SorobanTransactionMeta [{', '.join(out)}]>"

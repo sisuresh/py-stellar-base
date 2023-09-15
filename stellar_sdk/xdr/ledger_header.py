@@ -3,20 +3,28 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .uint32 import Uint32
 from .hash import Hash
-from .int64 import Int64
-from .ledger_header_ext import LedgerHeaderExt
 from .stellar_value import StellarValue
+from .hash import Hash
+from .hash import Hash
+from .uint32 import Uint32
+from .int64 import Int64
+from .int64 import Int64
 from .uint32 import Uint32
 from .uint64 import Uint64
-
-__all__ = ["LedgerHeader"]
-
-
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .hash import Hash
+from .ledger_header_ext import LedgerHeaderExt
+__all__ = ['LedgerHeader']
 class LedgerHeader:
     """
     XDR Source Code::
@@ -61,7 +69,6 @@ class LedgerHeader:
             ext;
         };
     """
-
     def __init__(
         self,
         ledger_version: Uint32,
@@ -82,9 +89,7 @@ class LedgerHeader:
     ) -> None:
         _expect_length = 4
         if skip_list and len(skip_list) != _expect_length:
-            raise ValueError(
-                f"The length of `skip_list` should be {_expect_length}, but got {len(skip_list)}."
-            )
+            raise ValueError(f"The length of `skip_list` should be {_expect_length}, but got {len(skip_list)}.")
         self.ledger_version = ledger_version
         self.previous_ledger_hash = previous_ledger_hash
         self.scp_value = scp_value
@@ -100,7 +105,6 @@ class LedgerHeader:
         self.max_tx_set_size = max_tx_set_size
         self.skip_list = skip_list
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.ledger_version.pack(packer)
         self.previous_ledger_hash.pack(packer)
@@ -118,7 +122,6 @@ class LedgerHeader:
         for skip_list_item in self.skip_list:
             skip_list_item.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerHeader:
         ledger_version = Uint32.unpack(unpacker)
@@ -156,7 +159,6 @@ class LedgerHeader:
             skip_list=skip_list,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -175,65 +177,28 @@ class LedgerHeader:
     def from_xdr(cls, xdr: str) -> LedgerHeader:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ledger_version,
-                self.previous_ledger_hash,
-                self.scp_value,
-                self.tx_set_result_hash,
-                self.bucket_list_hash,
-                self.ledger_seq,
-                self.total_coins,
-                self.fee_pool,
-                self.inflation_seq,
-                self.id_pool,
-                self.base_fee,
-                self.base_reserve,
-                self.max_tx_set_size,
-                self.skip_list,
-                self.ext,
-            )
-        )
-
+        return hash((self.ledger_version, self.previous_ledger_hash, self.scp_value, self.tx_set_result_hash, self.bucket_list_hash, self.ledger_seq, self.total_coins, self.fee_pool, self.inflation_seq, self.id_pool, self.base_fee, self.base_reserve, self.max_tx_set_size, self.skip_list, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ledger_version == other.ledger_version
-            and self.previous_ledger_hash == other.previous_ledger_hash
-            and self.scp_value == other.scp_value
-            and self.tx_set_result_hash == other.tx_set_result_hash
-            and self.bucket_list_hash == other.bucket_list_hash
-            and self.ledger_seq == other.ledger_seq
-            and self.total_coins == other.total_coins
-            and self.fee_pool == other.fee_pool
-            and self.inflation_seq == other.inflation_seq
-            and self.id_pool == other.id_pool
-            and self.base_fee == other.base_fee
-            and self.base_reserve == other.base_reserve
-            and self.max_tx_set_size == other.max_tx_set_size
-            and self.skip_list == other.skip_list
-            and self.ext == other.ext
-        )
-
+        return self.ledger_version== other.ledger_version and self.previous_ledger_hash== other.previous_ledger_hash and self.scp_value== other.scp_value and self.tx_set_result_hash== other.tx_set_result_hash and self.bucket_list_hash== other.bucket_list_hash and self.ledger_seq== other.ledger_seq and self.total_coins== other.total_coins and self.fee_pool== other.fee_pool and self.inflation_seq== other.inflation_seq and self.id_pool== other.id_pool and self.base_fee== other.base_fee and self.base_reserve== other.base_reserve and self.max_tx_set_size== other.max_tx_set_size and self.skip_list== other.skip_list and self.ext== other.ext
     def __str__(self):
         out = [
-            f"ledger_version={self.ledger_version}",
-            f"previous_ledger_hash={self.previous_ledger_hash}",
-            f"scp_value={self.scp_value}",
-            f"tx_set_result_hash={self.tx_set_result_hash}",
-            f"bucket_list_hash={self.bucket_list_hash}",
-            f"ledger_seq={self.ledger_seq}",
-            f"total_coins={self.total_coins}",
-            f"fee_pool={self.fee_pool}",
-            f"inflation_seq={self.inflation_seq}",
-            f"id_pool={self.id_pool}",
-            f"base_fee={self.base_fee}",
-            f"base_reserve={self.base_reserve}",
-            f"max_tx_set_size={self.max_tx_set_size}",
-            f"skip_list={self.skip_list}",
-            f"ext={self.ext}",
+            f'ledger_version={self.ledger_version}',
+            f'previous_ledger_hash={self.previous_ledger_hash}',
+            f'scp_value={self.scp_value}',
+            f'tx_set_result_hash={self.tx_set_result_hash}',
+            f'bucket_list_hash={self.bucket_list_hash}',
+            f'ledger_seq={self.ledger_seq}',
+            f'total_coins={self.total_coins}',
+            f'fee_pool={self.fee_pool}',
+            f'inflation_seq={self.inflation_seq}',
+            f'id_pool={self.id_pool}',
+            f'base_fee={self.base_fee}',
+            f'base_reserve={self.base_reserve}',
+            f'max_tx_set_size={self.max_tx_set_size}',
+            f'skip_list={self.skip_list}',
+            f'ext={self.ext}',
         ]
         return f"<LedgerHeader [{', '.join(out)}]>"

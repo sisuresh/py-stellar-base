@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["EnvelopeType"]
-
-
+__all__ = ['EnvelopeType']
 class EnvelopeType(IntEnum):
     """
     XDR Source Code::
@@ -28,7 +28,6 @@ class EnvelopeType(IntEnum):
             ENVELOPE_TYPE_SOROBAN_AUTHORIZATION = 9
         };
     """
-
     ENVELOPE_TYPE_TX_V0 = 0
     ENVELOPE_TYPE_SCP = 1
     ENVELOPE_TYPE_TX = 2
@@ -39,7 +38,6 @@ class EnvelopeType(IntEnum):
     ENVELOPE_TYPE_POOL_REVOKE_OP_ID = 7
     ENVELOPE_TYPE_CONTRACT_ID = 8
     ENVELOPE_TYPE_SOROBAN_AUTHORIZATION = 9
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -47,7 +45,6 @@ class EnvelopeType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> EnvelopeType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

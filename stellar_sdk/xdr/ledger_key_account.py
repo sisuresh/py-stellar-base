@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
-
-__all__ = ["LedgerKeyAccount"]
-
-
+__all__ = ['LedgerKeyAccount']
 class LedgerKeyAccount:
     """
     XDR Source Code::
@@ -20,23 +20,19 @@ class LedgerKeyAccount:
                 AccountID accountID;
             }
     """
-
     def __init__(
         self,
         account_id: AccountID,
     ) -> None:
         self.account_id = account_id
-
     def pack(self, packer: Packer) -> None:
         self.account_id.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerKeyAccount:
         account_id = AccountID.unpack(unpacker)
         return cls(
             account_id=account_id,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -55,17 +51,14 @@ class LedgerKeyAccount:
     def from_xdr(cls, xdr: str) -> LedgerKeyAccount:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.account_id,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.account_id == other.account_id
-
+        return self.account_id== other.account_id
     def __str__(self):
         out = [
-            f"account_id={self.account_id}",
+            f'account_id={self.account_id}',
         ]
         return f"<LedgerKeyAccount [{', '.join(out)}]>"

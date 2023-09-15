@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["OperationType"]
-
-
+__all__ = ['OperationType']
 class OperationType(IntEnum):
     """
     XDR Source Code::
@@ -45,7 +45,6 @@ class OperationType(IntEnum):
             RESTORE_FOOTPRINT = 26
         };
     """
-
     CREATE_ACCOUNT = 0
     PAYMENT = 1
     PATH_PAYMENT_STRICT_RECEIVE = 2
@@ -73,7 +72,6 @@ class OperationType(IntEnum):
     INVOKE_HOST_FUNCTION = 24
     BUMP_FOOTPRINT_EXPIRATION = 25
     RESTORE_FOOTPRINT = 26
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -81,7 +79,6 @@ class OperationType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> OperationType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

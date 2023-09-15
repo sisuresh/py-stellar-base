@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .allow_trust_result_code import AllowTrustResultCode
-
-__all__ = ["AllowTrustResult"]
-
-
+__all__ = ['AllowTrustResult']
 class AllowTrustResult:
     """
     XDR Source Code::
@@ -28,13 +28,11 @@ class AllowTrustResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: AllowTrustResultCode,
     ) -> None:
         self.code = code
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == AllowTrustResultCode.ALLOW_TRUST_SUCCESS:
@@ -51,7 +49,6 @@ class AllowTrustResult:
             return
         if self.code == AllowTrustResultCode.ALLOW_TRUST_LOW_RESERVE:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AllowTrustResult:
         code = AllowTrustResultCode.unpack(unpacker)
@@ -70,7 +67,6 @@ class AllowTrustResult:
         if code == AllowTrustResultCode.ALLOW_TRUST_LOW_RESERVE:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -89,16 +85,13 @@ class AllowTrustResult:
     def from_xdr(cls, xdr: str) -> AllowTrustResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.code,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code
-
+        return self.code== other.code
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
+        out.append(f'code={self.code}')
         return f"<AllowTrustResult [{', '.join(out)}]>"

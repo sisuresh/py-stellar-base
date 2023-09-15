@@ -3,15 +3,28 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .int64 import Int64
+from .int64 import Int64
+from .int64 import Int64
+from .int64 import Int64
+from .int64 import Int64
 from .int64 import Int64
 from .uint32 import Uint32
-
-__all__ = ["ConfigSettingContractLedgerCostV0"]
-
-
+__all__ = ['ConfigSettingContractLedgerCostV0']
 class ConfigSettingContractLedgerCostV0:
     """
     XDR Source Code::
@@ -46,13 +59,12 @@ class ConfigSettingContractLedgerCostV0:
             int64 bucketListTargetSizeBytes;
             // Fee per 1KB write when the bucket list is empty
             int64 writeFee1KBBucketListLow;
-            // Fee per 1KB write when the bucket list has reached `bucketListTargetSizeBytes`
+            // Fee per 1KB write when the bucket list has reached `bucketListTargetSizeBytes` 
             int64 writeFee1KBBucketListHigh;
             // Write fee multiplier for any additional data past the first `bucketListTargetSizeBytes`
             uint32 bucketListWriteFeeGrowthFactor;
         };
     """
-
     def __init__(
         self,
         ledger_max_read_ledger_entries: Uint32,
@@ -86,7 +98,6 @@ class ConfigSettingContractLedgerCostV0:
         self.write_fee1_kb_bucket_list_low = write_fee1_kb_bucket_list_low
         self.write_fee1_kb_bucket_list_high = write_fee1_kb_bucket_list_high
         self.bucket_list_write_fee_growth_factor = bucket_list_write_fee_growth_factor
-
     def pack(self, packer: Packer) -> None:
         self.ledger_max_read_ledger_entries.pack(packer)
         self.ledger_max_read_bytes.pack(packer)
@@ -103,7 +114,6 @@ class ConfigSettingContractLedgerCostV0:
         self.write_fee1_kb_bucket_list_low.pack(packer)
         self.write_fee1_kb_bucket_list_high.pack(packer)
         self.bucket_list_write_fee_growth_factor.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ConfigSettingContractLedgerCostV0:
         ledger_max_read_ledger_entries = Uint32.unpack(unpacker)
@@ -138,7 +148,6 @@ class ConfigSettingContractLedgerCostV0:
             write_fee1_kb_bucket_list_high=write_fee1_kb_bucket_list_high,
             bucket_list_write_fee_growth_factor=bucket_list_write_fee_growth_factor,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -157,70 +166,28 @@ class ConfigSettingContractLedgerCostV0:
     def from_xdr(cls, xdr: str) -> ConfigSettingContractLedgerCostV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ledger_max_read_ledger_entries,
-                self.ledger_max_read_bytes,
-                self.ledger_max_write_ledger_entries,
-                self.ledger_max_write_bytes,
-                self.tx_max_read_ledger_entries,
-                self.tx_max_read_bytes,
-                self.tx_max_write_ledger_entries,
-                self.tx_max_write_bytes,
-                self.fee_read_ledger_entry,
-                self.fee_write_ledger_entry,
-                self.fee_read1_kb,
-                self.bucket_list_target_size_bytes,
-                self.write_fee1_kb_bucket_list_low,
-                self.write_fee1_kb_bucket_list_high,
-                self.bucket_list_write_fee_growth_factor,
-            )
-        )
-
+        return hash((self.ledger_max_read_ledger_entries, self.ledger_max_read_bytes, self.ledger_max_write_ledger_entries, self.ledger_max_write_bytes, self.tx_max_read_ledger_entries, self.tx_max_read_bytes, self.tx_max_write_ledger_entries, self.tx_max_write_bytes, self.fee_read_ledger_entry, self.fee_write_ledger_entry, self.fee_read1_kb, self.bucket_list_target_size_bytes, self.write_fee1_kb_bucket_list_low, self.write_fee1_kb_bucket_list_high, self.bucket_list_write_fee_growth_factor,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ledger_max_read_ledger_entries == other.ledger_max_read_ledger_entries
-            and self.ledger_max_read_bytes == other.ledger_max_read_bytes
-            and self.ledger_max_write_ledger_entries
-            == other.ledger_max_write_ledger_entries
-            and self.ledger_max_write_bytes == other.ledger_max_write_bytes
-            and self.tx_max_read_ledger_entries == other.tx_max_read_ledger_entries
-            and self.tx_max_read_bytes == other.tx_max_read_bytes
-            and self.tx_max_write_ledger_entries == other.tx_max_write_ledger_entries
-            and self.tx_max_write_bytes == other.tx_max_write_bytes
-            and self.fee_read_ledger_entry == other.fee_read_ledger_entry
-            and self.fee_write_ledger_entry == other.fee_write_ledger_entry
-            and self.fee_read1_kb == other.fee_read1_kb
-            and self.bucket_list_target_size_bytes
-            == other.bucket_list_target_size_bytes
-            and self.write_fee1_kb_bucket_list_low
-            == other.write_fee1_kb_bucket_list_low
-            and self.write_fee1_kb_bucket_list_high
-            == other.write_fee1_kb_bucket_list_high
-            and self.bucket_list_write_fee_growth_factor
-            == other.bucket_list_write_fee_growth_factor
-        )
-
+        return self.ledger_max_read_ledger_entries== other.ledger_max_read_ledger_entries and self.ledger_max_read_bytes== other.ledger_max_read_bytes and self.ledger_max_write_ledger_entries== other.ledger_max_write_ledger_entries and self.ledger_max_write_bytes== other.ledger_max_write_bytes and self.tx_max_read_ledger_entries== other.tx_max_read_ledger_entries and self.tx_max_read_bytes== other.tx_max_read_bytes and self.tx_max_write_ledger_entries== other.tx_max_write_ledger_entries and self.tx_max_write_bytes== other.tx_max_write_bytes and self.fee_read_ledger_entry== other.fee_read_ledger_entry and self.fee_write_ledger_entry== other.fee_write_ledger_entry and self.fee_read1_kb== other.fee_read1_kb and self.bucket_list_target_size_bytes== other.bucket_list_target_size_bytes and self.write_fee1_kb_bucket_list_low== other.write_fee1_kb_bucket_list_low and self.write_fee1_kb_bucket_list_high== other.write_fee1_kb_bucket_list_high and self.bucket_list_write_fee_growth_factor== other.bucket_list_write_fee_growth_factor
     def __str__(self):
         out = [
-            f"ledger_max_read_ledger_entries={self.ledger_max_read_ledger_entries}",
-            f"ledger_max_read_bytes={self.ledger_max_read_bytes}",
-            f"ledger_max_write_ledger_entries={self.ledger_max_write_ledger_entries}",
-            f"ledger_max_write_bytes={self.ledger_max_write_bytes}",
-            f"tx_max_read_ledger_entries={self.tx_max_read_ledger_entries}",
-            f"tx_max_read_bytes={self.tx_max_read_bytes}",
-            f"tx_max_write_ledger_entries={self.tx_max_write_ledger_entries}",
-            f"tx_max_write_bytes={self.tx_max_write_bytes}",
-            f"fee_read_ledger_entry={self.fee_read_ledger_entry}",
-            f"fee_write_ledger_entry={self.fee_write_ledger_entry}",
-            f"fee_read1_kb={self.fee_read1_kb}",
-            f"bucket_list_target_size_bytes={self.bucket_list_target_size_bytes}",
-            f"write_fee1_kb_bucket_list_low={self.write_fee1_kb_bucket_list_low}",
-            f"write_fee1_kb_bucket_list_high={self.write_fee1_kb_bucket_list_high}",
-            f"bucket_list_write_fee_growth_factor={self.bucket_list_write_fee_growth_factor}",
+            f'ledger_max_read_ledger_entries={self.ledger_max_read_ledger_entries}',
+            f'ledger_max_read_bytes={self.ledger_max_read_bytes}',
+            f'ledger_max_write_ledger_entries={self.ledger_max_write_ledger_entries}',
+            f'ledger_max_write_bytes={self.ledger_max_write_bytes}',
+            f'tx_max_read_ledger_entries={self.tx_max_read_ledger_entries}',
+            f'tx_max_read_bytes={self.tx_max_read_bytes}',
+            f'tx_max_write_ledger_entries={self.tx_max_write_ledger_entries}',
+            f'tx_max_write_bytes={self.tx_max_write_bytes}',
+            f'fee_read_ledger_entry={self.fee_read_ledger_entry}',
+            f'fee_write_ledger_entry={self.fee_write_ledger_entry}',
+            f'fee_read1_kb={self.fee_read1_kb}',
+            f'bucket_list_target_size_bytes={self.bucket_list_target_size_bytes}',
+            f'write_fee1_kb_bucket_list_low={self.write_fee1_kb_bucket_list_low}',
+            f'write_fee1_kb_bucket_list_high={self.write_fee1_kb_bucket_list_high}',
+            f'bucket_list_write_fee_growth_factor={self.bucket_list_write_fee_growth_factor}',
         ]
         return f"<ConfigSettingContractLedgerCostV0 [{', '.join(out)}]>"

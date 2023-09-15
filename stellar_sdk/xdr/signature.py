@@ -3,32 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Opaque
-
-__all__ = ["Signature"]
-
-
+__all__ = ['Signature']
 class Signature:
     """
     XDR Source Code::
 
         typedef opaque Signature<64>;
     """
-
     def __init__(self, signature: bytes) -> None:
         self.signature = signature
-
     def pack(self, packer: Packer) -> None:
         Opaque(self.signature, 64, False).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Signature:
         signature = Opaque.unpack(unpacker, 64, False)
         return cls(signature)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -47,10 +42,8 @@ class Signature:
     def from_xdr(cls, xdr: str) -> Signature:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.signature)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

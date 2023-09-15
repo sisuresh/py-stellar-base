@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
 from .claim_predicate import ClaimPredicate
-
-__all__ = ["ClaimantV0"]
-
-
+__all__ = ['ClaimantV0']
 class ClaimantV0:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class ClaimantV0:
                 ClaimPredicate predicate; // Claimable if predicate is true
             }
     """
-
     def __init__(
         self,
         destination: AccountID,
@@ -30,11 +29,9 @@ class ClaimantV0:
     ) -> None:
         self.destination = destination
         self.predicate = predicate
-
     def pack(self, packer: Packer) -> None:
         self.destination.pack(packer)
         self.predicate.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ClaimantV0:
         destination = AccountID.unpack(unpacker)
@@ -43,7 +40,6 @@ class ClaimantV0:
             destination=destination,
             predicate=predicate,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,25 +58,15 @@ class ClaimantV0:
     def from_xdr(cls, xdr: str) -> ClaimantV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.destination,
-                self.predicate,
-            )
-        )
-
+        return hash((self.destination, self.predicate,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.destination == other.destination and self.predicate == other.predicate
-        )
-
+        return self.destination== other.destination and self.predicate== other.predicate
     def __str__(self):
         out = [
-            f"destination={self.destination}",
-            f"predicate={self.predicate}",
+            f'destination={self.destination}',
+            f'predicate={self.predicate}',
         ]
         return f"<ClaimantV0 [{', '.join(out)}]>"

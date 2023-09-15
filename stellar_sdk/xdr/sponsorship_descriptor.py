@@ -3,39 +3,32 @@
 from __future__ import annotations
 
 import base64
-from typing import Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
-
-__all__ = ["SponsorshipDescriptor"]
-
-
+__all__ = ['SponsorshipDescriptor']
 class SponsorshipDescriptor:
     """
     XDR Source Code::
 
         typedef AccountID* SponsorshipDescriptor;
     """
-
     def __init__(self, sponsorship_descriptor: Optional[AccountID]) -> None:
         self.sponsorship_descriptor = sponsorship_descriptor
-
     def pack(self, packer: Packer) -> None:
         if self.sponsorship_descriptor is None:
             packer.pack_uint(0)
         else:
             packer.pack_uint(1)
             self.sponsorship_descriptor.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SponsorshipDescriptor:
-        sponsorship_descriptor = (
-            AccountID.unpack(unpacker) if unpacker.unpack_uint() else None
-        )
+        sponsorship_descriptor = AccountID.unpack(unpacker) if unpacker.unpack_uint() else None
         return cls(sponsorship_descriptor)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -54,10 +47,8 @@ class SponsorshipDescriptor:
     def from_xdr(cls, xdr: str) -> SponsorshipDescriptor:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.sponsorship_descriptor)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

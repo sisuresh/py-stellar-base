@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["ClaimClaimableBalanceResultCode"]
-
-
+__all__ = ['ClaimClaimableBalanceResultCode']
 class ClaimClaimableBalanceResultCode(IntEnum):
     """
     XDR Source Code::
@@ -24,14 +24,12 @@ class ClaimClaimableBalanceResultCode(IntEnum):
             CLAIM_CLAIMABLE_BALANCE_NOT_AUTHORIZED = -5
         };
     """
-
     CLAIM_CLAIMABLE_BALANCE_SUCCESS = 0
     CLAIM_CLAIMABLE_BALANCE_DOES_NOT_EXIST = -1
     CLAIM_CLAIMABLE_BALANCE_CANNOT_CLAIM = -2
     CLAIM_CLAIMABLE_BALANCE_LINE_FULL = -3
     CLAIM_CLAIMABLE_BALANCE_NO_TRUST = -4
     CLAIM_CLAIMABLE_BALANCE_NOT_AUTHORIZED = -5
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -39,7 +37,6 @@ class ClaimClaimableBalanceResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> ClaimClaimableBalanceResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

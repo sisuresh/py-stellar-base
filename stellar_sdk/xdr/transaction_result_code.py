@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["TransactionResultCode"]
-
-
+__all__ = ['TransactionResultCode']
 class TransactionResultCode(IntEnum):
     """
     XDR Source Code::
@@ -41,7 +41,6 @@ class TransactionResultCode(IntEnum):
             txSOROBAN_INVALID = -17         // soroban-specific preconditions were not met
         };
     """
-
     txFEE_BUMP_INNER_SUCCESS = 1
     txSUCCESS = 0
     txFAILED = -1
@@ -61,7 +60,6 @@ class TransactionResultCode(IntEnum):
     txBAD_MIN_SEQ_AGE_OR_GAP = -15
     txMALFORMED = -16
     txSOROBAN_INVALID = -17
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -69,7 +67,6 @@ class TransactionResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> TransactionResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

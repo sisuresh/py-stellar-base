@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["SetTrustLineFlagsResultCode"]
-
-
+__all__ = ['SetTrustLineFlagsResultCode']
 class SetTrustLineFlagsResultCode(IntEnum):
     """
     XDR Source Code::
@@ -28,14 +28,12 @@ class SetTrustLineFlagsResultCode(IntEnum):
                                                   // on revoke due to low reserves
         };
     """
-
     SET_TRUST_LINE_FLAGS_SUCCESS = 0
     SET_TRUST_LINE_FLAGS_MALFORMED = -1
     SET_TRUST_LINE_FLAGS_NO_TRUST_LINE = -2
     SET_TRUST_LINE_FLAGS_CANT_REVOKE = -3
     SET_TRUST_LINE_FLAGS_INVALID_STATE = -4
     SET_TRUST_LINE_FLAGS_LOW_RESERVE = -5
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -43,7 +41,6 @@ class SetTrustLineFlagsResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> SetTrustLineFlagsResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

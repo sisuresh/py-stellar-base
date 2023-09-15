@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .account_entry_extension_v1_ext import AccountEntryExtensionV1Ext
 from .liabilities import Liabilities
-
-__all__ = ["AccountEntryExtensionV1"]
-
-
+from .account_entry_extension_v1_ext import AccountEntryExtensionV1Ext
+__all__ = ['AccountEntryExtensionV1']
 class AccountEntryExtensionV1:
     """
     XDR Source Code::
@@ -30,7 +30,6 @@ class AccountEntryExtensionV1:
             ext;
         };
     """
-
     def __init__(
         self,
         liabilities: Liabilities,
@@ -38,11 +37,9 @@ class AccountEntryExtensionV1:
     ) -> None:
         self.liabilities = liabilities
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.liabilities.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AccountEntryExtensionV1:
         liabilities = Liabilities.unpack(unpacker)
@@ -51,7 +48,6 @@ class AccountEntryExtensionV1:
             liabilities=liabilities,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -70,23 +66,15 @@ class AccountEntryExtensionV1:
     def from_xdr(cls, xdr: str) -> AccountEntryExtensionV1:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.liabilities,
-                self.ext,
-            )
-        )
-
+        return hash((self.liabilities, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.liabilities == other.liabilities and self.ext == other.ext
-
+        return self.liabilities== other.liabilities and self.ext== other.ext
     def __str__(self):
         out = [
-            f"liabilities={self.liabilities}",
-            f"ext={self.ext}",
+            f'liabilities={self.liabilities}',
+            f'ext={self.ext}',
         ]
         return f"<AccountEntryExtensionV1 [{', '.join(out)}]>"

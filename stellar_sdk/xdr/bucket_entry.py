@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .bucket_entry_type import BucketEntryType
-from .bucket_metadata import BucketMetadata
 from .ledger_entry import LedgerEntry
 from .ledger_key import LedgerKey
-
-__all__ = ["BucketEntry"]
-
-
+from .bucket_metadata import BucketMetadata
+__all__ = ['BucketEntry']
 class BucketEntry:
     """
     XDR Source Code::
@@ -30,7 +30,6 @@ class BucketEntry:
             BucketMetadata metaEntry;
         };
     """
-
     def __init__(
         self,
         type: BucketEntryType,
@@ -42,7 +41,6 @@ class BucketEntry:
         self.live_entry = live_entry
         self.dead_entry = dead_entry
         self.meta_entry = meta_entry
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == BucketEntryType.LIVEENTRY:
@@ -65,7 +63,6 @@ class BucketEntry:
                 raise ValueError("meta_entry should not be None.")
             self.meta_entry.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> BucketEntry:
         type = BucketEntryType.unpack(unpacker)
@@ -82,7 +79,6 @@ class BucketEntry:
             meta_entry = BucketMetadata.unpack(unpacker)
             return cls(type=type, meta_entry=meta_entry)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -101,37 +97,16 @@ class BucketEntry:
     def from_xdr(cls, xdr: str) -> BucketEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.live_entry,
-                self.dead_entry,
-                self.meta_entry,
-            )
-        )
-
+        return hash((self.type, self.live_entry, self.dead_entry, self.meta_entry,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.live_entry == other.live_entry
-            and self.dead_entry == other.dead_entry
-            and self.meta_entry == other.meta_entry
-        )
-
+        return self.type== other.type and self.live_entry== other.live_entry and self.dead_entry== other.dead_entry and self.meta_entry== other.meta_entry
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"live_entry={self.live_entry}"
-        ) if self.live_entry is not None else None
-        out.append(
-            f"dead_entry={self.dead_entry}"
-        ) if self.dead_entry is not None else None
-        out.append(
-            f"meta_entry={self.meta_entry}"
-        ) if self.meta_entry is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'live_entry={self.live_entry}') if self.live_entry is not None else None
+        out.append(f'dead_entry={self.dead_entry}') if self.dead_entry is not None else None
+        out.append(f'meta_entry={self.meta_entry}') if self.meta_entry is not None else None
         return f"<BucketEntry [{', '.join(out)}]>"

@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .change_trust_result_code import ChangeTrustResultCode
-
-__all__ = ["ChangeTrustResult"]
-
-
+__all__ = ['ChangeTrustResult']
 class ChangeTrustResult:
     """
     XDR Source Code::
@@ -30,13 +30,11 @@ class ChangeTrustResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: ChangeTrustResultCode,
     ) -> None:
         self.code = code
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == ChangeTrustResultCode.CHANGE_TRUST_SUCCESS:
@@ -55,12 +53,8 @@ class ChangeTrustResult:
             return
         if self.code == ChangeTrustResultCode.CHANGE_TRUST_CANNOT_DELETE:
             return
-        if (
-            self.code
-            == ChangeTrustResultCode.CHANGE_TRUST_NOT_AUTH_MAINTAIN_LIABILITIES
-        ):
+        if self.code == ChangeTrustResultCode.CHANGE_TRUST_NOT_AUTH_MAINTAIN_LIABILITIES:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ChangeTrustResult:
         code = ChangeTrustResultCode.unpack(unpacker)
@@ -83,7 +77,6 @@ class ChangeTrustResult:
         if code == ChangeTrustResultCode.CHANGE_TRUST_NOT_AUTH_MAINTAIN_LIABILITIES:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -102,16 +95,13 @@ class ChangeTrustResult:
     def from_xdr(cls, xdr: str) -> ChangeTrustResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.code,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code
-
+        return self.code== other.code
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
+        out.append(f'code={self.code}')
         return f"<ChangeTrustResult [{', '.join(out)}]>"

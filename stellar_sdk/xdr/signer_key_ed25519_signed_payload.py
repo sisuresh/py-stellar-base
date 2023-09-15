@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Opaque
 from .uint256 import Uint256
-
-__all__ = ["SignerKeyEd25519SignedPayload"]
-
-
+__all__ = ['SignerKeyEd25519SignedPayload']
 class SignerKeyEd25519SignedPayload:
     """
     XDR Source Code::
@@ -24,7 +23,6 @@ class SignerKeyEd25519SignedPayload:
                 opaque payload<64>;
             }
     """
-
     def __init__(
         self,
         ed25519: Uint256,
@@ -32,11 +30,9 @@ class SignerKeyEd25519SignedPayload:
     ) -> None:
         self.ed25519 = ed25519
         self.payload = payload
-
     def pack(self, packer: Packer) -> None:
         self.ed25519.pack(packer)
         Opaque(self.payload, 64, False).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SignerKeyEd25519SignedPayload:
         ed25519 = Uint256.unpack(unpacker)
@@ -45,7 +41,6 @@ class SignerKeyEd25519SignedPayload:
             ed25519=ed25519,
             payload=payload,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -64,23 +59,15 @@ class SignerKeyEd25519SignedPayload:
     def from_xdr(cls, xdr: str) -> SignerKeyEd25519SignedPayload:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ed25519,
-                self.payload,
-            )
-        )
-
+        return hash((self.ed25519, self.payload,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.ed25519 == other.ed25519 and self.payload == other.payload
-
+        return self.ed25519== other.ed25519 and self.payload== other.payload
     def __str__(self):
         out = [
-            f"ed25519={self.ed25519}",
-            f"payload={self.payload}",
+            f'ed25519={self.ed25519}',
+            f'payload={self.payload}',
         ]
         return f"<SignerKeyEd25519SignedPayload [{', '.join(out)}]>"

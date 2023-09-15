@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .inflation_payout import InflationPayout
 from .inflation_result_code import InflationResultCode
-
-__all__ = ["InflationResult"]
-
-
+from .inflation_payout import InflationPayout
+__all__ = ['InflationResult']
 class InflationResult:
     """
     XDR Source Code::
@@ -25,7 +24,6 @@ class InflationResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: InflationResultCode,
@@ -33,12 +31,9 @@ class InflationResult:
     ) -> None:
         _expect_max_length = 4294967295
         if payouts and len(payouts) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `payouts` should be {_expect_max_length}, but got {len(payouts)}."
-            )
+            raise ValueError(f"The maximum length of `payouts` should be {_expect_max_length}, but got {len(payouts)}.")
         self.code = code
         self.payouts = payouts
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == InflationResultCode.INFLATION_SUCCESS:
@@ -50,7 +45,6 @@ class InflationResult:
             return
         if self.code == InflationResultCode.INFLATION_NOT_TIME:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> InflationResult:
         code = InflationResultCode.unpack(unpacker)
@@ -63,7 +57,6 @@ class InflationResult:
         if code == InflationResultCode.INFLATION_NOT_TIME:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -82,22 +75,14 @@ class InflationResult:
     def from_xdr(cls, xdr: str) -> InflationResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.code,
-                self.payouts,
-            )
-        )
-
+        return hash((self.code, self.payouts,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code and self.payouts == other.payouts
-
+        return self.code== other.code and self.payouts== other.payouts
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
-        out.append(f"payouts={self.payouts}") if self.payouts is not None else None
+        out.append(f'code={self.code}')
+        out.append(f'payouts={self.payouts}') if self.payouts is not None else None
         return f"<InflationResult [{', '.join(out)}]>"

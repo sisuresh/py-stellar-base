@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .contract_executable import ContractExecutable
 from .sc_map import SCMap
-
-__all__ = ["SCContractInstance"]
-
-
+__all__ = ['SCContractInstance']
 class SCContractInstance:
     """
     XDR Source Code::
@@ -22,7 +21,6 @@ class SCContractInstance:
             SCMap* storage;
         };
     """
-
     def __init__(
         self,
         executable: ContractExecutable,
@@ -30,7 +28,6 @@ class SCContractInstance:
     ) -> None:
         self.executable = executable
         self.storage = storage
-
     def pack(self, packer: Packer) -> None:
         self.executable.pack(packer)
         if self.storage is None:
@@ -38,7 +35,6 @@ class SCContractInstance:
         else:
             packer.pack_uint(1)
             self.storage.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCContractInstance:
         executable = ContractExecutable.unpack(unpacker)
@@ -47,7 +43,6 @@ class SCContractInstance:
             executable=executable,
             storage=storage,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -66,23 +61,15 @@ class SCContractInstance:
     def from_xdr(cls, xdr: str) -> SCContractInstance:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.executable,
-                self.storage,
-            )
-        )
-
+        return hash((self.executable, self.storage,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.executable == other.executable and self.storage == other.storage
-
+        return self.executable== other.executable and self.storage== other.storage
     def __str__(self):
         out = [
-            f"executable={self.executable}",
-            f"storage={self.storage}",
+            f'executable={self.executable}',
+            f'storage={self.storage}',
         ]
         return f"<SCContractInstance [{', '.join(out)}]>"

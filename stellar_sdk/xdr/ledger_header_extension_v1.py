@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .ledger_header_extension_v1_ext import LedgerHeaderExtensionV1Ext
 from .uint32 import Uint32
-
-__all__ = ["LedgerHeaderExtensionV1"]
-
-
+from .ledger_header_extension_v1_ext import LedgerHeaderExtensionV1Ext
+__all__ = ['LedgerHeaderExtensionV1']
 class LedgerHeaderExtensionV1:
     """
     XDR Source Code::
@@ -28,7 +28,6 @@ class LedgerHeaderExtensionV1:
             ext;
         };
     """
-
     def __init__(
         self,
         flags: Uint32,
@@ -36,11 +35,9 @@ class LedgerHeaderExtensionV1:
     ) -> None:
         self.flags = flags
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.flags.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerHeaderExtensionV1:
         flags = Uint32.unpack(unpacker)
@@ -49,7 +46,6 @@ class LedgerHeaderExtensionV1:
             flags=flags,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -68,23 +64,15 @@ class LedgerHeaderExtensionV1:
     def from_xdr(cls, xdr: str) -> LedgerHeaderExtensionV1:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.flags,
-                self.ext,
-            )
-        )
-
+        return hash((self.flags, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.flags == other.flags and self.ext == other.ext
-
+        return self.flags== other.flags and self.ext== other.ext
     def __str__(self):
         out = [
-            f"flags={self.flags}",
-            f"ext={self.ext}",
+            f'flags={self.flags}',
+            f'ext={self.ext}',
         ]
         return f"<LedgerHeaderExtensionV1 [{', '.join(out)}]>"

@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import String
-from .hash import Hash
 from .memo_type import MemoType
 from .uint64 import Uint64
-
-__all__ = ["Memo"]
-
-
+from .hash import Hash
+from .hash import Hash
+__all__ = ['Memo']
 class Memo:
     """
     XDR Source Code::
@@ -32,7 +32,6 @@ class Memo:
             Hash retHash; // the hash of the tx you are rejecting
         };
     """
-
     def __init__(
         self,
         type: MemoType,
@@ -46,7 +45,6 @@ class Memo:
         self.id = id
         self.hash = hash
         self.ret_hash = ret_hash
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == MemoType.MEMO_NONE:
@@ -71,7 +69,6 @@ class Memo:
                 raise ValueError("ret_hash should not be None.")
             self.ret_hash.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Memo:
         type = MemoType.unpack(unpacker)
@@ -90,7 +87,6 @@ class Memo:
             ret_hash = Hash.unpack(unpacker)
             return cls(type=type, ret_hash=ret_hash)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -109,34 +105,17 @@ class Memo:
     def from_xdr(cls, xdr: str) -> Memo:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.text,
-                self.id,
-                self.hash,
-                self.ret_hash,
-            )
-        )
-
+        return hash((self.type, self.text, self.id, self.hash, self.ret_hash,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.text == other.text
-            and self.id == other.id
-            and self.hash == other.hash
-            and self.ret_hash == other.ret_hash
-        )
-
+        return self.type== other.type and self.text== other.text and self.id== other.id and self.hash== other.hash and self.ret_hash== other.ret_hash
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"text={self.text}") if self.text is not None else None
-        out.append(f"id={self.id}") if self.id is not None else None
-        out.append(f"hash={self.hash}") if self.hash is not None else None
-        out.append(f"ret_hash={self.ret_hash}") if self.ret_hash is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'text={self.text}') if self.text is not None else None
+        out.append(f'id={self.id}') if self.id is not None else None
+        out.append(f'hash={self.hash}') if self.hash is not None else None
+        out.append(f'ret_hash={self.ret_hash}') if self.ret_hash is not None else None
         return f"<Memo [{', '.join(out)}]>"

@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Integer
-
-__all__ = ["InnerTransactionResultExt"]
-
-
+__all__ = ['InnerTransactionResultExt']
 class InnerTransactionResultExt:
     """
     XDR Source Code::
@@ -21,25 +20,21 @@ class InnerTransactionResultExt:
                 void;
             }
     """
-
     def __init__(
         self,
         v: int,
     ) -> None:
         self.v = v
-
     def pack(self, packer: Packer) -> None:
         Integer(self.v).pack(packer)
         if self.v == 0:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> InnerTransactionResultExt:
         v = Integer.unpack(unpacker)
         if v == 0:
             return cls(v=v)
         return cls(v=v)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -58,16 +53,13 @@ class InnerTransactionResultExt:
     def from_xdr(cls, xdr: str) -> InnerTransactionResultExt:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.v,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.v == other.v
-
+        return self.v== other.v
     def __str__(self):
         out = []
-        out.append(f"v={self.v}")
+        out.append(f'v={self.v}')
         return f"<InnerTransactionResultExt [{', '.join(out)}]>"

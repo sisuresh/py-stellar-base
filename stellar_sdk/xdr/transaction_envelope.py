@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .envelope_type import EnvelopeType
-from .fee_bump_transaction_envelope import FeeBumpTransactionEnvelope
 from .transaction_v0_envelope import TransactionV0Envelope
 from .transaction_v1_envelope import TransactionV1Envelope
-
-__all__ = ["TransactionEnvelope"]
-
-
+from .fee_bump_transaction_envelope import FeeBumpTransactionEnvelope
+__all__ = ['TransactionEnvelope']
 class TransactionEnvelope:
     """
     XDR Source Code::
@@ -28,7 +28,6 @@ class TransactionEnvelope:
             FeeBumpTransactionEnvelope feeBump;
         };
     """
-
     def __init__(
         self,
         type: EnvelopeType,
@@ -40,7 +39,6 @@ class TransactionEnvelope:
         self.v0 = v0
         self.v1 = v1
         self.fee_bump = fee_bump
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == EnvelopeType.ENVELOPE_TYPE_TX_V0:
@@ -58,7 +56,6 @@ class TransactionEnvelope:
                 raise ValueError("fee_bump should not be None.")
             self.fee_bump.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionEnvelope:
         type = EnvelopeType.unpack(unpacker)
@@ -72,7 +69,6 @@ class TransactionEnvelope:
             fee_bump = FeeBumpTransactionEnvelope.unpack(unpacker)
             return cls(type=type, fee_bump=fee_bump)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -91,31 +87,16 @@ class TransactionEnvelope:
     def from_xdr(cls, xdr: str) -> TransactionEnvelope:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.v0,
-                self.v1,
-                self.fee_bump,
-            )
-        )
-
+        return hash((self.type, self.v0, self.v1, self.fee_bump,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.v0 == other.v0
-            and self.v1 == other.v1
-            and self.fee_bump == other.fee_bump
-        )
-
+        return self.type== other.type and self.v0== other.v0 and self.v1== other.v1 and self.fee_bump== other.fee_bump
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"v0={self.v0}") if self.v0 is not None else None
-        out.append(f"v1={self.v1}") if self.v1 is not None else None
-        out.append(f"fee_bump={self.fee_bump}") if self.fee_bump is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'v0={self.v0}') if self.v0 is not None else None
+        out.append(f'v1={self.v1}') if self.v1 is not None else None
+        out.append(f'fee_bump={self.fee_bump}') if self.fee_bump is not None else None
         return f"<TransactionEnvelope [{', '.join(out)}]>"

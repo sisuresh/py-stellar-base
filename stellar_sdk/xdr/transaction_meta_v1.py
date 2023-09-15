@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .ledger_entry_changes import LedgerEntryChanges
 from .operation_meta import OperationMeta
-
-__all__ = ["TransactionMetaV1"]
-
-
+__all__ = ['TransactionMetaV1']
 class TransactionMetaV1:
     """
     XDR Source Code::
@@ -23,7 +22,6 @@ class TransactionMetaV1:
             OperationMeta operations<>;   // meta for each operation
         };
     """
-
     def __init__(
         self,
         tx_changes: LedgerEntryChanges,
@@ -31,18 +29,14 @@ class TransactionMetaV1:
     ) -> None:
         _expect_max_length = 4294967295
         if operations and len(operations) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}."
-            )
+            raise ValueError(f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}.")
         self.tx_changes = tx_changes
         self.operations = operations
-
     def pack(self, packer: Packer) -> None:
         self.tx_changes.pack(packer)
         packer.pack_uint(len(self.operations))
         for operations_item in self.operations:
             operations_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionMetaV1:
         tx_changes = LedgerEntryChanges.unpack(unpacker)
@@ -54,7 +48,6 @@ class TransactionMetaV1:
             tx_changes=tx_changes,
             operations=operations,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -73,25 +66,15 @@ class TransactionMetaV1:
     def from_xdr(cls, xdr: str) -> TransactionMetaV1:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.tx_changes,
-                self.operations,
-            )
-        )
-
+        return hash((self.tx_changes, self.operations,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.tx_changes == other.tx_changes and self.operations == other.operations
-        )
-
+        return self.tx_changes== other.tx_changes and self.operations== other.operations
     def __str__(self):
         out = [
-            f"tx_changes={self.tx_changes}",
-            f"operations={self.operations}",
+            f'tx_changes={self.tx_changes}',
+            f'operations={self.operations}',
         ]
         return f"<TransactionMetaV1 [{', '.join(out)}]>"

@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .extension_point import ExtensionPoint
-from .time_point import TimePoint
 from .uint32 import Uint32
-
-__all__ = ["AccountEntryExtensionV3"]
-
-
+from .time_point import TimePoint
+__all__ = ['AccountEntryExtensionV3']
 class AccountEntryExtensionV3:
     """
     XDR Source Code::
@@ -30,7 +30,6 @@ class AccountEntryExtensionV3:
             TimePoint seqTime;
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
@@ -40,12 +39,10 @@ class AccountEntryExtensionV3:
         self.ext = ext
         self.seq_ledger = seq_ledger
         self.seq_time = seq_time
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         self.seq_ledger.pack(packer)
         self.seq_time.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AccountEntryExtensionV3:
         ext = ExtensionPoint.unpack(unpacker)
@@ -56,7 +53,6 @@ class AccountEntryExtensionV3:
             seq_ledger=seq_ledger,
             seq_time=seq_time,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -75,29 +71,16 @@ class AccountEntryExtensionV3:
     def from_xdr(cls, xdr: str) -> AccountEntryExtensionV3:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.seq_ledger,
-                self.seq_time,
-            )
-        )
-
+        return hash((self.ext, self.seq_ledger, self.seq_time,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ext == other.ext
-            and self.seq_ledger == other.seq_ledger
-            and self.seq_time == other.seq_time
-        )
-
+        return self.ext== other.ext and self.seq_ledger== other.seq_ledger and self.seq_time== other.seq_time
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"seq_ledger={self.seq_ledger}",
-            f"seq_time={self.seq_time}",
+            f'ext={self.ext}',
+            f'seq_ledger={self.seq_ledger}',
+            f'seq_time={self.seq_time}',
         ]
         return f"<AccountEntryExtensionV3 [{', '.join(out)}]>"

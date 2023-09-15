@@ -3,32 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Opaque
-
-__all__ = ["AssetCode4"]
-
-
+__all__ = ['AssetCode4']
 class AssetCode4:
     """
     XDR Source Code::
 
         typedef opaque AssetCode4[4];
     """
-
     def __init__(self, asset_code4: bytes) -> None:
         self.asset_code4 = asset_code4
-
     def pack(self, packer: Packer) -> None:
         Opaque(self.asset_code4, 4, True).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AssetCode4:
         asset_code4 = Opaque.unpack(unpacker, 4, True)
         return cls(asset_code4)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -47,10 +42,8 @@ class AssetCode4:
     def from_xdr(cls, xdr: str) -> AssetCode4:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.asset_code4)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

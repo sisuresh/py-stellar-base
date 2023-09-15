@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .ledger_entry_changes import LedgerEntryChanges
 from .operation_meta import OperationMeta
-
-__all__ = ["TransactionMetaV2"]
-
-
+from .ledger_entry_changes import LedgerEntryChanges
+__all__ = ['TransactionMetaV2']
 class TransactionMetaV2:
     """
     XDR Source Code::
@@ -26,7 +26,6 @@ class TransactionMetaV2:
                                                 // applied if any
         };
     """
-
     def __init__(
         self,
         tx_changes_before: LedgerEntryChanges,
@@ -35,20 +34,16 @@ class TransactionMetaV2:
     ) -> None:
         _expect_max_length = 4294967295
         if operations and len(operations) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}."
-            )
+            raise ValueError(f"The maximum length of `operations` should be {_expect_max_length}, but got {len(operations)}.")
         self.tx_changes_before = tx_changes_before
         self.operations = operations
         self.tx_changes_after = tx_changes_after
-
     def pack(self, packer: Packer) -> None:
         self.tx_changes_before.pack(packer)
         packer.pack_uint(len(self.operations))
         for operations_item in self.operations:
             operations_item.pack(packer)
         self.tx_changes_after.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TransactionMetaV2:
         tx_changes_before = LedgerEntryChanges.unpack(unpacker)
@@ -62,7 +57,6 @@ class TransactionMetaV2:
             operations=operations,
             tx_changes_after=tx_changes_after,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -81,29 +75,16 @@ class TransactionMetaV2:
     def from_xdr(cls, xdr: str) -> TransactionMetaV2:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.tx_changes_before,
-                self.operations,
-                self.tx_changes_after,
-            )
-        )
-
+        return hash((self.tx_changes_before, self.operations, self.tx_changes_after,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.tx_changes_before == other.tx_changes_before
-            and self.operations == other.operations
-            and self.tx_changes_after == other.tx_changes_after
-        )
-
+        return self.tx_changes_before== other.tx_changes_before and self.operations== other.operations and self.tx_changes_after== other.tx_changes_after
     def __str__(self):
         out = [
-            f"tx_changes_before={self.tx_changes_before}",
-            f"operations={self.operations}",
-            f"tx_changes_after={self.tx_changes_after}",
+            f'tx_changes_before={self.tx_changes_before}',
+            f'operations={self.operations}',
+            f'tx_changes_after={self.tx_changes_after}',
         ]
         return f"<TransactionMetaV2 [{', '.join(out)}]>"

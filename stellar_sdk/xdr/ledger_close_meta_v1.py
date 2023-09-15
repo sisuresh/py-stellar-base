@@ -3,19 +3,18 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .generalized_transaction_set import GeneralizedTransactionSet
 from .ledger_header_history_entry import LedgerHeaderHistoryEntry
-from .scp_history_entry import SCPHistoryEntry
+from .generalized_transaction_set import GeneralizedTransactionSet
 from .transaction_result_meta import TransactionResultMeta
 from .upgrade_entry_meta import UpgradeEntryMeta
-
-__all__ = ["LedgerCloseMetaV1"]
-
-
+from .scp_history_entry import SCPHistoryEntry
+__all__ = ['LedgerCloseMetaV1']
 class LedgerCloseMetaV1:
     """
     XDR Source Code::
@@ -38,7 +37,6 @@ class LedgerCloseMetaV1:
             SCPHistoryEntry scpInfo<>;
         };
     """
-
     def __init__(
         self,
         ledger_header: LedgerHeaderHistoryEntry,
@@ -49,25 +47,18 @@ class LedgerCloseMetaV1:
     ) -> None:
         _expect_max_length = 4294967295
         if tx_processing and len(tx_processing) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `tx_processing` should be {_expect_max_length}, but got {len(tx_processing)}."
-            )
+            raise ValueError(f"The maximum length of `tx_processing` should be {_expect_max_length}, but got {len(tx_processing)}.")
         _expect_max_length = 4294967295
         if upgrades_processing and len(upgrades_processing) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `upgrades_processing` should be {_expect_max_length}, but got {len(upgrades_processing)}."
-            )
+            raise ValueError(f"The maximum length of `upgrades_processing` should be {_expect_max_length}, but got {len(upgrades_processing)}.")
         _expect_max_length = 4294967295
         if scp_info and len(scp_info) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `scp_info` should be {_expect_max_length}, but got {len(scp_info)}."
-            )
+            raise ValueError(f"The maximum length of `scp_info` should be {_expect_max_length}, but got {len(scp_info)}.")
         self.ledger_header = ledger_header
         self.tx_set = tx_set
         self.tx_processing = tx_processing
         self.upgrades_processing = upgrades_processing
         self.scp_info = scp_info
-
     def pack(self, packer: Packer) -> None:
         self.ledger_header.pack(packer)
         self.tx_set.pack(packer)
@@ -80,7 +71,6 @@ class LedgerCloseMetaV1:
         packer.pack_uint(len(self.scp_info))
         for scp_info_item in self.scp_info:
             scp_info_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerCloseMetaV1:
         ledger_header = LedgerHeaderHistoryEntry.unpack(unpacker)
@@ -104,7 +94,6 @@ class LedgerCloseMetaV1:
             upgrades_processing=upgrades_processing,
             scp_info=scp_info,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -123,35 +112,18 @@ class LedgerCloseMetaV1:
     def from_xdr(cls, xdr: str) -> LedgerCloseMetaV1:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ledger_header,
-                self.tx_set,
-                self.tx_processing,
-                self.upgrades_processing,
-                self.scp_info,
-            )
-        )
-
+        return hash((self.ledger_header, self.tx_set, self.tx_processing, self.upgrades_processing, self.scp_info,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ledger_header == other.ledger_header
-            and self.tx_set == other.tx_set
-            and self.tx_processing == other.tx_processing
-            and self.upgrades_processing == other.upgrades_processing
-            and self.scp_info == other.scp_info
-        )
-
+        return self.ledger_header== other.ledger_header and self.tx_set== other.tx_set and self.tx_processing== other.tx_processing and self.upgrades_processing== other.upgrades_processing and self.scp_info== other.scp_info
     def __str__(self):
         out = [
-            f"ledger_header={self.ledger_header}",
-            f"tx_set={self.tx_set}",
-            f"tx_processing={self.tx_processing}",
-            f"upgrades_processing={self.upgrades_processing}",
-            f"scp_info={self.scp_info}",
+            f'ledger_header={self.ledger_header}',
+            f'tx_set={self.tx_set}',
+            f'tx_processing={self.tx_processing}',
+            f'upgrades_processing={self.upgrades_processing}',
+            f'scp_info={self.scp_info}',
         ]
         return f"<LedgerCloseMetaV1 [{', '.join(out)}]>"

@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_entry_extension_v3 import AccountEntryExtensionV3
-from .base import Integer
-
-__all__ = ["AccountEntryExtensionV2Ext"]
-
-
+__all__ = ['AccountEntryExtensionV2Ext']
 class AccountEntryExtensionV2Ext:
     """
     XDR Source Code::
@@ -24,7 +23,6 @@ class AccountEntryExtensionV2Ext:
                 AccountEntryExtensionV3 v3;
             }
     """
-
     def __init__(
         self,
         v: int,
@@ -32,7 +30,6 @@ class AccountEntryExtensionV2Ext:
     ) -> None:
         self.v = v
         self.v3 = v3
-
     def pack(self, packer: Packer) -> None:
         Integer(self.v).pack(packer)
         if self.v == 0:
@@ -42,7 +39,6 @@ class AccountEntryExtensionV2Ext:
                 raise ValueError("v3 should not be None.")
             self.v3.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> AccountEntryExtensionV2Ext:
         v = Integer.unpack(unpacker)
@@ -52,7 +48,6 @@ class AccountEntryExtensionV2Ext:
             v3 = AccountEntryExtensionV3.unpack(unpacker)
             return cls(v=v, v3=v3)
         return cls(v=v)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -71,22 +66,14 @@ class AccountEntryExtensionV2Ext:
     def from_xdr(cls, xdr: str) -> AccountEntryExtensionV2Ext:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.v,
-                self.v3,
-            )
-        )
-
+        return hash((self.v, self.v3,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.v == other.v and self.v3 == other.v3
-
+        return self.v== other.v and self.v3== other.v3
     def __str__(self):
         out = []
-        out.append(f"v={self.v}")
-        out.append(f"v3={self.v3}") if self.v3 is not None else None
+        out.append(f'v={self.v}')
+        out.append(f'v3={self.v3}') if self.v3 is not None else None
         return f"<AccountEntryExtensionV2Ext [{', '.join(out)}]>"

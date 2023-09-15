@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Opaque
 from .extension_point import ExtensionPoint
 from .hash import Hash
-
-__all__ = ["ContractCodeEntry"]
-
-
+__all__ = ['ContractCodeEntry']
 class ContractCodeEntry:
     """
     XDR Source Code::
@@ -24,7 +23,6 @@ class ContractCodeEntry:
             opaque code<>;
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
@@ -34,12 +32,10 @@ class ContractCodeEntry:
         self.ext = ext
         self.hash = hash
         self.code = code
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         self.hash.pack(packer)
         Opaque(self.code, 4294967295, False).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ContractCodeEntry:
         ext = ExtensionPoint.unpack(unpacker)
@@ -50,7 +46,6 @@ class ContractCodeEntry:
             hash=hash,
             code=code,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +64,16 @@ class ContractCodeEntry:
     def from_xdr(cls, xdr: str) -> ContractCodeEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.hash,
-                self.code,
-            )
-        )
-
+        return hash((self.ext, self.hash, self.code,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ext == other.ext
-            and self.hash == other.hash
-            and self.code == other.code
-        )
-
+        return self.ext== other.ext and self.hash== other.hash and self.code== other.code
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"hash={self.hash}",
-            f"code={self.code}",
+            f'ext={self.ext}',
+            f'hash={self.hash}',
+            f'code={self.code}',
         ]
         return f"<ContractCodeEntry [{', '.join(out)}]>"

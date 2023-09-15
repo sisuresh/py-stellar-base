@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .precondition_type import PreconditionType
-from .preconditions_v2 import PreconditionsV2
 from .time_bounds import TimeBounds
-
-__all__ = ["Preconditions"]
-
-
+from .preconditions_v2 import PreconditionsV2
+__all__ = ['Preconditions']
 class Preconditions:
     """
     XDR Source Code::
@@ -27,7 +27,6 @@ class Preconditions:
             PreconditionsV2 v2;
         };
     """
-
     def __init__(
         self,
         type: PreconditionType,
@@ -37,7 +36,6 @@ class Preconditions:
         self.type = type
         self.time_bounds = time_bounds
         self.v2 = v2
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == PreconditionType.PRECOND_NONE:
@@ -52,7 +50,6 @@ class Preconditions:
                 raise ValueError("v2 should not be None.")
             self.v2.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Preconditions:
         type = PreconditionType.unpack(unpacker)
@@ -65,7 +62,6 @@ class Preconditions:
             v2 = PreconditionsV2.unpack(unpacker)
             return cls(type=type, v2=v2)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -84,30 +80,15 @@ class Preconditions:
     def from_xdr(cls, xdr: str) -> Preconditions:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.time_bounds,
-                self.v2,
-            )
-        )
-
+        return hash((self.type, self.time_bounds, self.v2,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.time_bounds == other.time_bounds
-            and self.v2 == other.v2
-        )
-
+        return self.type== other.type and self.time_bounds== other.time_bounds and self.v2== other.v2
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"time_bounds={self.time_bounds}"
-        ) if self.time_bounds is not None else None
-        out.append(f"v2={self.v2}") if self.v2 is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'time_bounds={self.time_bounds}') if self.time_bounds is not None else None
+        out.append(f'v2={self.v2}') if self.v2 is not None else None
         return f"<Preconditions [{', '.join(out)}]>"

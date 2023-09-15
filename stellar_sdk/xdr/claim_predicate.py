@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-from typing import List, Optional
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .claim_predicate_type import ClaimPredicateType
 from .int64 import Int64
-
-__all__ = ["ClaimPredicate"]
-
-
+from .int64 import Int64
+__all__ = ['ClaimPredicate']
 class ClaimPredicate:
     """
     XDR Source Code::
@@ -34,7 +34,6 @@ class ClaimPredicate:
                              // ClaimableBalanceEntry was created
         };
     """
-
     def __init__(
         self,
         type: ClaimPredicateType,
@@ -46,21 +45,16 @@ class ClaimPredicate:
     ) -> None:
         _expect_max_length = 2
         if and_predicates and len(and_predicates) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `and_predicates` should be {_expect_max_length}, but got {len(and_predicates)}."
-            )
+            raise ValueError(f"The maximum length of `and_predicates` should be {_expect_max_length}, but got {len(and_predicates)}.")
         _expect_max_length = 2
         if or_predicates and len(or_predicates) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `or_predicates` should be {_expect_max_length}, but got {len(or_predicates)}."
-            )
+            raise ValueError(f"The maximum length of `or_predicates` should be {_expect_max_length}, but got {len(or_predicates)}.")
         self.type = type
         self.and_predicates = and_predicates
         self.or_predicates = or_predicates
         self.not_predicate = not_predicate
         self.abs_before = abs_before
         self.rel_before = rel_before
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == ClaimPredicateType.CLAIM_PREDICATE_UNCONDITIONAL:
@@ -98,7 +92,6 @@ class ClaimPredicate:
                 raise ValueError("rel_before should not be None.")
             self.rel_before.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ClaimPredicate:
         type = ClaimPredicateType.unpack(unpacker)
@@ -117,9 +110,7 @@ class ClaimPredicate:
                 or_predicates.append(ClaimPredicate.unpack(unpacker))
             return cls(type=type, or_predicates=or_predicates)
         if type == ClaimPredicateType.CLAIM_PREDICATE_NOT:
-            not_predicate = (
-                ClaimPredicate.unpack(unpacker) if unpacker.unpack_uint() else None
-            )
+            not_predicate = ClaimPredicate.unpack(unpacker) if unpacker.unpack_uint() else None
             return cls(type=type, not_predicate=not_predicate)
         if type == ClaimPredicateType.CLAIM_PREDICATE_BEFORE_ABSOLUTE_TIME:
             abs_before = Int64.unpack(unpacker)
@@ -128,7 +119,6 @@ class ClaimPredicate:
             rel_before = Int64.unpack(unpacker)
             return cls(type=type, rel_before=rel_before)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -147,47 +137,18 @@ class ClaimPredicate:
     def from_xdr(cls, xdr: str) -> ClaimPredicate:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.and_predicates,
-                self.or_predicates,
-                self.not_predicate,
-                self.abs_before,
-                self.rel_before,
-            )
-        )
-
+        return hash((self.type, self.and_predicates, self.or_predicates, self.not_predicate, self.abs_before, self.rel_before,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.and_predicates == other.and_predicates
-            and self.or_predicates == other.or_predicates
-            and self.not_predicate == other.not_predicate
-            and self.abs_before == other.abs_before
-            and self.rel_before == other.rel_before
-        )
-
+        return self.type== other.type and self.and_predicates== other.and_predicates and self.or_predicates== other.or_predicates and self.not_predicate== other.not_predicate and self.abs_before== other.abs_before and self.rel_before== other.rel_before
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"and_predicates={self.and_predicates}"
-        ) if self.and_predicates is not None else None
-        out.append(
-            f"or_predicates={self.or_predicates}"
-        ) if self.or_predicates is not None else None
-        out.append(
-            f"not_predicate={self.not_predicate}"
-        ) if self.not_predicate is not None else None
-        out.append(
-            f"abs_before={self.abs_before}"
-        ) if self.abs_before is not None else None
-        out.append(
-            f"rel_before={self.rel_before}"
-        ) if self.rel_before is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'and_predicates={self.and_predicates}') if self.and_predicates is not None else None
+        out.append(f'or_predicates={self.or_predicates}') if self.or_predicates is not None else None
+        out.append(f'not_predicate={self.not_predicate}') if self.not_predicate is not None else None
+        out.append(f'abs_before={self.abs_before}') if self.abs_before is not None else None
+        out.append(f'rel_before={self.rel_before}') if self.rel_before is not None else None
         return f"<ClaimPredicate [{', '.join(out)}]>"

@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .contract_id_preimage import ContractIDPreimage
 from .hash import Hash
-
-__all__ = ["HashIDPreimageContractID"]
-
-
+from .contract_id_preimage import ContractIDPreimage
+__all__ = ['HashIDPreimageContractID']
 class HashIDPreimageContractID:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class HashIDPreimageContractID:
                 ContractIDPreimage contractIDPreimage;
             }
     """
-
     def __init__(
         self,
         network_id: Hash,
@@ -30,11 +29,9 @@ class HashIDPreimageContractID:
     ) -> None:
         self.network_id = network_id
         self.contract_id_preimage = contract_id_preimage
-
     def pack(self, packer: Packer) -> None:
         self.network_id.pack(packer)
         self.contract_id_preimage.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> HashIDPreimageContractID:
         network_id = Hash.unpack(unpacker)
@@ -43,7 +40,6 @@ class HashIDPreimageContractID:
             network_id=network_id,
             contract_id_preimage=contract_id_preimage,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,26 +58,15 @@ class HashIDPreimageContractID:
     def from_xdr(cls, xdr: str) -> HashIDPreimageContractID:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.network_id,
-                self.contract_id_preimage,
-            )
-        )
-
+        return hash((self.network_id, self.contract_id_preimage,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.network_id == other.network_id
-            and self.contract_id_preimage == other.contract_id_preimage
-        )
-
+        return self.network_id== other.network_id and self.contract_id_preimage== other.contract_id_preimage
     def __str__(self):
         out = [
-            f"network_id={self.network_id}",
-            f"contract_id_preimage={self.contract_id_preimage}",
+            f'network_id={self.network_id}',
+            f'contract_id_preimage={self.contract_id_preimage}',
         ]
         return f"<HashIDPreimageContractID [{', '.join(out)}]>"

@@ -3,18 +3,19 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
-from .int64 import Int64
 from .trust_line_asset import TrustLineAsset
-from .trust_line_entry_ext import TrustLineEntryExt
+from .int64 import Int64
+from .int64 import Int64
 from .uint32 import Uint32
-
-__all__ = ["TrustLineEntry"]
-
-
+from .trust_line_entry_ext import TrustLineEntryExt
+__all__ = ['TrustLineEntry']
 class TrustLineEntry:
     """
     XDR Source Code::
@@ -52,7 +53,6 @@ class TrustLineEntry:
             ext;
         };
     """
-
     def __init__(
         self,
         account_id: AccountID,
@@ -68,7 +68,6 @@ class TrustLineEntry:
         self.limit = limit
         self.flags = flags
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.account_id.pack(packer)
         self.asset.pack(packer)
@@ -76,7 +75,6 @@ class TrustLineEntry:
         self.limit.pack(packer)
         self.flags.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> TrustLineEntry:
         account_id = AccountID.unpack(unpacker)
@@ -93,7 +91,6 @@ class TrustLineEntry:
             flags=flags,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -112,38 +109,19 @@ class TrustLineEntry:
     def from_xdr(cls, xdr: str) -> TrustLineEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.account_id,
-                self.asset,
-                self.balance,
-                self.limit,
-                self.flags,
-                self.ext,
-            )
-        )
-
+        return hash((self.account_id, self.asset, self.balance, self.limit, self.flags, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.account_id == other.account_id
-            and self.asset == other.asset
-            and self.balance == other.balance
-            and self.limit == other.limit
-            and self.flags == other.flags
-            and self.ext == other.ext
-        )
-
+        return self.account_id== other.account_id and self.asset== other.asset and self.balance== other.balance and self.limit== other.limit and self.flags== other.flags and self.ext== other.ext
     def __str__(self):
         out = [
-            f"account_id={self.account_id}",
-            f"asset={self.asset}",
-            f"balance={self.balance}",
-            f"limit={self.limit}",
-            f"flags={self.flags}",
-            f"ext={self.ext}",
+            f'account_id={self.account_id}',
+            f'asset={self.asset}',
+            f'balance={self.balance}',
+            f'limit={self.limit}',
+            f'flags={self.flags}',
+            f'ext={self.ext}',
         ]
         return f"<TrustLineEntry [{', '.join(out)}]>"

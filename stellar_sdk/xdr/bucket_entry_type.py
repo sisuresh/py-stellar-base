@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["BucketEntryType"]
-
-
+__all__ = ['BucketEntryType']
 class BucketEntryType(IntEnum):
     """
     XDR Source Code::
@@ -24,12 +24,10 @@ class BucketEntryType(IntEnum):
             INITENTRY = 2 // At-and-after protocol 11: only created.
         };
     """
-
     METAENTRY = -1
     LIVEENTRY = 0
     DEADENTRY = 1
     INITENTRY = 2
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -37,7 +35,6 @@ class BucketEntryType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> BucketEntryType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

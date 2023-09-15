@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["PaymentResultCode"]
-
-
+__all__ = ['PaymentResultCode']
 class PaymentResultCode(IntEnum):
     """
     XDR Source Code::
@@ -31,7 +31,6 @@ class PaymentResultCode(IntEnum):
             PAYMENT_NO_ISSUER = -9       // missing issuer on asset
         };
     """
-
     PAYMENT_SUCCESS = 0
     PAYMENT_MALFORMED = -1
     PAYMENT_UNDERFUNDED = -2
@@ -42,7 +41,6 @@ class PaymentResultCode(IntEnum):
     PAYMENT_NOT_AUTHORIZED = -7
     PAYMENT_LINE_FULL = -8
     PAYMENT_NO_ISSUER = -9
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -50,7 +48,6 @@ class PaymentResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> PaymentResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

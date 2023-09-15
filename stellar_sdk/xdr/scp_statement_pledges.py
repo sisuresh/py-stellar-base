@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .scp_nomination import SCPNomination
+from .scp_statement_type import SCPStatementType
+from .scp_statement_prepare import SCPStatementPrepare
 from .scp_statement_confirm import SCPStatementConfirm
 from .scp_statement_externalize import SCPStatementExternalize
-from .scp_statement_prepare import SCPStatementPrepare
-from .scp_statement_type import SCPStatementType
-
-__all__ = ["SCPStatementPledges"]
-
-
+from .scp_nomination import SCPNomination
+__all__ = ['SCPStatementPledges']
 class SCPStatementPledges:
     """
     XDR Source Code::
@@ -51,7 +51,6 @@ class SCPStatementPledges:
                 SCPNomination nominate;
             }
     """
-
     def __init__(
         self,
         type: SCPStatementType,
@@ -65,7 +64,6 @@ class SCPStatementPledges:
         self.confirm = confirm
         self.externalize = externalize
         self.nominate = nominate
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == SCPStatementType.SCP_ST_PREPARE:
@@ -88,7 +86,6 @@ class SCPStatementPledges:
                 raise ValueError("nominate should not be None.")
             self.nominate.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCPStatementPledges:
         type = SCPStatementType.unpack(unpacker)
@@ -105,7 +102,6 @@ class SCPStatementPledges:
             nominate = SCPNomination.unpack(unpacker)
             return cls(type=type, nominate=nominate)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -124,36 +120,17 @@ class SCPStatementPledges:
     def from_xdr(cls, xdr: str) -> SCPStatementPledges:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.prepare,
-                self.confirm,
-                self.externalize,
-                self.nominate,
-            )
-        )
-
+        return hash((self.type, self.prepare, self.confirm, self.externalize, self.nominate,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.prepare == other.prepare
-            and self.confirm == other.confirm
-            and self.externalize == other.externalize
-            and self.nominate == other.nominate
-        )
-
+        return self.type== other.type and self.prepare== other.prepare and self.confirm== other.confirm and self.externalize== other.externalize and self.nominate== other.nominate
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"prepare={self.prepare}") if self.prepare is not None else None
-        out.append(f"confirm={self.confirm}") if self.confirm is not None else None
-        out.append(
-            f"externalize={self.externalize}"
-        ) if self.externalize is not None else None
-        out.append(f"nominate={self.nominate}") if self.nominate is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'prepare={self.prepare}') if self.prepare is not None else None
+        out.append(f'confirm={self.confirm}') if self.confirm is not None else None
+        out.append(f'externalize={self.externalize}') if self.externalize is not None else None
+        out.append(f'nominate={self.nominate}') if self.nominate is not None else None
         return f"<SCPStatementPledges [{', '.join(out)}]>"

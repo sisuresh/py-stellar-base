@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .restore_footprint_result_code import RestoreFootprintResultCode
-
-__all__ = ["RestoreFootprintResult"]
-
-
+__all__ = ['RestoreFootprintResult']
 class RestoreFootprintResult:
     """
     XDR Source Code::
@@ -25,30 +25,21 @@ class RestoreFootprintResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: RestoreFootprintResultCode,
     ) -> None:
         self.code = code
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == RestoreFootprintResultCode.RESTORE_FOOTPRINT_SUCCESS:
             return
         if self.code == RestoreFootprintResultCode.RESTORE_FOOTPRINT_MALFORMED:
             return
-        if (
-            self.code
-            == RestoreFootprintResultCode.RESTORE_FOOTPRINT_RESOURCE_LIMIT_EXCEEDED
-        ):
+        if self.code == RestoreFootprintResultCode.RESTORE_FOOTPRINT_RESOURCE_LIMIT_EXCEEDED:
             return
-        if (
-            self.code
-            == RestoreFootprintResultCode.RESTORE_FOOTPRINT_INSUFFICIENT_REFUNDABLE_FEE
-        ):
+        if self.code == RestoreFootprintResultCode.RESTORE_FOOTPRINT_INSUFFICIENT_REFUNDABLE_FEE:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> RestoreFootprintResult:
         code = RestoreFootprintResultCode.unpack(unpacker)
@@ -58,13 +49,9 @@ class RestoreFootprintResult:
             return cls(code=code)
         if code == RestoreFootprintResultCode.RESTORE_FOOTPRINT_RESOURCE_LIMIT_EXCEEDED:
             return cls(code=code)
-        if (
-            code
-            == RestoreFootprintResultCode.RESTORE_FOOTPRINT_INSUFFICIENT_REFUNDABLE_FEE
-        ):
+        if code == RestoreFootprintResultCode.RESTORE_FOOTPRINT_INSUFFICIENT_REFUNDABLE_FEE:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -83,16 +70,13 @@ class RestoreFootprintResult:
     def from_xdr(cls, xdr: str) -> RestoreFootprintResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.code,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code
-
+        return self.code== other.code
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
+        out.append(f'code={self.code}')
         return f"<RestoreFootprintResult [{', '.join(out)}]>"

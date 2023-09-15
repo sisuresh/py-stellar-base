@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .hash import Hash
 from .scp_ballot import SCPBallot
 from .uint32 import Uint32
-
-__all__ = ["SCPStatementExternalize"]
-
-
+from .hash import Hash
+__all__ = ['SCPStatementExternalize']
 class SCPStatementExternalize:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class SCPStatementExternalize:
                     Hash commitQuorumSetHash; // D used before EXTERNALIZE
                 }
     """
-
     def __init__(
         self,
         commit: SCPBallot,
@@ -34,12 +33,10 @@ class SCPStatementExternalize:
         self.commit = commit
         self.n_h = n_h
         self.commit_quorum_set_hash = commit_quorum_set_hash
-
     def pack(self, packer: Packer) -> None:
         self.commit.pack(packer)
         self.n_h.pack(packer)
         self.commit_quorum_set_hash.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCPStatementExternalize:
         commit = SCPBallot.unpack(unpacker)
@@ -50,7 +47,6 @@ class SCPStatementExternalize:
             n_h=n_h,
             commit_quorum_set_hash=commit_quorum_set_hash,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,29 +65,16 @@ class SCPStatementExternalize:
     def from_xdr(cls, xdr: str) -> SCPStatementExternalize:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.commit,
-                self.n_h,
-                self.commit_quorum_set_hash,
-            )
-        )
-
+        return hash((self.commit, self.n_h, self.commit_quorum_set_hash,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.commit == other.commit
-            and self.n_h == other.n_h
-            and self.commit_quorum_set_hash == other.commit_quorum_set_hash
-        )
-
+        return self.commit== other.commit and self.n_h== other.n_h and self.commit_quorum_set_hash== other.commit_quorum_set_hash
     def __str__(self):
         out = [
-            f"commit={self.commit}",
-            f"n_h={self.n_h}",
-            f"commit_quorum_set_hash={self.commit_quorum_set_hash}",
+            f'commit={self.commit}',
+            f'n_h={self.n_h}',
+            f'commit_quorum_set_hash={self.commit_quorum_set_hash}',
         ]
         return f"<SCPStatementExternalize [{', '.join(out)}]>"

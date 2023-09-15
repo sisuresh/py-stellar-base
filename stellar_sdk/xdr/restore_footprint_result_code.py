@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["RestoreFootprintResultCode"]
-
-
+__all__ = ['RestoreFootprintResultCode']
 class RestoreFootprintResultCode(IntEnum):
     """
     XDR Source Code::
@@ -25,12 +25,10 @@ class RestoreFootprintResultCode(IntEnum):
             RESTORE_FOOTPRINT_INSUFFICIENT_REFUNDABLE_FEE = -3
         };
     """
-
     RESTORE_FOOTPRINT_SUCCESS = 0
     RESTORE_FOOTPRINT_MALFORMED = -1
     RESTORE_FOOTPRINT_RESOURCE_LIMIT_EXCEEDED = -2
     RESTORE_FOOTPRINT_INSUFFICIENT_REFUNDABLE_FEE = -3
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -38,7 +36,6 @@ class RestoreFootprintResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> RestoreFootprintResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

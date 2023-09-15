@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .ledger_close_value_signature import LedgerCloseValueSignature
 from .stellar_value_type import StellarValueType
-
-__all__ = ["StellarValueExt"]
-
-
+from .ledger_close_value_signature import LedgerCloseValueSignature
+__all__ = ['StellarValueExt']
 class StellarValueExt:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class StellarValueExt:
                 LedgerCloseValueSignature lcValueSignature;
             }
     """
-
     def __init__(
         self,
         v: StellarValueType,
@@ -32,7 +31,6 @@ class StellarValueExt:
     ) -> None:
         self.v = v
         self.lc_value_signature = lc_value_signature
-
     def pack(self, packer: Packer) -> None:
         self.v.pack(packer)
         if self.v == StellarValueType.STELLAR_VALUE_BASIC:
@@ -42,7 +40,6 @@ class StellarValueExt:
                 raise ValueError("lc_value_signature should not be None.")
             self.lc_value_signature.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> StellarValueExt:
         v = StellarValueType.unpack(unpacker)
@@ -52,7 +49,6 @@ class StellarValueExt:
             lc_value_signature = LedgerCloseValueSignature.unpack(unpacker)
             return cls(v=v, lc_value_signature=lc_value_signature)
         return cls(v=v)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -71,24 +67,14 @@ class StellarValueExt:
     def from_xdr(cls, xdr: str) -> StellarValueExt:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.v,
-                self.lc_value_signature,
-            )
-        )
-
+        return hash((self.v, self.lc_value_signature,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.v == other.v and self.lc_value_signature == other.lc_value_signature
-
+        return self.v== other.v and self.lc_value_signature== other.lc_value_signature
     def __str__(self):
         out = []
-        out.append(f"v={self.v}")
-        out.append(
-            f"lc_value_signature={self.lc_value_signature}"
-        ) if self.lc_value_signature is not None else None
+        out.append(f'v={self.v}')
+        out.append(f'lc_value_signature={self.lc_value_signature}') if self.lc_value_signature is not None else None
         return f"<StellarValueExt [{', '.join(out)}]>"

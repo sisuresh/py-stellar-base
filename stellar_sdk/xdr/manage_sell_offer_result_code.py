@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["ManageSellOfferResultCode"]
-
-
+__all__ = ['ManageSellOfferResultCode']
 class ManageSellOfferResultCode(IntEnum):
     """
     XDR Source Code::
@@ -41,7 +41,6 @@ class ManageSellOfferResultCode(IntEnum):
                 -12 // not enough funds to create a new Offer
         };
     """
-
     MANAGE_SELL_OFFER_SUCCESS = 0
     MANAGE_SELL_OFFER_MALFORMED = -1
     MANAGE_SELL_OFFER_SELL_NO_TRUST = -2
@@ -55,7 +54,6 @@ class ManageSellOfferResultCode(IntEnum):
     MANAGE_SELL_OFFER_BUY_NO_ISSUER = -10
     MANAGE_SELL_OFFER_NOT_FOUND = -11
     MANAGE_SELL_OFFER_LOW_RESERVE = -12
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -63,7 +61,6 @@ class ManageSellOfferResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> ManageSellOfferResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

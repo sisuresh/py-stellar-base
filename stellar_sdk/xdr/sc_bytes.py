@@ -3,32 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import Opaque
-
-__all__ = ["SCBytes"]
-
-
+__all__ = ['SCBytes']
 class SCBytes:
     """
     XDR Source Code::
 
         typedef opaque SCBytes<>;
     """
-
     def __init__(self, sc_bytes: bytes) -> None:
         self.sc_bytes = sc_bytes
-
     def pack(self, packer: Packer) -> None:
         Opaque(self.sc_bytes, 4294967295, False).pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCBytes:
         sc_bytes = Opaque.unpack(unpacker, 4294967295, False)
         return cls(sc_bytes)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -47,10 +42,8 @@ class SCBytes:
     def from_xdr(cls, xdr: str) -> SCBytes:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash(self.sc_bytes)
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented

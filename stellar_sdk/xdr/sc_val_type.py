@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["SCValType"]
-
-
+__all__ = ['SCValType']
 class SCValType(IntEnum):
     """
     XDR Source Code::
@@ -59,7 +59,7 @@ class SCValType(IntEnum):
             SCV_ADDRESS = 18,
 
             // The following are the internal SCVal variants that are not
-            // exposed to the contracts.
+            // exposed to the contracts. 
             SCV_CONTRACT_INSTANCE = 19,
 
             // SCV_LEDGER_KEY_CONTRACT_INSTANCE and SCV_LEDGER_KEY_NONCE are unique
@@ -69,7 +69,6 @@ class SCValType(IntEnum):
             SCV_LEDGER_KEY_NONCE = 21
         };
     """
-
     SCV_BOOL = 0
     SCV_VOID = 1
     SCV_ERROR = 2
@@ -92,7 +91,6 @@ class SCValType(IntEnum):
     SCV_CONTRACT_INSTANCE = 19
     SCV_LEDGER_KEY_CONTRACT_INSTANCE = 20
     SCV_LEDGER_KEY_NONCE = 21
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -100,7 +98,6 @@ class SCValType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> SCValType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

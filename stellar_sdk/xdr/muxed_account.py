@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .crypto_key_type import CryptoKeyType
-from .muxed_account_med25519 import MuxedAccountMed25519
 from .uint256 import Uint256
-
-__all__ = ["MuxedAccount"]
-
-
+from .muxed_account_med25519 import MuxedAccountMed25519
+__all__ = ['MuxedAccount']
 class MuxedAccount:
     """
     XDR Source Code::
@@ -29,7 +29,6 @@ class MuxedAccount:
             } med25519;
         };
     """
-
     def __init__(
         self,
         type: CryptoKeyType,
@@ -39,7 +38,6 @@ class MuxedAccount:
         self.type = type
         self.ed25519 = ed25519
         self.med25519 = med25519
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == CryptoKeyType.KEY_TYPE_ED25519:
@@ -52,7 +50,6 @@ class MuxedAccount:
                 raise ValueError("med25519 should not be None.")
             self.med25519.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> MuxedAccount:
         type = CryptoKeyType.unpack(unpacker)
@@ -63,7 +60,6 @@ class MuxedAccount:
             med25519 = MuxedAccountMed25519.unpack(unpacker)
             return cls(type=type, med25519=med25519)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -82,28 +78,15 @@ class MuxedAccount:
     def from_xdr(cls, xdr: str) -> MuxedAccount:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.ed25519,
-                self.med25519,
-            )
-        )
-
+        return hash((self.type, self.ed25519, self.med25519,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.ed25519 == other.ed25519
-            and self.med25519 == other.med25519
-        )
-
+        return self.type== other.type and self.ed25519== other.ed25519 and self.med25519== other.med25519
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"ed25519={self.ed25519}") if self.ed25519 is not None else None
-        out.append(f"med25519={self.med25519}") if self.med25519 is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'ed25519={self.ed25519}') if self.ed25519 is not None else None
+        out.append(f'med25519={self.med25519}') if self.med25519 is not None else None
         return f"<MuxedAccount [{', '.join(out)}]>"

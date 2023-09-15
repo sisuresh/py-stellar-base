@@ -3,16 +3,27 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .base import String
 from .node_id import NodeID
 from .uint64 import Uint64
-
-__all__ = ["PeerStats"]
-
-
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+from .uint64 import Uint64
+__all__ = ['PeerStats']
 class PeerStats:
     """
     XDR Source Code::
@@ -38,7 +49,6 @@ class PeerStats:
             uint64 duplicateFetchMessageRecv;
         };
     """
-
     def __init__(
         self,
         id: NodeID,
@@ -72,7 +82,6 @@ class PeerStats:
         self.duplicate_flood_message_recv = duplicate_flood_message_recv
         self.unique_fetch_message_recv = unique_fetch_message_recv
         self.duplicate_fetch_message_recv = duplicate_fetch_message_recv
-
     def pack(self, packer: Packer) -> None:
         self.id.pack(packer)
         String(self.version_str, 100).pack(packer)
@@ -89,7 +98,6 @@ class PeerStats:
         self.duplicate_flood_message_recv.pack(packer)
         self.unique_fetch_message_recv.pack(packer)
         self.duplicate_fetch_message_recv.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> PeerStats:
         id = NodeID.unpack(unpacker)
@@ -124,7 +132,6 @@ class PeerStats:
             unique_fetch_message_recv=unique_fetch_message_recv,
             duplicate_fetch_message_recv=duplicate_fetch_message_recv,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -143,65 +150,28 @@ class PeerStats:
     def from_xdr(cls, xdr: str) -> PeerStats:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.id,
-                self.version_str,
-                self.messages_read,
-                self.messages_written,
-                self.bytes_read,
-                self.bytes_written,
-                self.seconds_connected,
-                self.unique_flood_bytes_recv,
-                self.duplicate_flood_bytes_recv,
-                self.unique_fetch_bytes_recv,
-                self.duplicate_fetch_bytes_recv,
-                self.unique_flood_message_recv,
-                self.duplicate_flood_message_recv,
-                self.unique_fetch_message_recv,
-                self.duplicate_fetch_message_recv,
-            )
-        )
-
+        return hash((self.id, self.version_str, self.messages_read, self.messages_written, self.bytes_read, self.bytes_written, self.seconds_connected, self.unique_flood_bytes_recv, self.duplicate_flood_bytes_recv, self.unique_fetch_bytes_recv, self.duplicate_fetch_bytes_recv, self.unique_flood_message_recv, self.duplicate_flood_message_recv, self.unique_fetch_message_recv, self.duplicate_fetch_message_recv,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.id == other.id
-            and self.version_str == other.version_str
-            and self.messages_read == other.messages_read
-            and self.messages_written == other.messages_written
-            and self.bytes_read == other.bytes_read
-            and self.bytes_written == other.bytes_written
-            and self.seconds_connected == other.seconds_connected
-            and self.unique_flood_bytes_recv == other.unique_flood_bytes_recv
-            and self.duplicate_flood_bytes_recv == other.duplicate_flood_bytes_recv
-            and self.unique_fetch_bytes_recv == other.unique_fetch_bytes_recv
-            and self.duplicate_fetch_bytes_recv == other.duplicate_fetch_bytes_recv
-            and self.unique_flood_message_recv == other.unique_flood_message_recv
-            and self.duplicate_flood_message_recv == other.duplicate_flood_message_recv
-            and self.unique_fetch_message_recv == other.unique_fetch_message_recv
-            and self.duplicate_fetch_message_recv == other.duplicate_fetch_message_recv
-        )
-
+        return self.id== other.id and self.version_str== other.version_str and self.messages_read== other.messages_read and self.messages_written== other.messages_written and self.bytes_read== other.bytes_read and self.bytes_written== other.bytes_written and self.seconds_connected== other.seconds_connected and self.unique_flood_bytes_recv== other.unique_flood_bytes_recv and self.duplicate_flood_bytes_recv== other.duplicate_flood_bytes_recv and self.unique_fetch_bytes_recv== other.unique_fetch_bytes_recv and self.duplicate_fetch_bytes_recv== other.duplicate_fetch_bytes_recv and self.unique_flood_message_recv== other.unique_flood_message_recv and self.duplicate_flood_message_recv== other.duplicate_flood_message_recv and self.unique_fetch_message_recv== other.unique_fetch_message_recv and self.duplicate_fetch_message_recv== other.duplicate_fetch_message_recv
     def __str__(self):
         out = [
-            f"id={self.id}",
-            f"version_str={self.version_str}",
-            f"messages_read={self.messages_read}",
-            f"messages_written={self.messages_written}",
-            f"bytes_read={self.bytes_read}",
-            f"bytes_written={self.bytes_written}",
-            f"seconds_connected={self.seconds_connected}",
-            f"unique_flood_bytes_recv={self.unique_flood_bytes_recv}",
-            f"duplicate_flood_bytes_recv={self.duplicate_flood_bytes_recv}",
-            f"unique_fetch_bytes_recv={self.unique_fetch_bytes_recv}",
-            f"duplicate_fetch_bytes_recv={self.duplicate_fetch_bytes_recv}",
-            f"unique_flood_message_recv={self.unique_flood_message_recv}",
-            f"duplicate_flood_message_recv={self.duplicate_flood_message_recv}",
-            f"unique_fetch_message_recv={self.unique_fetch_message_recv}",
-            f"duplicate_fetch_message_recv={self.duplicate_fetch_message_recv}",
+            f'id={self.id}',
+            f'version_str={self.version_str}',
+            f'messages_read={self.messages_read}',
+            f'messages_written={self.messages_written}',
+            f'bytes_read={self.bytes_read}',
+            f'bytes_written={self.bytes_written}',
+            f'seconds_connected={self.seconds_connected}',
+            f'unique_flood_bytes_recv={self.unique_flood_bytes_recv}',
+            f'duplicate_flood_bytes_recv={self.duplicate_flood_bytes_recv}',
+            f'unique_fetch_bytes_recv={self.unique_fetch_bytes_recv}',
+            f'duplicate_fetch_bytes_recv={self.duplicate_fetch_bytes_recv}',
+            f'unique_flood_message_recv={self.unique_flood_message_recv}',
+            f'duplicate_flood_message_recv={self.duplicate_flood_message_recv}',
+            f'unique_fetch_message_recv={self.unique_fetch_message_recv}',
+            f'duplicate_fetch_message_recv={self.duplicate_fetch_message_recv}',
         ]
         return f"<PeerStats [{', '.join(out)}]>"

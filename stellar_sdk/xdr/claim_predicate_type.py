@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["ClaimPredicateType"]
-
-
+__all__ = ['ClaimPredicateType']
 class ClaimPredicateType(IntEnum):
     """
     XDR Source Code::
@@ -24,14 +24,12 @@ class ClaimPredicateType(IntEnum):
             CLAIM_PREDICATE_BEFORE_RELATIVE_TIME = 5
         };
     """
-
     CLAIM_PREDICATE_UNCONDITIONAL = 0
     CLAIM_PREDICATE_AND = 1
     CLAIM_PREDICATE_OR = 2
     CLAIM_PREDICATE_NOT = 3
     CLAIM_PREDICATE_BEFORE_ABSOLUTE_TIME = 4
     CLAIM_PREDICATE_BEFORE_RELATIVE_TIME = 5
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -39,7 +37,6 @@ class ClaimPredicateType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> ClaimPredicateType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

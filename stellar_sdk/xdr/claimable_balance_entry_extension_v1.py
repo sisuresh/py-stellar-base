@@ -3,17 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .claimable_balance_entry_extension_v1_ext import (
-    ClaimableBalanceEntryExtensionV1Ext,
-)
+from .claimable_balance_entry_extension_v1_ext import ClaimableBalanceEntryExtensionV1Ext
 from .uint32 import Uint32
-
-__all__ = ["ClaimableBalanceEntryExtensionV1"]
-
-
+__all__ = ['ClaimableBalanceEntryExtensionV1']
 class ClaimableBalanceEntryExtensionV1:
     """
     XDR Source Code::
@@ -30,7 +28,6 @@ class ClaimableBalanceEntryExtensionV1:
             uint32 flags; // see ClaimableBalanceFlags
         };
     """
-
     def __init__(
         self,
         ext: ClaimableBalanceEntryExtensionV1Ext,
@@ -38,11 +35,9 @@ class ClaimableBalanceEntryExtensionV1:
     ) -> None:
         self.ext = ext
         self.flags = flags
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         self.flags.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ClaimableBalanceEntryExtensionV1:
         ext = ClaimableBalanceEntryExtensionV1Ext.unpack(unpacker)
@@ -51,7 +46,6 @@ class ClaimableBalanceEntryExtensionV1:
             ext=ext,
             flags=flags,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -70,23 +64,15 @@ class ClaimableBalanceEntryExtensionV1:
     def from_xdr(cls, xdr: str) -> ClaimableBalanceEntryExtensionV1:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.flags,
-            )
-        )
-
+        return hash((self.ext, self.flags,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.ext == other.ext and self.flags == other.flags
-
+        return self.ext== other.ext and self.flags== other.flags
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"flags={self.flags}",
+            f'ext={self.ext}',
+            f'flags={self.flags}',
         ]
         return f"<ClaimableBalanceEntryExtensionV1 [{', '.join(out)}]>"

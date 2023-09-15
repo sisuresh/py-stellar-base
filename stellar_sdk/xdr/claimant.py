@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .claimant_type import ClaimantType
 from .claimant_v0 import ClaimantV0
-
-__all__ = ["Claimant"]
-
-
+__all__ = ['Claimant']
 class Claimant:
     """
     XDR Source Code::
@@ -26,7 +26,6 @@ class Claimant:
             } v0;
         };
     """
-
     def __init__(
         self,
         type: ClaimantType,
@@ -34,7 +33,6 @@ class Claimant:
     ) -> None:
         self.type = type
         self.v0 = v0
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == ClaimantType.CLAIMANT_TYPE_V0:
@@ -42,7 +40,6 @@ class Claimant:
                 raise ValueError("v0 should not be None.")
             self.v0.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> Claimant:
         type = ClaimantType.unpack(unpacker)
@@ -50,7 +47,6 @@ class Claimant:
             v0 = ClaimantV0.unpack(unpacker)
             return cls(type=type, v0=v0)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -69,22 +65,14 @@ class Claimant:
     def from_xdr(cls, xdr: str) -> Claimant:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.v0,
-            )
-        )
-
+        return hash((self.type, self.v0,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.type == other.type and self.v0 == other.v0
-
+        return self.type== other.type and self.v0== other.v0
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"v0={self.v0}") if self.v0 is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'v0={self.v0}') if self.v0 is not None else None
         return f"<Claimant [{', '.join(out)}]>"

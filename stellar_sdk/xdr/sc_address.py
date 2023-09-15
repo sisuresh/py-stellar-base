@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
+from .sc_address_type import SCAddressType
 from .account_id import AccountID
 from .hash import Hash
-from .sc_address_type import SCAddressType
-
-__all__ = ["SCAddress"]
-
-
+__all__ = ['SCAddress']
 class SCAddress:
     """
     XDR Source Code::
@@ -25,7 +25,6 @@ class SCAddress:
             Hash contractId;
         };
     """
-
     def __init__(
         self,
         type: SCAddressType,
@@ -35,7 +34,6 @@ class SCAddress:
         self.type = type
         self.account_id = account_id
         self.contract_id = contract_id
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == SCAddressType.SC_ADDRESS_TYPE_ACCOUNT:
@@ -48,7 +46,6 @@ class SCAddress:
                 raise ValueError("contract_id should not be None.")
             self.contract_id.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCAddress:
         type = SCAddressType.unpack(unpacker)
@@ -59,7 +56,6 @@ class SCAddress:
             contract_id = Hash.unpack(unpacker)
             return cls(type=type, contract_id=contract_id)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -78,32 +74,15 @@ class SCAddress:
     def from_xdr(cls, xdr: str) -> SCAddress:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.account_id,
-                self.contract_id,
-            )
-        )
-
+        return hash((self.type, self.account_id, self.contract_id,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.account_id == other.account_id
-            and self.contract_id == other.contract_id
-        )
-
+        return self.type== other.type and self.account_id== other.account_id and self.contract_id== other.contract_id
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"account_id={self.account_id}"
-        ) if self.account_id is not None else None
-        out.append(
-            f"contract_id={self.contract_id}"
-        ) if self.contract_id is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'account_id={self.account_id}') if self.account_id is not None else None
+        out.append(f'contract_id={self.contract_id}') if self.contract_id is not None else None
         return f"<SCAddress [{', '.join(out)}]>"

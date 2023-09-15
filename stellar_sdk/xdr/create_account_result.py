@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .create_account_result_code import CreateAccountResultCode
-
-__all__ = ["CreateAccountResult"]
-
-
+__all__ = ['CreateAccountResult']
 class CreateAccountResult:
     """
     XDR Source Code::
@@ -26,13 +26,11 @@ class CreateAccountResult:
             void;
         };
     """
-
     def __init__(
         self,
         code: CreateAccountResultCode,
     ) -> None:
         self.code = code
-
     def pack(self, packer: Packer) -> None:
         self.code.pack(packer)
         if self.code == CreateAccountResultCode.CREATE_ACCOUNT_SUCCESS:
@@ -45,7 +43,6 @@ class CreateAccountResult:
             return
         if self.code == CreateAccountResultCode.CREATE_ACCOUNT_ALREADY_EXIST:
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> CreateAccountResult:
         code = CreateAccountResultCode.unpack(unpacker)
@@ -60,7 +57,6 @@ class CreateAccountResult:
         if code == CreateAccountResultCode.CREATE_ACCOUNT_ALREADY_EXIST:
             return cls(code=code)
         return cls(code=code)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -79,16 +75,13 @@ class CreateAccountResult:
     def from_xdr(cls, xdr: str) -> CreateAccountResult:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.code,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.code == other.code
-
+        return self.code== other.code
     def __str__(self):
         out = []
-        out.append(f"code={self.code}")
+        out.append(f'code={self.code}')
         return f"<CreateAccountResult [{', '.join(out)}]>"

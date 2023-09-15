@@ -3,16 +3,21 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .config_upgrade_set_key import ConfigUpgradeSetKey
 from .ledger_upgrade_type import LedgerUpgradeType
 from .uint32 import Uint32
-
-__all__ = ["LedgerUpgrade"]
-
-
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .uint32 import Uint32
+from .config_upgrade_set_key import ConfigUpgradeSetKey
+from .uint32 import Uint32
+__all__ = ['LedgerUpgrade']
 class LedgerUpgrade:
     """
     XDR Source Code::
@@ -38,7 +43,6 @@ class LedgerUpgrade:
             uint32 newMaxSorobanTxSetSize;
         };
     """
-
     def __init__(
         self,
         type: LedgerUpgradeType,
@@ -58,7 +62,6 @@ class LedgerUpgrade:
         self.new_flags = new_flags
         self.new_config = new_config
         self.new_max_soroban_tx_set_size = new_max_soroban_tx_set_size
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == LedgerUpgradeType.LEDGER_UPGRADE_VERSION:
@@ -96,7 +99,6 @@ class LedgerUpgrade:
                 raise ValueError("new_max_soroban_tx_set_size should not be None.")
             self.new_max_soroban_tx_set_size.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerUpgrade:
         type = LedgerUpgradeType.unpack(unpacker)
@@ -120,11 +122,8 @@ class LedgerUpgrade:
             return cls(type=type, new_config=new_config)
         if type == LedgerUpgradeType.LEDGER_UPGRADE_MAX_SOROBAN_TX_SET_SIZE:
             new_max_soroban_tx_set_size = Uint32.unpack(unpacker)
-            return cls(
-                type=type, new_max_soroban_tx_set_size=new_max_soroban_tx_set_size
-            )
+            return cls(type=type, new_max_soroban_tx_set_size=new_max_soroban_tx_set_size)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -143,57 +142,20 @@ class LedgerUpgrade:
     def from_xdr(cls, xdr: str) -> LedgerUpgrade:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.new_ledger_version,
-                self.new_base_fee,
-                self.new_max_tx_set_size,
-                self.new_base_reserve,
-                self.new_flags,
-                self.new_config,
-                self.new_max_soroban_tx_set_size,
-            )
-        )
-
+        return hash((self.type, self.new_ledger_version, self.new_base_fee, self.new_max_tx_set_size, self.new_base_reserve, self.new_flags, self.new_config, self.new_max_soroban_tx_set_size,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.new_ledger_version == other.new_ledger_version
-            and self.new_base_fee == other.new_base_fee
-            and self.new_max_tx_set_size == other.new_max_tx_set_size
-            and self.new_base_reserve == other.new_base_reserve
-            and self.new_flags == other.new_flags
-            and self.new_config == other.new_config
-            and self.new_max_soroban_tx_set_size == other.new_max_soroban_tx_set_size
-        )
-
+        return self.type== other.type and self.new_ledger_version== other.new_ledger_version and self.new_base_fee== other.new_base_fee and self.new_max_tx_set_size== other.new_max_tx_set_size and self.new_base_reserve== other.new_base_reserve and self.new_flags== other.new_flags and self.new_config== other.new_config and self.new_max_soroban_tx_set_size== other.new_max_soroban_tx_set_size
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(
-            f"new_ledger_version={self.new_ledger_version}"
-        ) if self.new_ledger_version is not None else None
-        out.append(
-            f"new_base_fee={self.new_base_fee}"
-        ) if self.new_base_fee is not None else None
-        out.append(
-            f"new_max_tx_set_size={self.new_max_tx_set_size}"
-        ) if self.new_max_tx_set_size is not None else None
-        out.append(
-            f"new_base_reserve={self.new_base_reserve}"
-        ) if self.new_base_reserve is not None else None
-        out.append(
-            f"new_flags={self.new_flags}"
-        ) if self.new_flags is not None else None
-        out.append(
-            f"new_config={self.new_config}"
-        ) if self.new_config is not None else None
-        out.append(
-            f"new_max_soroban_tx_set_size={self.new_max_soroban_tx_set_size}"
-        ) if self.new_max_soroban_tx_set_size is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'new_ledger_version={self.new_ledger_version}') if self.new_ledger_version is not None else None
+        out.append(f'new_base_fee={self.new_base_fee}') if self.new_base_fee is not None else None
+        out.append(f'new_max_tx_set_size={self.new_max_tx_set_size}') if self.new_max_tx_set_size is not None else None
+        out.append(f'new_base_reserve={self.new_base_reserve}') if self.new_base_reserve is not None else None
+        out.append(f'new_flags={self.new_flags}') if self.new_flags is not None else None
+        out.append(f'new_config={self.new_config}') if self.new_config is not None else None
+        out.append(f'new_max_soroban_tx_set_size={self.new_max_soroban_tx_set_size}') if self.new_max_soroban_tx_set_size is not None else None
         return f"<LedgerUpgrade [{', '.join(out)}]>"

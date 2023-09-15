@@ -3,23 +3,22 @@
 from __future__ import annotations
 
 import base64
-from typing import TYPE_CHECKING
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .sc_spec_type import SCSpecType
-
 if TYPE_CHECKING:
-    from .sc_spec_type_bytes_n import SCSpecTypeBytesN
-    from .sc_spec_type_map import SCSpecTypeMap
     from .sc_spec_type_option import SCSpecTypeOption
     from .sc_spec_type_result import SCSpecTypeResult
-    from .sc_spec_type_tuple import SCSpecTypeTuple
-    from .sc_spec_type_udt import SCSpecTypeUDT
     from .sc_spec_type_vec import SCSpecTypeVec
-__all__ = ["SCSpecTypeDef"]
-
-
+    from .sc_spec_type_map import SCSpecTypeMap
+    from .sc_spec_type_tuple import SCSpecTypeTuple
+    from .sc_spec_type_bytes_n import SCSpecTypeBytesN
+    from .sc_spec_type_udt import SCSpecTypeUDT
+__all__ = ['SCSpecTypeDef']
 class SCSpecTypeDef:
     """
     XDR Source Code::
@@ -61,7 +60,6 @@ class SCSpecTypeDef:
             SCSpecTypeUDT udt;
         };
     """
-
     def __init__(
         self,
         type: SCSpecType,
@@ -81,7 +79,6 @@ class SCSpecTypeDef:
         self.tuple = tuple
         self.bytes_n = bytes_n
         self.udt = udt
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == SCSpecType.SC_SPEC_TYPE_VAL:
@@ -155,7 +152,6 @@ class SCSpecTypeDef:
                 raise ValueError("udt should not be None.")
             self.udt.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecTypeDef:
         type = SCSpecType.unpack(unpacker)
@@ -197,41 +193,33 @@ class SCSpecTypeDef:
             return cls(type=type)
         if type == SCSpecType.SC_SPEC_TYPE_OPTION:
             from .sc_spec_type_option import SCSpecTypeOption
-
             option = SCSpecTypeOption.unpack(unpacker)
             return cls(type=type, option=option)
         if type == SCSpecType.SC_SPEC_TYPE_RESULT:
             from .sc_spec_type_result import SCSpecTypeResult
-
             result = SCSpecTypeResult.unpack(unpacker)
             return cls(type=type, result=result)
         if type == SCSpecType.SC_SPEC_TYPE_VEC:
             from .sc_spec_type_vec import SCSpecTypeVec
-
             vec = SCSpecTypeVec.unpack(unpacker)
             return cls(type=type, vec=vec)
         if type == SCSpecType.SC_SPEC_TYPE_MAP:
             from .sc_spec_type_map import SCSpecTypeMap
-
             map = SCSpecTypeMap.unpack(unpacker)
             return cls(type=type, map=map)
         if type == SCSpecType.SC_SPEC_TYPE_TUPLE:
             from .sc_spec_type_tuple import SCSpecTypeTuple
-
             tuple = SCSpecTypeTuple.unpack(unpacker)
             return cls(type=type, tuple=tuple)
         if type == SCSpecType.SC_SPEC_TYPE_BYTES_N:
             from .sc_spec_type_bytes_n import SCSpecTypeBytesN
-
             bytes_n = SCSpecTypeBytesN.unpack(unpacker)
             return cls(type=type, bytes_n=bytes_n)
         if type == SCSpecType.SC_SPEC_TYPE_UDT:
             from .sc_spec_type_udt import SCSpecTypeUDT
-
             udt = SCSpecTypeUDT.unpack(unpacker)
             return cls(type=type, udt=udt)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -250,43 +238,20 @@ class SCSpecTypeDef:
     def from_xdr(cls, xdr: str) -> SCSpecTypeDef:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.option,
-                self.result,
-                self.vec,
-                self.map,
-                self.tuple,
-                self.bytes_n,
-                self.udt,
-            )
-        )
-
+        return hash((self.type, self.option, self.result, self.vec, self.map, self.tuple, self.bytes_n, self.udt,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.type == other.type
-            and self.option == other.option
-            and self.result == other.result
-            and self.vec == other.vec
-            and self.map == other.map
-            and self.tuple == other.tuple
-            and self.bytes_n == other.bytes_n
-            and self.udt == other.udt
-        )
-
+        return self.type== other.type and self.option== other.option and self.result== other.result and self.vec== other.vec and self.map== other.map and self.tuple== other.tuple and self.bytes_n== other.bytes_n and self.udt== other.udt
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"option={self.option}") if self.option is not None else None
-        out.append(f"result={self.result}") if self.result is not None else None
-        out.append(f"vec={self.vec}") if self.vec is not None else None
-        out.append(f"map={self.map}") if self.map is not None else None
-        out.append(f"tuple={self.tuple}") if self.tuple is not None else None
-        out.append(f"bytes_n={self.bytes_n}") if self.bytes_n is not None else None
-        out.append(f"udt={self.udt}") if self.udt is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'option={self.option}') if self.option is not None else None
+        out.append(f'result={self.result}') if self.result is not None else None
+        out.append(f'vec={self.vec}') if self.vec is not None else None
+        out.append(f'map={self.map}') if self.map is not None else None
+        out.append(f'tuple={self.tuple}') if self.tuple is not None else None
+        out.append(f'bytes_n={self.bytes_n}') if self.bytes_n is not None else None
+        out.append(f'udt={self.udt}') if self.udt is not None else None
         return f"<SCSpecTypeDef [{', '.join(out)}]>"

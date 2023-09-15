@@ -3,19 +3,16 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
-
-from .base import String
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
 from .constants import *
+
+from .sc_symbol import SCSymbol
 from .sc_spec_function_input_v0 import SCSpecFunctionInputV0
 from .sc_spec_type_def import SCSpecTypeDef
-from .sc_symbol import SCSymbol
-
-__all__ = ["SCSpecFunctionV0"]
-
-
+__all__ = ['SCSpecFunctionV0']
 class SCSpecFunctionV0:
     """
     XDR Source Code::
@@ -28,7 +25,6 @@ class SCSpecFunctionV0:
             SCSpecTypeDef outputs<1>;
         };
     """
-
     def __init__(
         self,
         doc: bytes,
@@ -38,19 +34,14 @@ class SCSpecFunctionV0:
     ) -> None:
         _expect_max_length = 10
         if inputs and len(inputs) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `inputs` should be {_expect_max_length}, but got {len(inputs)}."
-            )
+            raise ValueError(f"The maximum length of `inputs` should be {_expect_max_length}, but got {len(inputs)}.")
         _expect_max_length = 1
         if outputs and len(outputs) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `outputs` should be {_expect_max_length}, but got {len(outputs)}."
-            )
+            raise ValueError(f"The maximum length of `outputs` should be {_expect_max_length}, but got {len(outputs)}.")
         self.doc = doc
         self.name = name
         self.inputs = inputs
         self.outputs = outputs
-
     def pack(self, packer: Packer) -> None:
         String(self.doc, SC_SPEC_DOC_LIMIT).pack(packer)
         self.name.pack(packer)
@@ -60,7 +51,6 @@ class SCSpecFunctionV0:
         packer.pack_uint(len(self.outputs))
         for outputs_item in self.outputs:
             outputs_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCSpecFunctionV0:
         doc = String.unpack(unpacker)
@@ -79,7 +69,6 @@ class SCSpecFunctionV0:
             inputs=inputs,
             outputs=outputs,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -98,32 +87,17 @@ class SCSpecFunctionV0:
     def from_xdr(cls, xdr: str) -> SCSpecFunctionV0:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.doc,
-                self.name,
-                self.inputs,
-                self.outputs,
-            )
-        )
-
+        return hash((self.doc, self.name, self.inputs, self.outputs,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.doc == other.doc
-            and self.name == other.name
-            and self.inputs == other.inputs
-            and self.outputs == other.outputs
-        )
-
+        return self.doc== other.doc and self.name== other.name and self.inputs== other.inputs and self.outputs== other.outputs
     def __str__(self):
         out = [
-            f"doc={self.doc}",
-            f"name={self.name}",
-            f"inputs={self.inputs}",
-            f"outputs={self.outputs}",
+            f'doc={self.doc}',
+            f'name={self.name}',
+            f'inputs={self.inputs}',
+            f'outputs={self.outputs}',
         ]
         return f"<SCSpecFunctionV0 [{', '.join(out)}]>"

@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .int64 import Int64
-
-__all__ = ["SCNonceKey"]
-
-
+__all__ = ['SCNonceKey']
 class SCNonceKey:
     """
     XDR Source Code::
@@ -19,23 +19,19 @@ class SCNonceKey:
             int64 nonce;
         };
     """
-
     def __init__(
         self,
         nonce: Int64,
     ) -> None:
         self.nonce = nonce
-
     def pack(self, packer: Packer) -> None:
         self.nonce.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SCNonceKey:
         nonce = Int64.unpack(unpacker)
         return cls(
             nonce=nonce,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -54,17 +50,14 @@ class SCNonceKey:
     def from_xdr(cls, xdr: str) -> SCNonceKey:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
         return hash((self.nonce,))
-
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.nonce == other.nonce
-
+        return self.nonce== other.nonce
     def __str__(self):
         out = [
-            f"nonce={self.nonce}",
+            f'nonce={self.nonce}',
         ]
         return f"<SCNonceKey [{', '.join(out)}]>"

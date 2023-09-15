@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .account_id import AccountID
 from .string64 import String64
-
-__all__ = ["LedgerKeyData"]
-
-
+__all__ = ['LedgerKeyData']
 class LedgerKeyData:
     """
     XDR Source Code::
@@ -22,7 +22,6 @@ class LedgerKeyData:
                 string64 dataName;
             }
     """
-
     def __init__(
         self,
         account_id: AccountID,
@@ -30,11 +29,9 @@ class LedgerKeyData:
     ) -> None:
         self.account_id = account_id
         self.data_name = data_name
-
     def pack(self, packer: Packer) -> None:
         self.account_id.pack(packer)
         self.data_name.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerKeyData:
         account_id = AccountID.unpack(unpacker)
@@ -43,7 +40,6 @@ class LedgerKeyData:
             account_id=account_id,
             data_name=data_name,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -62,23 +58,15 @@ class LedgerKeyData:
     def from_xdr(cls, xdr: str) -> LedgerKeyData:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.account_id,
-                self.data_name,
-            )
-        )
-
+        return hash((self.account_id, self.data_name,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.account_id == other.account_id and self.data_name == other.data_name
-
+        return self.account_id== other.account_id and self.data_name== other.data_name
     def __str__(self):
         out = [
-            f"account_id={self.account_id}",
-            f"data_name={self.data_name}",
+            f'account_id={self.account_id}',
+            f'data_name={self.data_name}',
         ]
         return f"<LedgerKeyData [{', '.join(out)}]>"

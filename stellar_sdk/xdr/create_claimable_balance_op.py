@@ -3,17 +3,16 @@
 from __future__ import annotations
 
 import base64
-from typing import List
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .asset import Asset
-from .claimant import Claimant
 from .int64 import Int64
-
-__all__ = ["CreateClaimableBalanceOp"]
-
-
+from .claimant import Claimant
+__all__ = ['CreateClaimableBalanceOp']
 class CreateClaimableBalanceOp:
     """
     XDR Source Code::
@@ -25,7 +24,6 @@ class CreateClaimableBalanceOp:
             Claimant claimants<10>;
         };
     """
-
     def __init__(
         self,
         asset: Asset,
@@ -34,20 +32,16 @@ class CreateClaimableBalanceOp:
     ) -> None:
         _expect_max_length = 10
         if claimants and len(claimants) > _expect_max_length:
-            raise ValueError(
-                f"The maximum length of `claimants` should be {_expect_max_length}, but got {len(claimants)}."
-            )
+            raise ValueError(f"The maximum length of `claimants` should be {_expect_max_length}, but got {len(claimants)}.")
         self.asset = asset
         self.amount = amount
         self.claimants = claimants
-
     def pack(self, packer: Packer) -> None:
         self.asset.pack(packer)
         self.amount.pack(packer)
         packer.pack_uint(len(self.claimants))
         for claimants_item in self.claimants:
             claimants_item.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> CreateClaimableBalanceOp:
         asset = Asset.unpack(unpacker)
@@ -61,7 +55,6 @@ class CreateClaimableBalanceOp:
             amount=amount,
             claimants=claimants,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -80,29 +73,16 @@ class CreateClaimableBalanceOp:
     def from_xdr(cls, xdr: str) -> CreateClaimableBalanceOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.asset,
-                self.amount,
-                self.claimants,
-            )
-        )
-
+        return hash((self.asset, self.amount, self.claimants,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.asset == other.asset
-            and self.amount == other.amount
-            and self.claimants == other.claimants
-        )
-
+        return self.asset== other.asset and self.amount== other.amount and self.claimants== other.claimants
     def __str__(self):
         out = [
-            f"asset={self.asset}",
-            f"amount={self.amount}",
-            f"claimants={self.claimants}",
+            f'asset={self.asset}',
+            f'amount={self.amount}',
+            f'claimants={self.claimants}',
         ]
         return f"<CreateClaimableBalanceOp [{', '.join(out)}]>"

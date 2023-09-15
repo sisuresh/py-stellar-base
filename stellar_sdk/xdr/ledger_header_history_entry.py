@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .hash import Hash
 from .ledger_header import LedgerHeader
 from .ledger_header_history_entry_ext import LedgerHeaderHistoryEntryExt
-
-__all__ = ["LedgerHeaderHistoryEntry"]
-
-
+__all__ = ['LedgerHeaderHistoryEntry']
 class LedgerHeaderHistoryEntry:
     """
     XDR Source Code::
@@ -31,7 +31,6 @@ class LedgerHeaderHistoryEntry:
             ext;
         };
     """
-
     def __init__(
         self,
         hash: Hash,
@@ -41,12 +40,10 @@ class LedgerHeaderHistoryEntry:
         self.hash = hash
         self.header = header
         self.ext = ext
-
     def pack(self, packer: Packer) -> None:
         self.hash.pack(packer)
         self.header.pack(packer)
         self.ext.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> LedgerHeaderHistoryEntry:
         hash = Hash.unpack(unpacker)
@@ -57,7 +54,6 @@ class LedgerHeaderHistoryEntry:
             header=header,
             ext=ext,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -76,29 +72,16 @@ class LedgerHeaderHistoryEntry:
     def from_xdr(cls, xdr: str) -> LedgerHeaderHistoryEntry:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.hash,
-                self.header,
-                self.ext,
-            )
-        )
-
+        return hash((self.hash, self.header, self.ext,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.hash == other.hash
-            and self.header == other.header
-            and self.ext == other.ext
-        )
-
+        return self.hash== other.hash and self.header== other.header and self.ext== other.ext
     def __str__(self):
         out = [
-            f"hash={self.hash}",
-            f"header={self.header}",
-            f"ext={self.ext}",
+            f'hash={self.hash}',
+            f'header={self.header}',
+            f'ext={self.ext}',
         ]
         return f"<LedgerHeaderHistoryEntry [{', '.join(out)}]>"

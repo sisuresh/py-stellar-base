@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .change_trust_asset import ChangeTrustAsset
 from .int64 import Int64
-
-__all__ = ["ChangeTrustOp"]
-
-
+__all__ = ['ChangeTrustOp']
 class ChangeTrustOp:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class ChangeTrustOp:
             int64 limit;
         };
     """
-
     def __init__(
         self,
         line: ChangeTrustAsset,
@@ -32,11 +31,9 @@ class ChangeTrustOp:
     ) -> None:
         self.line = line
         self.limit = limit
-
     def pack(self, packer: Packer) -> None:
         self.line.pack(packer)
         self.limit.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> ChangeTrustOp:
         line = ChangeTrustAsset.unpack(unpacker)
@@ -45,7 +42,6 @@ class ChangeTrustOp:
             line=line,
             limit=limit,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -64,23 +60,15 @@ class ChangeTrustOp:
     def from_xdr(cls, xdr: str) -> ChangeTrustOp:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.line,
-                self.limit,
-            )
-        )
-
+        return hash((self.line, self.limit,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.line == other.line and self.limit == other.limit
-
+        return self.line== other.line and self.limit== other.limit
     def __str__(self):
         out = [
-            f"line={self.line}",
-            f"limit={self.limit}",
+            f'line={self.line}',
+            f'limit={self.limit}',
         ]
         return f"<ChangeTrustOp [{', '.join(out)}]>"

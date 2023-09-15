@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["MemoType"]
-
-
+__all__ = ['MemoType']
 class MemoType(IntEnum):
     """
     XDR Source Code::
@@ -23,13 +23,11 @@ class MemoType(IntEnum):
             MEMO_RETURN = 4
         };
     """
-
     MEMO_NONE = 0
     MEMO_TEXT = 1
     MEMO_ID = 2
     MEMO_HASH = 3
     MEMO_RETURN = 4
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -37,7 +35,6 @@ class MemoType(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> MemoType:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

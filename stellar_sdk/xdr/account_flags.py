@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["AccountFlags"]
-
-
+__all__ = ['AccountFlags']
 class AccountFlags(IntEnum):
     """
     XDR Source Code::
@@ -32,12 +32,10 @@ class AccountFlags(IntEnum):
             AUTH_CLAWBACK_ENABLED_FLAG = 0x8
         };
     """
-
     AUTH_REQUIRED_FLAG = 1
     AUTH_REVOCABLE_FLAG = 2
     AUTH_IMMUTABLE_FLAG = 4
     AUTH_CLAWBACK_ENABLED_FLAG = 8
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -45,7 +43,6 @@ class AccountFlags(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> AccountFlags:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

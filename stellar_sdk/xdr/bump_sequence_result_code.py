@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import base64
 from enum import IntEnum
-
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-__all__ = ["BumpSequenceResultCode"]
-
-
+__all__ = ['BumpSequenceResultCode']
 class BumpSequenceResultCode(IntEnum):
     """
     XDR Source Code::
@@ -22,10 +22,8 @@ class BumpSequenceResultCode(IntEnum):
             BUMP_SEQUENCE_BAD_SEQ = -1 // `bumpTo` is not within bounds
         };
     """
-
     BUMP_SEQUENCE_SUCCESS = 0
     BUMP_SEQUENCE_BAD_SEQ = -1
-
     def pack(self, packer: Packer) -> None:
         packer.pack_int(self.value)
 
@@ -33,7 +31,6 @@ class BumpSequenceResultCode(IntEnum):
     def unpack(cls, unpacker: Unpacker) -> BumpSequenceResultCode:
         value = unpacker.unpack_int()
         return cls(value)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)

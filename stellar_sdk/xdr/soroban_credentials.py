@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
-from .soroban_address_credentials import SorobanAddressCredentials
 from .soroban_credentials_type import SorobanCredentialsType
-
-__all__ = ["SorobanCredentials"]
-
-
+from .soroban_address_credentials import SorobanAddressCredentials
+__all__ = ['SorobanCredentials']
 class SorobanCredentials:
     """
     XDR Source Code::
@@ -24,7 +24,6 @@ class SorobanCredentials:
             SorobanAddressCredentials address;
         };
     """
-
     def __init__(
         self,
         type: SorobanCredentialsType,
@@ -32,7 +31,6 @@ class SorobanCredentials:
     ) -> None:
         self.type = type
         self.address = address
-
     def pack(self, packer: Packer) -> None:
         self.type.pack(packer)
         if self.type == SorobanCredentialsType.SOROBAN_CREDENTIALS_SOURCE_ACCOUNT:
@@ -42,7 +40,6 @@ class SorobanCredentials:
                 raise ValueError("address should not be None.")
             self.address.pack(packer)
             return
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SorobanCredentials:
         type = SorobanCredentialsType.unpack(unpacker)
@@ -52,7 +49,6 @@ class SorobanCredentials:
             address = SorobanAddressCredentials.unpack(unpacker)
             return cls(type=type, address=address)
         return cls(type=type)
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -71,22 +67,14 @@ class SorobanCredentials:
     def from_xdr(cls, xdr: str) -> SorobanCredentials:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.type,
-                self.address,
-            )
-        )
-
+        return hash((self.type, self.address,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.type == other.type and self.address == other.address
-
+        return self.type== other.type and self.address== other.address
     def __str__(self):
         out = []
-        out.append(f"type={self.type}")
-        out.append(f"address={self.address}") if self.address is not None else None
+        out.append(f'type={self.type}')
+        out.append(f'address={self.address}') if self.address is not None else None
         return f"<SorobanCredentials [{', '.join(out)}]>"

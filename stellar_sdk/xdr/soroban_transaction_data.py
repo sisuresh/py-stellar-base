@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import base64
-
+from enum import IntEnum
+from typing import List, Optional, TYPE_CHECKING
 from xdrlib3 import Packer, Unpacker
+from .base import Integer, UnsignedInteger, Float, Double, Hyper, UnsignedHyper, Boolean, String, Opaque
+from .constants import *
 
 from .extension_point import ExtensionPoint
-from .int64 import Int64
 from .soroban_resources import SorobanResources
-
-__all__ = ["SorobanTransactionData"]
-
-
+from .int64 import Int64
+__all__ = ['SorobanTransactionData']
 class SorobanTransactionData:
     """
     XDR Source Code::
@@ -25,7 +25,6 @@ class SorobanTransactionData:
             int64 refundableFee;
         };
     """
-
     def __init__(
         self,
         ext: ExtensionPoint,
@@ -35,12 +34,10 @@ class SorobanTransactionData:
         self.ext = ext
         self.resources = resources
         self.refundable_fee = refundable_fee
-
     def pack(self, packer: Packer) -> None:
         self.ext.pack(packer)
         self.resources.pack(packer)
         self.refundable_fee.pack(packer)
-
     @classmethod
     def unpack(cls, unpacker: Unpacker) -> SorobanTransactionData:
         ext = ExtensionPoint.unpack(unpacker)
@@ -51,7 +48,6 @@ class SorobanTransactionData:
             resources=resources,
             refundable_fee=refundable_fee,
         )
-
     def to_xdr_bytes(self) -> bytes:
         packer = Packer()
         self.pack(packer)
@@ -70,29 +66,16 @@ class SorobanTransactionData:
     def from_xdr(cls, xdr: str) -> SorobanTransactionData:
         xdr_bytes = base64.b64decode(xdr.encode())
         return cls.from_xdr_bytes(xdr_bytes)
-
     def __hash__(self):
-        return hash(
-            (
-                self.ext,
-                self.resources,
-                self.refundable_fee,
-            )
-        )
-
+        return hash((self.ext, self.resources, self.refundable_fee,))
     def __eq__(self, other: object):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return (
-            self.ext == other.ext
-            and self.resources == other.resources
-            and self.refundable_fee == other.refundable_fee
-        )
-
+        return self.ext== other.ext and self.resources== other.resources and self.refundable_fee== other.refundable_fee
     def __str__(self):
         out = [
-            f"ext={self.ext}",
-            f"resources={self.resources}",
-            f"refundable_fee={self.refundable_fee}",
+            f'ext={self.ext}',
+            f'resources={self.resources}',
+            f'refundable_fee={self.refundable_fee}',
         ]
         return f"<SorobanTransactionData [{', '.join(out)}]>"
